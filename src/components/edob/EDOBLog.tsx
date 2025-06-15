@@ -43,7 +43,14 @@ const EDOBLog = ({ entries }: EDOBLogProps) => {
                   {entry.accessType && <CardDescription>Access: {entry.accessType} - {entry.personName} ({entry.company})</CardDescription>}
                   {entry.alarmZone && <CardDescription>Alarm: {entry.alarmType} in {entry.alarmZone}</CardDescription>}
                   {entry.equipmentChecked && <CardDescription>Equipment Check: {entry.equipmentChecked} - <span className={cn(entry.equipmentStatus === 'OK' ? 'text-green-500' : 'text-orange-500', "font-semibold")}>{entry.equipmentStatus}</span></CardDescription>}
-                  <p className="text-sm whitespace-pre-wrap pt-2">{entry.details}</p>
+                  
+                  {entry.type === 'Patrol' && entry.details.trim() === '' ? (
+                    <p className="text-sm italic text-muted-foreground pt-2">A.I.O (All In Order)</p>
+                  ) : (
+                    entry.details.trim() !== '' && (
+                      <p className="text-sm whitespace-pre-wrap pt-2">{entry.details}</p>
+                    )
+                  )}
                 </CardContent>
               </Card>
             ))}
