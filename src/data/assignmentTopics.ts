@@ -1,4 +1,4 @@
-import { Topic } from "./assignmentTopics";
+
 
 export type Topic = {
   id: string;
