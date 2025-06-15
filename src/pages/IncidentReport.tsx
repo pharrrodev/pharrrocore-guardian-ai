@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { AnimatePresence, motion, type Transition } from 'framer-motion';
+import { AnimatePresence, motion, type Easing, type Transition } from 'framer-motion';
 
 import Step1Date from '@/components/incident-reporting/Step1Date';
 import Step2Time from '@/components/incident-reporting/Step2Time';
@@ -13,6 +13,8 @@ import Step4IncidentType from '@/components/incident-reporting/Step4IncidentType
 import Step5Description from '@/components/incident-reporting/Step5Description';
 import Step6PeopleInvolved from '@/components/incident-reporting/Step6PeopleInvolved';
 import Step7ActionsTaken from '@/components/incident-reporting/Step7ActionsTaken';
+import ProcessingReportModal from '@/components/incident-reporting/ProcessingReportModal';
+import FinalReport from '@/components/incident-reporting/FinalReport';
 
 const TOTAL_STEPS = 7;
 
@@ -24,6 +26,8 @@ const IncidentReport = () => {
     actionsTaken: [],
   });
   const [direction, setDirection] = useState(1);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const updateFormData = (data: object) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -66,7 +70,7 @@ const IncidentReport = () => {
 
   const renderStepContent = () => {
     const key = `${currentStep}-${direction}`;
-    const transition: Transition = { duration: 0.3, ease: 'easeInOut' };
+    const transition: Transition = { duration: 0.3, ease: 'easeInOut' as Easing };
     const motionProps = {
         key: key,
         initial: { opacity: 0, x: direction * 100 },
@@ -96,13 +100,26 @@ const IncidentReport = () => {
   };
 
   const handleSubmit = () => {
-    console.log('Final Report Data:', formData);
-    // Here you would typically send the data to a server
-    alert('Incident report submitted successfully!');
+    setIsProcessing(true);
+    // Simulate AI processing
+    setTimeout(() => {
+      console.log('Final Report Data:', formData);
+      setIsProcessing(false);
+      setIsSubmitted(true);
+    }, 4000);
   };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <FinalReport formData={formData} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <ProcessingReportModal open={isProcessing} />
       <Card className="w-full max-w-4xl">
         <CardHeader>
           <div className="flex items-center justify-between">
