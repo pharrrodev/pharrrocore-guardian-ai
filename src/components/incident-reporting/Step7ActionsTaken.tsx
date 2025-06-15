@@ -1,39 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { ListChecks } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { allActions, incidentActionsMapping } from '@/data/incidentActionsMapping';
 
 interface Step7ActionsTakenProps {
-  formData: { actionsTaken?: string[] };
+  formData: { actionsTaken?: string[]; incidentType?: string };
   updateFormData: (data: { actionsTaken: string[] }) => void;
 }
 
-const actionsOptions = [
-    'Called 999',
-    'Called Control Room',
-    'Called Site Supervisor',
-    'Provided First Aid',
-    'Used Defibrillator (AED)',
-    'Initiated Building Evacuation',
-    'Used Fire Extinguisher',
-    'Attempted to De-escalate',
-    'Secured Scene',
-    'Gathered Witness Information',
-    'Checked CCTV',
-    'Completed Live Logbook Entry',
-    'Other (specify in description)'
-];
-
-
 const Step7ActionsTaken: React.FC<Step7ActionsTakenProps> = ({ formData, updateFormData }) => {
-  const [selectedActions, setSelectedActions] = useState<string[]>(formData.actionsTaken || []);
+  const { actionsTaken = [], incidentType } = formData;
+
+  const relevantActions = incidentType ? (incidentActionsMapping[incidentType] || allActions) : allActions;
+
+  useEffect(() => {
+    // When the incident type changes, filter out any selected actions that are no longer relevant.
+    const newSelectedActions = actionsTaken.filter(action => relevantActions.includes(action));
+    if (newSelectedActions.length !== actionsTaken.length) {
+      updateFormData({ actionsTaken: newSelectedActions });
+    }
+  }, [incidentType, actionsTaken, updateFormData, relevantActions]);
 
   const handleCheckboxChange = (action: string) => {
-    const newSelectedActions = selectedActions.includes(action)
-      ? selectedActions.filter((a) => a !== action)
-      : [...selectedActions, action];
-    setSelectedActions(newSelectedActions);
+    const newSelectedActions = actionsTaken.includes(action)
+      ? actionsTaken.filter((a) => a !== action)
+      : [...actionsTaken, action];
     updateFormData({ actionsTaken: newSelectedActions });
   };
 
@@ -45,21 +38,23 @@ const Step7ActionsTaken: React.FC<Step7ActionsTakenProps> = ({ formData, updateF
         </div>
       </div>
       <h3 className="text-xl font-semibold mb-2">What actions were taken?</h3>
-      <p className="text-muted-foreground mb-6">Select all that apply.</p>
+      <p className="text-muted-foreground mb-6">
+        {incidentType ? `Actions related to the ${incidentType.toLowerCase()} incident.` : 'Select all that apply.'}
+      </p>
       
       <div className="space-y-3 text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-        {actionsOptions.map((action) => (
+        {relevantActions.map((action) => (
           <div key={action} className="flex items-center space-x-3">
             <Checkbox
               id={action}
-              checked={selectedActions.includes(action)}
+              checked={actionsTaken.includes(action)}
               onCheckedChange={() => handleCheckboxChange(action)}
             />
             <Label htmlFor={action} className="font-normal cursor-pointer text-sm">{action}</Label>
           </div>
         ))}
       </div>
-       {selectedActions.length === 0 && (
+       {actionsTaken.length === 0 && (
           <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
             Please select at least one action.
           </div>
