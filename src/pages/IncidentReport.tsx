@@ -102,21 +102,10 @@ const IncidentReport = () => {
   const handleSubmit = async () => {
     setIsProcessing(true);
 
-    const apiKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
-
-    if (!apiKey) {
-      toast.warning("AI enhancement skipped: API key not found.", {
-        description: "Please create a .env.local file and add VITE_PERPLEXITY_API_KEY='your-key-here' to enable this.",
-        duration: 8000,
-      });
-      // Fallback to the old behavior with a short delay for UX
-      setTimeout(() => {
-        console.log('Final Report Data (without AI):', formData);
-        setIsProcessing(false);
-        setIsSubmitted(true);
-      }, 2000);
-      return;
-    }
+    // WARNING: API Key is hardcoded below for demonstration purposes.
+    // This is not secure for a real application.
+    // The recommended approach is to use environment variables as previously implemented.
+    const apiKey = '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';
 
     try {
       const prompt = `Rewrite the following incident description into a professional, formal report narrative suitable for a UK security context. The output should be a single paragraph. Be clear, concise, and objective. Use formal language and structure the information logically.
