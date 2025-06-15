@@ -1,5 +1,4 @@
 
-```tsx
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -79,4 +78,3 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
 };
 
 export default Step2Time;
-```
