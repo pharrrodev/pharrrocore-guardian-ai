@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Bot, Home, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { assignmentTopics, Topic } from "@/data/assignmentTopics";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Message = {
   sender: 'user' | 'ai';
@@ -65,31 +66,35 @@ const AssignmentInstructions = () => {
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={cn(
-                'flex items-end gap-2',
-                message.sender === 'user' ? 'justify-end' : 'justify-start'
-              )}
-            >
-              {message.sender === 'ai' && <Bot className="w-8 h-8 text-primary shrink-0 self-start" />}
-              <div
-                className={cn(
-                  'rounded-lg px-4 py-2 max-w-[80%]',
-                  message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                )}
-              >
-                <p className="text-sm">{message.text}</p>
-              </div>
+        <CardContent className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="p-6 space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex items-end gap-2',
+                    message.sender === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  {message.sender === 'ai' && <Bot className="w-8 h-8 text-primary shrink-0 self-start" />}
+                  <div
+                    className={cn(
+                      'rounded-lg px-4 py-2 max-w-[80%]',
+                      message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    )}
+                  >
+                    <p className="text-sm">{message.text}</p>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
             </div>
-          ))}
-          <div ref={messagesEndRef} />
+          </ScrollArea>
         </CardContent>
-        <CardFooter className="flex-col items-center justify-center gap-4 pt-4 border-t">
+        <CardFooter className="flex-col items-center justify-center gap-2 pt-2 border-t">
            <div className="flex flex-wrap justify-center gap-2">
             {currentTopics.map((topic) => (
               <Button
