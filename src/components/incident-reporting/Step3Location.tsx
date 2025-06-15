@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -43,7 +42,7 @@ const Step3Location: React.FC<Step3LocationProps> = ({ formData, updateFormData 
       <h3 className="text-xl font-semibold mb-2">Where did the incident occur?</h3>
       <p className="text-muted-foreground mb-6">Select the location from the list. Be more specific in the description if needed.</p>
       
-      <div className="h-[320px] flex items-center justify-center">
+      <div className="py-8 flex items-center justify-center">
         <Select onValueChange={handleLocationChange} value={location} required>
           <SelectTrigger className="h-12 text-base max-w-sm w-full">
             <SelectValue placeholder="Select a location" />

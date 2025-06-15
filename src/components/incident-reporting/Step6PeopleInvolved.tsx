@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Users2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -58,7 +57,7 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
       <h3 className="text-xl font-semibold mb-2">Who was involved or notified?</h3>
       <p className="text-muted-foreground mb-6">Select all that apply, or N/A.</p>
       
-      <div className="rounded-md border text-left p-4 h-[320px] overflow-y-auto">
+      <div className="rounded-md border text-left p-4 max-h-72 overflow-y-auto">
         <div className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
           {peopleOptions.map((person) => (
             <div key={person} className="flex items-center space-x-3">

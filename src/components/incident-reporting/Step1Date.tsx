@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -81,7 +80,7 @@ const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
       <h3 className="text-xl font-semibold mb-2 text-center">What was the date of the incident?</h3>
       <p className="text-muted-foreground mb-6 text-center">Please select the date when the incident occurred.</p>
       
-      <div className="h-[320px] flex flex-col items-center justify-center">
+      <div className="py-8 flex flex-col items-center justify-center">
         <div className="flex items-center justify-center gap-2 sm:gap-3">
           <Select onValueChange={handleYearChange} value={year}>
             <SelectTrigger className="w-[120px] h-12 text-base">

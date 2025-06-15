@@ -32,7 +32,7 @@ const Step5Description: React.FC<Step5DescriptionProps> = ({ formData, updateFor
         placeholder="Be clear, concise, and objective. Describe the sequence of events, people involved, and actions taken..."
         value={description}
         onChange={handleDescriptionChange}
-        className="h-[320px] text-base resize-none"
+        className="min-h-[240px] text-base resize-none"
         required
       />
 
