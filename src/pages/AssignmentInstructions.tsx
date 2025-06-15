@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Home, ArrowLeft } from "lucide-react";
+import { Bot, Home, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { assignmentTopics, Topic } from "@/data/assignmentTopics";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +17,7 @@ const AssignmentInstructions = () => {
   const [messages, setMessages] = useState<Message[]>([
     { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. Please select a topic below to get started." }
   ]);
+  const [isAiTyping, setIsAiTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentTopics, setCurrentTopics] = useState<Topic[]>(assignmentTopics);
   const [history, setHistory] = useState<Topic[][]>([assignmentTopics]);
@@ -27,18 +28,23 @@ const AssignmentInstructions = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isAiTyping]);
 
   const handleTopicSelect = (topic: Topic) => {
     const userMessage: Message = { sender: 'user', text: topic.label };
-    const aiResponse: Message = { sender: 'ai', text: topic.response };
+    setMessages(prev => [...prev, userMessage]);
+    setIsAiTyping(true);
 
-    setMessages(prev => [...prev, userMessage, aiResponse]);
-
-    if (topic.subTopics && topic.subTopics.length > 0) {
-      setCurrentTopics(topic.subTopics);
-      setHistory(prev => [...prev, topic.subTopics!]);
-    }
+    setTimeout(() => {
+        const aiResponse: Message = { sender: 'ai', text: topic.response };
+        setMessages(prev => [...prev, aiResponse]);
+        setIsAiTyping(false);
+    
+        if (topic.subTopics && topic.subTopics.length > 0) {
+          setCurrentTopics(topic.subTopics);
+          setHistory(prev => [...prev, topic.subTopics!]);
+        }
+    }, 1000);
   };
 
   const handleBack = () => {
@@ -49,6 +55,34 @@ const AssignmentInstructions = () => {
       setCurrentTopics(prevTopics);
       setHistory(newHistory);
     }
+  };
+  
+  const handleStartOver = () => {
+    setMessages([
+      { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. Please select a topic below to get started." }
+    ]);
+    setCurrentTopics(assignmentTopics);
+    setHistory([assignmentTopics]);
+  };
+
+  const renderMessageText = (text: string) => {
+    const phoneRegex = /(\d{3}-\d{3}-\d{4})/g;
+    const parts = text.split(phoneRegex);
+
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (index % 2 === 1) { // Matched parts are at odd indices
+            return (
+              <a key={index} href={`tel:${part}`} className="text-blue-500 hover:underline">
+                {part}
+              </a>
+            );
+          }
+          return part;
+        })}
+      </>
+    );
   };
 
   return (
@@ -86,15 +120,27 @@ const AssignmentInstructions = () => {
                         : 'bg-muted'
                     )}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm whitespace-pre-wrap">{renderMessageText(message.text)}</p>
                   </div>
                 </div>
               ))}
+              {isAiTyping && (
+                <div className="flex items-end gap-2 justify-start">
+                  <Bot className="w-8 h-8 text-primary shrink-0 self-start" />
+                  <div className="bg-muted rounded-lg px-4 py-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 bg-foreground/50 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="h-2 w-2 bg-foreground/50 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="h-2 w-2 bg-foreground/50 rounded-full animate-bounce"></span>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="flex-col items-center justify-center gap-2 pt-2 border-t">
+        <CardFooter className="flex-col items-center justify-center gap-2 pt-4 border-t">
            <div className="flex flex-wrap justify-center gap-2">
             {currentTopics.map((topic) => (
               <Button
@@ -102,16 +148,23 @@ const AssignmentInstructions = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => handleTopicSelect(topic)}
+                disabled={isAiTyping}
               >
                 {topic.label}
               </Button>
             ))}
           </div>
           {history.length > 1 && (
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to previous topics
-            </Button>
+            <div className="flex items-center gap-2 mt-2">
+              <Button variant="ghost" size="sm" onClick={handleBack} disabled={isAiTyping}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleStartOver} disabled={isAiTyping}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Start Over
+              </Button>
+            </div>
           )}
         </CardFooter>
       </Card>
