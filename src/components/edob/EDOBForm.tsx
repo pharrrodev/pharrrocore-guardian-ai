@@ -45,25 +45,6 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
     form.reset();
   }
 
-  const handleAioSubmit = () => {
-    const patrolRouteValue = form.getValues("patrolRoute");
-    if (!patrolRouteValue || patrolRouteValue === "") {
-      form.setError("patrolRoute", {
-        type: "manual",
-        message: "Please select a patrol route to log A.I.O.",
-      });
-      return;
-    }
-    form.clearErrors("patrolRoute");
-
-    const aioValues: FormValues = {
-      entryType: "Patrol",
-      patrolRoute: patrolRouteValue,
-      details: "", // Explicitly empty for A.I.O.
-    };
-    handleFormSubmit(aioValues);
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <h3 className="text-lg font-semibold">New Entry</h3>
@@ -186,18 +167,7 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
               )}
             />
           )}
-          {watchEntryType === 'Patrol' ? (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button type="button" variant="secondary" onClick={handleAioSubmit} className="flex-1">
-                Log A.I.O.
-              </Button>
-              <Button type="submit" className="flex-1">
-                Submit with Details
-              </Button>
-            </div>
-          ) : (
-            watchEntryType && <Button type="submit">Submit Entry</Button>
-          )}
+          {watchEntryType && <Button type="submit">Submit Entry</Button>}
         </form>
       </Form>
     </div>
