@@ -2,7 +2,6 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { AnimatePresence } from 'framer-motion';
 
 import { useIncidentReport } from '@/hooks/useIncidentReport';
 import ProcessingReportModal from '@/components/incident-reporting/ProcessingReportModal';
@@ -15,7 +14,6 @@ const IncidentReport = () => {
     currentStep,
     TOTAL_STEPS,
     formData,
-    direction,
     isProcessing,
     isFinallySubmitting,
     isSubmitted,
@@ -75,14 +73,11 @@ const IncidentReport = () => {
             </Button>
 
             <div className="w-full flex-1 max-w-2xl px-4">
-              <AnimatePresence mode="wait">
-                <StepManager
-                  currentStep={currentStep}
-                  direction={direction}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                />
-              </AnimatePresence>
+              <StepManager
+                currentStep={currentStep}
+                formData={formData}
+                updateFormData={updateFormData}
+              />
             </div>
 
             <Button

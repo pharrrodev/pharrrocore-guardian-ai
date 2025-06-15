@@ -116,7 +116,7 @@ const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
         </Select>
       </div>
       
-      <p className="text-sm text-muted-foreground mt-2 text-left">Cannot select future dates.</p>
+      <p className="text-sm text-muted-foreground mt-2 text-center">Cannot select future dates.</p>
       <div
         className={cn(
           "min-h-[60px] flex items-center justify-center mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm",

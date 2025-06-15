@@ -9,7 +9,6 @@ export const useIncidentReport = () => {
     peopleInvolved: [],
     actionsTaken: [],
   });
-  const [direction, setDirection] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFinallySubmitting, setIsFinallySubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -22,14 +21,12 @@ export const useIncidentReport = () => {
 
   const handleNext = () => {
     if (currentStep < TOTAL_STEPS) {
-      setDirection(1);
       setCurrentStep(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setDirection(-1);
       setCurrentStep(currentStep - 1);
     }
   };
@@ -177,7 +174,6 @@ Original description: "${formData.description}"`;
     currentStep,
     TOTAL_STEPS,
     formData,
-    direction,
     isProcessing,
     isFinallySubmitting,
     isSubmitted,
