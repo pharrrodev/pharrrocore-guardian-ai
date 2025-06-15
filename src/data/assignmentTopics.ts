@@ -93,4 +93,35 @@ export const assignmentTopics: Topic[] = [
       },
     ],
   },
+  {
+    id: 'access-control',
+    label: 'Access Control',
+    response: 'This section details protocols for managing access to the site for visitors, contractors, and deliveries.',
+    subTopics: [
+      { id: 'visitor-management', label: 'Visitor Management', response: 'All visitors must be pre-registered and sign in at reception. They must be issued a visitor pass and be escorted.'},
+      { id: 'contractor-management', label: 'Contractor Management', response: 'Approved contractors are listed in the EDOB system. Verify their identity and work order before granting access.'},
+      { id: 'delivery-management', label: 'Delivery Management', response: 'All deliveries must be logged. Inspect packages if protocol requires.'}
+    ]
+  },
+  {
+    id: 'alarm-systems',
+    label: 'Alarm Systems',
+    response: 'The site is equipped with a multi-zone alarm system. Familiarize yourself with the zones and response protocols.',
+    subTopics: [
+      { id: 'zone-1', label: 'Zone 1 - Main Lab', response: 'Covers all lab areas on the ground floor.' },
+      { id: 'zone-2', label: 'Zone 2 - Warehouse Perimeter', response: 'Covers all external doors and windows of the warehouse.' },
+      { id: 'zone-3', label: 'Zone 3 - Office Area', response: 'Covers the main office block, including all individual offices.' },
+      { id: 'zone-4', label: 'Zone 4 - Server Room', response: 'High-security zone for the server room.' },
+    ]
+  },
+  {
+    id: 'equipment-checks',
+    label: 'Equipment Checks',
+    response: 'Routine checks on key safety and security equipment are mandatory. Please log all checks in the EDOB.',
+    subTopics: [
+      { id: 'fire-extinguishers', label: 'Fire Extinguishers', response: 'Check pressure gauges and for any visible damage. Ensure they are unobstructed.' },
+      { id: 'emergency-exits', label: 'Emergency Exits', response: 'Ensure doors are unlocked and paths are clear of obstructions.' },
+      { id: 'cctv-cameras', label: 'CCTV Cameras', response: 'Visually inspect for clear lens and proper orientation. Report any offline cameras.' },
+    ]
+  }
 ];
