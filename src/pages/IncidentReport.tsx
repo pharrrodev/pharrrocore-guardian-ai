@@ -1,5 +1,4 @@
-
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -61,7 +60,19 @@ const IncidentReport = () => {
           </div>
           <Progress value={(currentStep / TOTAL_STEPS) * 100} className="w-full mt-4" />
         </CardHeader>
-        <CardContent className="flex justify-center items-center py-8 min-h-[450px] overflow-hidden">
+        <CardContent className="relative flex justify-center items-center py-8 min-h-[450px] overflow-hidden">
+          {currentStep > 1 && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleBack}
+              disabled={isProcessing}
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
+
           <AnimatePresence mode="wait">
             <StepManager 
               currentStep={currentStep}
@@ -70,28 +81,27 @@ const IncidentReport = () => {
               updateFormData={updateFormData}
             />
           </AnimatePresence>
+
+          {currentStep < TOTAL_STEPS && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNext}
+              disabled={isNextDisabled() || isProcessing}
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10"
+            >
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          )}
         </CardContent>
         <CardFooter className="flex justify-center">
-          <div className="flex w-full max-w-lg justify-between items-center">
-            <div>
-              {currentStep > 1 && (
-                <Button variant="outline" size="lg" onClick={handleBack} disabled={isProcessing}>
-                  <ArrowLeft className="mr-2 h-5 w-5" />
-                  Back
-                </Button>
-              )}
-            </div>
-
-            {currentStep === TOTAL_STEPS ? (
-              <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled() || isProcessing}>
-                {getSubmitButtonText()}
-              </Button>
-            ) : (
-              <Button size="lg" onClick={handleNext} disabled={isNextDisabled() || isProcessing}>
-                Next
-              </Button>
-            )}
-          </div>
+          {currentStep === TOTAL_STEPS ? (
+            <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled() || isProcessing}>
+              {getSubmitButtonText()}
+            </Button>
+          ) : (
+            <div className="h-11" />
+          )}
         </CardFooter>
       </Card>
     </div>
