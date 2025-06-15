@@ -123,5 +123,19 @@ export const assignmentTopics: Topic[] = [
       { id: 'emergency-exits', label: 'Emergency Exits', response: 'Ensure doors are unlocked and paths are clear of obstructions.' },
       { id: 'cctv-cameras', label: 'CCTV Cameras', response: 'Visually inspect for clear lens and proper orientation. Report any offline cameras.' },
     ]
+  },
+  {
+    id: 'uniform-kit-policy',
+    label: 'Uniform and Kit Policy',
+    response: 'Before starting any shift, guards must confirm they have the following uniform and equipment:',
+    subTopics: [
+      { id: 'boots', label: 'Black Security Boots', response: 'Must be worn and in good condition.' },
+      { id: 'hi-vis', label: 'Hi-Vis Jacket', response: 'Mandatory for all patrols and external posts.' },
+      { id: 'radio', label: 'Radio', response: 'Must be powered on and tested during radio check.' },
+      { id: 'bodycam', label: 'Body-Worn Camera', response: 'Fully charged and operational.' },
+      { id: 'id-badge', label: 'ID Badge / SIA Licence', response: 'Must be displayed clearly at all times.' },
+      { id: 'torch', label: 'Torch', response: 'Required for all night shifts.' },
+      { id: 'notebook', label: 'Notebook & Pen', response: 'Needed for note-taking during patrols.' }
+    ]
   }
 ];

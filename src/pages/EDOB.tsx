@@ -19,12 +19,13 @@ const EDOB = () => {
         details: (values.entryType === 'Patrol' && (!values.details || values.details.trim() === '')) ? "A.I.O." : (values.details || ""),
         route: values.entryType === 'Patrol' ? values.patrolRoute : undefined,
         accessType: values.entryType === 'Access Control' ? values.accessType : undefined,
-        personName: values.entryType === 'Access Control' ? values.personName : undefined,
+        personName: ['Access Control', 'Uniform Check'].includes(values.entryType) ? values.personName : undefined,
         company: values.entryType === 'Access Control' ? values.company : undefined,
         alarmZone: values.entryType === 'Alarm Activation' ? values.alarmZone : undefined,
         alarmType: values.entryType === 'Alarm Activation' ? values.alarmType : undefined,
         equipmentChecked: values.entryType === 'Equipment Check' ? values.equipmentChecked : undefined,
         equipmentStatus: values.entryType === 'Equipment Check' ? values.equipmentStatus : undefined,
+        uniformChecklist: values.entryType === 'Uniform Check' ? values.uniformChecklist : undefined,
     };
     setEntries(prev => [newEntry, ...prev]);
   }

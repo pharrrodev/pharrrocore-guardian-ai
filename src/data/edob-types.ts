@@ -1,10 +1,10 @@
-
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
 export const patrolRoutes = ["Full Patrol", ...(assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [])];
 export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.subTopics?.map(st => st.label) || [];
 export const equipmentToCheck = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => st.label) || [];
+export const uniformKitItems = assignmentTopics.find(t => t.id === 'uniform-kit-policy')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 
 export const entryTypes = [
   "Patrol",
@@ -12,6 +12,7 @@ export const entryTypes = [
   "Access Control",
   "Alarm Activation",
   "Equipment Check",
+  "Uniform Check",
 ];
 export const accessTypes = ["Visitor Entry", "Contractor Entry", "Delivery"];
 export const alarmTypes = ["Intruder", "Fire", "Panic", "Environmental"];
@@ -28,6 +29,12 @@ export const formSchema = z.object({
   alarmType: z.string().optional(),
   equipmentChecked: z.string().optional(),
   equipmentStatus: z.string().optional(),
+  uniformChecklist: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    confirmed: z.boolean(),
+    comment: z.string().optional(),
+  })).optional(),
 }).superRefine((data, ctx) => {
   if (data.entryType === 'Patrol' && (!data.patrolRoute || data.patrolRoute === "")) {
     ctx.addIssue({
@@ -49,9 +56,23 @@ export const formSchema = z.object({
     if (!data.equipmentChecked) ctx.addIssue({ code: 'custom', path: ['equipmentChecked'], message: 'Equipment selection is required.' });
     if (!data.equipmentStatus) ctx.addIssue({ code: 'custom', path: ['equipmentStatus'], message: 'Equipment status is required.' });
   }
+  if (data.entryType === 'Uniform Check') {
+    if (!data.personName || data.personName.trim() === "") {
+        ctx.addIssue({ code: 'custom', path: ['personName'], message: 'Guard name is required.' });
+    }
+    data.uniformChecklist?.forEach((item, index) => {
+        if (!item.confirmed && (!item.comment || item.comment.trim() === '')) {
+            ctx.addIssue({
+                code: 'custom',
+                path: [`uniformChecklist.${index}.comment`],
+                message: "Comment required if not confirmed.",
+            });
+        }
+    });
+  }
 
-  // Require details for all types except 'Patrol'
-  if (data.entryType && data.entryType !== 'Patrol' && (!data.details || data.details.trim() === '')) {
+  // Require details for all types except 'Patrol' and 'Uniform Check'
+  if (data.entryType && !['Patrol', 'Uniform Check'].includes(data.entryType) && (!data.details || data.details.trim() === '')) {
     ctx.addIssue({
       code: 'custom',
       path: ['details'],
@@ -77,4 +98,10 @@ export type EDOBEntry = {
     alarmType?: string;
     equipmentChecked?: string;
     equipmentStatus?: string;
+    uniformChecklist?: {
+        id: string;
+        label: string;
+        confirmed: boolean;
+        comment?: string;
+    }[];
 }

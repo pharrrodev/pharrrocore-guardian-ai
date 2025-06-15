@@ -1,8 +1,7 @@
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock } from "lucide-react";
+import { CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { EDOBEntry } from "@/data/edob-types";
@@ -44,6 +43,27 @@ const EDOBLog = ({ entries }: EDOBLogProps) => {
                   {entry.alarmZone && <CardDescription>Alarm: {entry.alarmType} in {entry.alarmZone}</CardDescription>}
                   {entry.equipmentChecked && <CardDescription>Equipment Check: {entry.equipmentChecked} - <span className={cn(entry.equipmentStatus === 'OK' ? 'text-green-500' : 'text-orange-500', "font-semibold")}>{entry.equipmentStatus}</span></CardDescription>}
                   
+                  {entry.type === 'Uniform Check' && entry.personName && (
+                    <div className="space-y-3">
+                      <CardDescription>Guard: {entry.personName}</CardDescription>
+                      {entry.uniformChecklist?.map(item => (
+                        <div key={item.id} className="text-sm p-2 rounded-md bg-background/50 border">
+                          <div className="flex items-center justify-between">
+                             <span className="font-medium">{item.label}</span>
+                            {item.confirmed ? (
+                              <span className="flex items-center gap-1.5 text-xs font-semibold text-green-500"><CheckCircle className="w-4 h-4" /> Confirmed</span>
+                            ) : (
+                              <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-500"><XCircle className="w-4 h-4" /> Not Confirmed</span>
+                            )}
+                          </div>
+                          {item.comment && item.comment.trim() !== '' && (
+                            <p className="text-xs italic text-muted-foreground pt-1.5 mt-1.5 border-t border-dashed flex items-start gap-1.5"><MessageSquare className="w-3 h-3 mt-0.5 shrink-0" /> "{item.comment}"</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {entry.type === 'Patrol' && entry.details.trim() === '' ? (
                     <p className="text-sm italic text-muted-foreground pt-2">A.I.O (All In Order)</p>
                   ) : (
