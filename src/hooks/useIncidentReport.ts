@@ -120,7 +120,10 @@ Original description: "${formData.description}"`;
     const apiKey = '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';
     
     try {
-      const validationPrompt = `Given the incident type "${formData.incidentType}" and the description: "${formData.description}", does the description accurately match the incident type? The user might have made a mistake. Please analyze and respond with only a JSON object in the format: { "match": boolean, "reason": "A brief explanation for your decision." }. For example, if the type is "Theft" but description is about a fire, "match" should be false.`;
+      const validationPrompt = `Analyze the following incident report data for logical consistency.
+Incident Type: "${formData.incidentType}"
+Description: "${formData.description}"
+Does the description provided logically match the selected incident type? For example, if the type is "Theft" but the description is about a fire alarm, the two do not match.`;
 
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
@@ -129,11 +132,11 @@ Original description: "${formData.description}"`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
+          model: 'llama-3.1-sonar-large-128k-online',
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful assistant that validates form data. Respond only with the requested JSON object.'
+              content: 'You are a meticulous assistant who validates form data for logical consistency. Your response MUST be a single, valid JSON object in the format: { "match": boolean, "reason": "A brief explanation for your decision." }. Do not include any other text, explanation, or markdown formatting like ```json.'
             },
             {
               role: 'user',
