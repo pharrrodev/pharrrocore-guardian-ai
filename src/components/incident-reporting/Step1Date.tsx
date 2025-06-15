@@ -29,8 +29,8 @@ const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
               <CalendarIcon className="w-10 h-10 text-primary" />
           </div>
       </div>
-      <h3 className="text-xl font-semibold mb-2">When did this incident occur?</h3>
-      <p className="text-muted-foreground mb-6">Select the date when the incident took place.</p>
+      <h3 className="text-xl font-semibold mb-2">What was the date of the incident?</h3>
+      <p className="text-muted-foreground mb-6">Please select the date when the incident occurred.</p>
       
       <Popover>
         <PopoverTrigger asChild>
@@ -42,7 +42,7 @@ const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>dd/mm/yyyy</span>}
+            {date ? format(date, "PPP") : <span>Select a date</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
