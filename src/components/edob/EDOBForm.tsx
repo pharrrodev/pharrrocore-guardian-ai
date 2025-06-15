@@ -53,11 +53,11 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full border rounded-lg p-4">
       <h3 className="text-lg font-semibold">New Entry</h3>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="flex flex-1 flex-col gap-4">
-          <ScrollArea className="flex-1 -mr-6 pr-6">
+          <ScrollArea className="flex-1 -mr-4 pr-4">
             <div className="space-y-4">
               <FormField
                 control={form.control}
