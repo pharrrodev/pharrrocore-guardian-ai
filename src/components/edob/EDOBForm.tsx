@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,18 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
 
   const handleFormSubmit = (values: FormValues) => {
     onSubmit(values);
-    form.reset();
+    form.reset({
+      entryType: "",
+      patrolRoute: "",
+      details: "",
+      accessType: "",
+      personName: "",
+      company: "",
+      alarmZone: "",
+      alarmType: "",
+      equipmentChecked: "",
+      equipmentStatus: "",
+    });
   }
 
   return (
@@ -57,11 +69,10 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
               <FormItem>
                 <FormLabel>Entry Type</FormLabel>
                 <Select onValueChange={(value) => {
-                    const currentDetails = form.getValues("details");
                     form.reset({
                       entryType: value,
                       patrolRoute: "",
-                      details: currentDetails,
+                      details: "",
                       accessType: "",
                       personName: "",
                       company: "",
