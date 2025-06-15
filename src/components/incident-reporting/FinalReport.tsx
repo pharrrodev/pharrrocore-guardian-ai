@@ -1,9 +1,9 @@
-
 import { format } from 'date-fns';
 import { Shield, Save, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface FinalReportProps {
   formData: any;
@@ -28,6 +28,32 @@ const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
       return `The following actions were taken: ${formData.actionsTaken.join(', ')}.`;
     }
     return 'No specific immediate actions were logged in the system.';
+  };
+
+  const handleSaveDraft = () => {
+    try {
+      const reportWithStatus = { ...formData, status: 'draft', reportId, savedAt: new Date().toISOString() };
+      localStorage.setItem(`report-${reportId}`, JSON.stringify(reportWithStatus));
+      toast.success("Draft Saved Locally", {
+        description: `Report ${reportId} has been saved in your browser.`,
+      });
+    } catch (error) {
+      console.error("Error saving draft to localStorage:", error);
+      toast.error("Failed to save draft.");
+    }
+  };
+
+  const handleFinalizeReport = () => {
+    try {
+      const reportWithStatus = { ...formData, status: 'finalized', reportId, finalizedAt: new Date().toISOString() };
+      localStorage.setItem(`report-${reportId}`, JSON.stringify(reportWithStatus));
+      toast.success("Report Finalized and Saved Locally", {
+        description: `Report ${reportId} is now finalized. In a real app, this would be sent to a server.`,
+      });
+    } catch (error) {
+      console.error("Error finalizing report in localStorage:", error);
+      toast.error("Failed to finalize report.");
+    }
   };
 
   return (
@@ -72,10 +98,10 @@ const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
             </Link>
           </Button>
           <div className="flex gap-4">
-            <Button variant="secondary">
+            <Button variant="secondary" onClick={handleSaveDraft}>
               <Save className="mr-2 h-4 w-4" /> Save Draft
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleFinalizeReport}>
               Finalize Report
             </Button>
           </div>
