@@ -1,7 +1,8 @@
 
+```tsx
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Step2TimeProps {
   formData: { incidentTime?: string };
@@ -9,13 +10,30 @@ interface Step2TimeProps {
 }
 
 const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
-  const [time, setTime] = useState(formData.incidentTime || '');
+  const initialTime = formData.incidentTime?.split(':');
+  const [hour, setHour] = useState<string | undefined>(initialTime?.[0] || undefined);
+  const [minute, setMinute] = useState<string | undefined>(initialTime?.[1] || undefined);
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = e.target.value;
-    setTime(newTime);
-    updateFormData({ incidentTime: newTime });
+  const handleHourChange = (newHour: string) => {
+    setHour(newHour);
+    if (newHour && minute) {
+      updateFormData({ incidentTime: `${newHour}:${minute}` });
+    } else {
+      updateFormData({ incidentTime: '' });
+    }
   };
+
+  const handleMinuteChange = (newMinute: string) => {
+    setMinute(newMinute);
+    if (hour && newMinute) {
+      updateFormData({ incidentTime: `${hour}:${newMinute}` });
+    } else {
+      updateFormData({ incidentTime: '' });
+    }
+  };
+
+  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
   return (
     <div className="w-full max-w-md text-center">
@@ -27,15 +45,31 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
       <h3 className="text-xl font-semibold mb-2">What time did the incident occur?</h3>
       <p className="text-muted-foreground mb-6">Please specify the time of the incident.</p>
       
-      <Input
-        type="time"
-        value={time}
-        onChange={handleTimeChange}
-        className="h-12 text-base"
-        required
-      />
+      <div className="flex items-center justify-center gap-2 sm:gap-4">
+        <Select onValueChange={handleHourChange} value={hour}>
+          <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
+            <SelectValue placeholder="Hour" />
+          </SelectTrigger>
+          <SelectContent>
+            {hours.map(h => (
+              <SelectItem key={h} value={h}>{h}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-2xl font-bold">:</span>
+        <Select onValueChange={handleMinuteChange} value={minute}>
+          <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
+            <SelectValue placeholder="Minute" />
+          </SelectTrigger>
+          <SelectContent>
+            {minutes.map(m => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      {!time && (
+      {!formData.incidentTime && (
         <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
           Please select an incident time.
         </div>
@@ -45,3 +79,4 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
 };
 
 export default Step2Time;
+```
