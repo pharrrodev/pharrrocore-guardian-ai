@@ -4,21 +4,22 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import Step1IncidentType from '@/components/incident-reporting/Step1IncidentType';
+import Step1Date from '@/components/incident-reporting/Step1Date';
 
 interface ReportData {
-  incidentType: string;
+  incidentType?: string;
+  incidentDate?: Date;
   // Future fields will be added here
 }
 
 const STEPS = [
-    { number: 1, title: 'Incident Type' },
-    { number: 2, title: 'Input Method' },
-    { number: 3, title: 'Processing' },
-    { number: 4, title: 'Validation & Review' },
-    { number: 5, title: 'Report Preview' },
-    { number: 6, title: 'Confirmation' },
-    { number: 7, title: 'Download' },
+    { number: 1, title: 'Incident Date' },
+    { number: 2, title: 'Incident Time' },
+    { number: 3, title: 'Location' },
+    { number: 4, title: 'Incident Type' },
+    { number: 5, title: 'Actions & Evidence' },
+    { number: 6, 'title': 'Description' },
+    { number: 7, title: 'Report Preview' },
 ];
 
 const IncidentReport = () => {
@@ -44,7 +45,7 @@ const IncidentReport = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1IncidentType formData={formData} updateFormData={updateFormData} />;
+        return <Step1Date formData={formData} updateFormData={updateFormData} />;
       default:
         return (
           <div className="text-center">
@@ -64,7 +65,7 @@ const IncidentReport = () => {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center mb-2">
-              <CardTitle className="text-2xl">AI Incident Reporting Wizard</CardTitle>
+              <CardTitle className="text-2xl">Create Incident Report</CardTitle>
               <Button asChild variant="ghost">
                 <Link to="/">Cancel</Link>
               </Button>
@@ -85,7 +86,7 @@ const IncidentReport = () => {
             )}
             
             {!isLastStep ? (
-              <Button onClick={nextStep} disabled={currentStep === 1 && !formData.incidentType}>
+              <Button onClick={nextStep} disabled={currentStep === 1 && !formData.incidentDate}>
                 Next
               </Button>
             ) : (
