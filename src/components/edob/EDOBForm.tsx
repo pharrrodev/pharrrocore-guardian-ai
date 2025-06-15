@@ -14,8 +14,6 @@ import {
   accessTypes,
   alarmZones,
   alarmTypes,
-  equipmentToCheck,
-  equipmentStatuses,
 } from "@/data/edob-types";
 
 interface EDOBFormProps {
@@ -34,8 +32,6 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
       company: "",
       alarmZone: "",
       alarmType: "",
-      equipmentChecked: "",
-      equipmentStatus: "",
     },
   });
 
@@ -52,8 +48,6 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
       company: "",
       alarmZone: "",
       alarmType: "",
-      equipmentChecked: "",
-      equipmentStatus: "",
     });
   }
 
@@ -80,8 +74,6 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
                           company: "",
                           alarmZone: "",
                           alarmType: "",
-                          equipmentChecked: "",
-                          equipmentStatus: "",
                         });
                       }} value={field.value}>
                       <FormControl>
@@ -138,13 +130,6 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
                   <FormField control={form.control} name="alarmType" render={({ field }) => (<FormItem><FormLabel>Alarm Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select alarm type..." /></SelectTrigger></FormControl><SelectContent>{alarmTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                 </>
               )}
-               {watchEntryType === 'Equipment Check' && (
-                <>
-                  <FormField control={form.control} name="equipmentChecked" render={({ field }) => (<FormItem><FormLabel>Equipment Checked</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select equipment..." /></SelectTrigger></FormControl><SelectContent>{equipmentToCheck.map(item => (<SelectItem key={item} value={item}>{item}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="equipmentStatus" render={({ field }) => (<FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select status..." /></SelectTrigger></FormControl><SelectContent>{equipmentStatuses.map(status => (<SelectItem key={status} value={status}>{status}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                </>
-              )}
-
               {watchEntryType && !['Incident / Observation'].includes(watchEntryType) && (
                  <FormField
                     control={form.control}

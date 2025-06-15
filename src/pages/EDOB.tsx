@@ -22,8 +22,6 @@ const EDOB = () => {
         company: values.entryType === 'Access Control' ? values.company : undefined,
         alarmZone: values.entryType === 'Alarm Activation' ? values.alarmZone : undefined,
         alarmType: values.entryType === 'Alarm Activation' ? values.alarmType : undefined,
-        equipmentChecked: values.entryType === 'Equipment Check' ? values.equipmentChecked : undefined,
-        equipmentStatus: values.entryType === 'Equipment Check' ? values.equipmentStatus : undefined,
     };
     setEntries(prev => [newEntry, ...prev]);
   }

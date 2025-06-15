@@ -3,7 +3,7 @@ import { assignmentTopics } from "@/data/assignmentTopics";
 
 export const patrolRoutes = ["Full Patrol", ...(assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [])];
 export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.subTopics?.map(st => st.label) || [];
-export const equipmentToCheck = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => st.label) || [];
+export const equipmentToCheck: { id: string; label: string }[] = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 export const uniformKitItems: { id: string; label: string }[] = assignmentTopics.find(t => t.id === 'uniform-kit-policy')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 
 export const entryTypes = [
@@ -11,7 +11,6 @@ export const entryTypes = [
   "Incident / Observation",
   "Access Control",
   "Alarm Activation",
-  "Equipment Check",
 ];
 export const accessTypes = ["Visitor Entry", "Contractor Entry", "Delivery"];
 export const alarmTypes = ["Intruder", "Fire", "Panic", "Environmental"];
@@ -26,8 +25,6 @@ export const formSchema = z.object({
   company: z.string().optional(),
   alarmZone: z.string().optional(),
   alarmType: z.string().optional(),
-  equipmentChecked: z.string().optional(),
-  equipmentStatus: z.string().optional(),
   uniformChecklist: z.array(z.object({
     id: z.string(),
     label: z.string(),
@@ -50,10 +47,6 @@ export const formSchema = z.object({
   if (data.entryType === 'Alarm Activation') {
     if (!data.alarmZone) ctx.addIssue({ code: 'custom', path: ['alarmZone'], message: 'Alarm zone is required.' });
     if (!data.alarmType) ctx.addIssue({ code: 'custom', path: ['alarmType'], message: 'Alarm type is required.' });
-  }
-  if (data.entryType === 'Equipment Check') {
-    if (!data.equipmentChecked) ctx.addIssue({ code: 'custom', path: ['equipmentChecked'], message: 'Equipment selection is required.' });
-    if (!data.equipmentStatus) ctx.addIssue({ code: 'custom', path: ['equipmentStatus'], message: 'Equipment status is required.' });
   }
 
   // Require details for all types except 'Patrol'
@@ -81,6 +74,4 @@ export type EDOBEntry = {
     company?: string;
     alarmZone?: string;
     alarmType?: string;
-    equipmentChecked?: string;
-    equipmentStatus?: string;
 }

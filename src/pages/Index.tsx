@@ -1,8 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck, ListChecks } from "lucide-react";
 
 const Index = () => {
   return (
@@ -11,7 +10,7 @@ const Index = () => {
         <h1 className="text-5xl font-bold tracking-tighter mb-2">Pharrrocore</h1>
         <p className="text-xl text-muted-foreground">Advanced AI Security Management</p>
       </header>
-      <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl w-full">
+      <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl w-full">
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -88,10 +87,28 @@ const Index = () => {
             </Button>
           </CardContent>
         </Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <ListChecks className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Equipment Check</CardTitle>
+                <CardDescription>Perform routine equipment inspections.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              A checklist to ensure all key safety and security equipment is operational and report any issues found during inspection.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/equipment-check">Start Check</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
 };
 
 export default Index;
-
