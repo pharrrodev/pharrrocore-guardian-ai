@@ -78,45 +78,48 @@ const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
               <CalendarIcon className="w-10 h-10 text-primary" />
           </div>
       </div>
-      <h3 className="text-xl font-semibold mb-2">What was the date of the incident?</h3>
-      <p className="text-muted-foreground mb-6">Please select the date when the incident occurred.</p>
+      <h3 className="text-xl font-semibold mb-2 text-center">What was the date of the incident?</h3>
+      <p className="text-muted-foreground mb-6 text-center">Please select the date when the incident occurred.</p>
       
-      <div className="flex items-center justify-center gap-2 sm:gap-3">
-        <Select onValueChange={handleYearChange} value={year}>
-          <SelectTrigger className="w-[120px] h-12 text-base">
-            <SelectValue placeholder="Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map(y => (
-              <SelectItem key={y} value={y}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="h-[320px] flex flex-col items-center justify-center">
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <Select onValueChange={handleYearChange} value={year}>
+            <SelectTrigger className="w-[120px] h-12 text-base">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(y => (
+                <SelectItem key={y} value={y}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select onValueChange={handleMonthChange} value={month} disabled={!year}>
-          <SelectTrigger className="w-[150px] h-12 text-base">
-            <SelectValue placeholder="Month" />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map(m => (
-              <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-    
-        <Select onValueChange={setDay} value={day} disabled={!month || !year}>
-          <SelectTrigger className="w-[100px] h-12 text-base">
-            <SelectValue placeholder="Day" />
-          </SelectTrigger>
-          <SelectContent>
-            {daysInMonth.map(d => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select onValueChange={handleMonthChange} value={month} disabled={!year}>
+            <SelectTrigger className="w-[150px] h-12 text-base">
+              <SelectValue placeholder="Month" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map(m => (
+                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+      
+          <Select onValueChange={setDay} value={day} disabled={!month || !year}>
+            <SelectTrigger className="w-[100px] h-12 text-base">
+              <SelectValue placeholder="Day" />
+            </SelectTrigger>
+            <SelectContent>
+              {daysInMonth.map(d => (
+                <SelectItem key={d} value={d}>{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <p className="text-sm text-muted-foreground mt-2 text-center">Cannot select future dates.</p>
       </div>
       
-      <p className="text-sm text-muted-foreground mt-2 text-center">Cannot select future dates.</p>
       <div
         className={cn(
           "min-h-[60px] flex items-center justify-center mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm",

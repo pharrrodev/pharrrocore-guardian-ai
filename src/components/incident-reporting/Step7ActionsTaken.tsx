@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ListChecks } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -42,7 +43,7 @@ const Step7ActionsTaken: React.FC<Step7ActionsTakenProps> = ({ formData, updateF
         {incidentType ? `Actions related to the ${incidentType.toLowerCase()} incident.` : 'Select all that apply.'}
       </p>
       
-      <div className="rounded-md border text-left p-4">
+      <div className="rounded-md border text-left p-4 h-[320px] overflow-y-auto">
         <div className="space-y-3 text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
           {relevantActions.map((action) => (
             <div key={action} className="flex items-center space-x-3">

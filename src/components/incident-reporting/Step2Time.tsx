@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,28 +45,30 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
       <h3 className="text-xl font-semibold mb-2">What time did the incident occur?</h3>
       <p className="text-muted-foreground mb-6">Please specify the time of the incident.</p>
       
-      <div className="flex items-center justify-center gap-2 sm:gap-4">
-        <Select onValueChange={handleHourChange} value={hour}>
-          <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
-            <SelectValue placeholder="Hour" />
-          </SelectTrigger>
-          <SelectContent>
-            {hours.map(h => (
-              <SelectItem key={h} value={h}>{h}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <span className="text-2xl font-bold">:</span>
-        <Select onValueChange={handleMinuteChange} value={minute}>
-          <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
-            <SelectValue placeholder="Minute" />
-          </SelectTrigger>
-          <SelectContent>
-            {minutes.map(m => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="h-[320px] flex items-center justify-center">
+        <div className="flex items-center justify-center gap-2 sm:gap-4">
+          <Select onValueChange={handleHourChange} value={hour}>
+            <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
+              <SelectValue placeholder="Hour" />
+            </SelectTrigger>
+            <SelectContent>
+              {hours.map(h => (
+                <SelectItem key={h} value={h}>{h}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-2xl font-bold">:</span>
+          <Select onValueChange={handleMinuteChange} value={minute}>
+            <SelectTrigger className="w-[100px] sm:w-[120px] h-12 text-base">
+              <SelectValue placeholder="Minute" />
+            </SelectTrigger>
+            <SelectContent>
+              {minutes.map(m => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div

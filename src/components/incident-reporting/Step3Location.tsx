@@ -43,16 +43,18 @@ const Step3Location: React.FC<Step3LocationProps> = ({ formData, updateFormData 
       <h3 className="text-xl font-semibold mb-2">Where did the incident occur?</h3>
       <p className="text-muted-foreground mb-6">Select the location from the list. Be more specific in the description if needed.</p>
       
-      <Select onValueChange={handleLocationChange} value={location} required>
-        <SelectTrigger className="h-12 text-base">
-          <SelectValue placeholder="Select a location" />
-        </SelectTrigger>
-        <SelectContent>
-          {locations.map((loc) => (
-            <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="h-[320px] flex items-center justify-center">
+        <Select onValueChange={handleLocationChange} value={location} required>
+          <SelectTrigger className="h-12 text-base max-w-sm w-full">
+            <SelectValue placeholder="Select a location" />
+          </SelectTrigger>
+          <SelectContent>
+            {locations.map((loc) => (
+              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div
         className={cn(

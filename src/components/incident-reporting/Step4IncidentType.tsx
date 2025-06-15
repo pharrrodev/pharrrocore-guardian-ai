@@ -40,11 +40,16 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
 
   return (
     <div className="w-full text-center">
+      <div className="flex justify-center mb-6">
+        <div className="bg-blue-100 dark:bg-primary/20 rounded-full p-3">
+          <TriangleAlert className="w-10 h-10 text-primary" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       
-      <div className="rounded-md border p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="rounded-md border p-4 h-[320px] overflow-y-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {incidentTypes.map((type) => (
             <Button
               key={type.name}
