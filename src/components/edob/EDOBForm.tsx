@@ -57,7 +57,21 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Entry Type</FormLabel>
-                <Select onValueChange={(value) => { form.reset(); field.onChange(value); }} value={field.value}>
+                <Select onValueChange={(value) => {
+                    const currentDetails = form.getValues("details");
+                    form.reset({
+                      entryType: value,
+                      patrolRoute: "",
+                      details: currentDetails,
+                      accessType: "",
+                      personName: "",
+                      company: "",
+                      alarmZone: "",
+                      alarmType: "",
+                      equipmentChecked: "",
+                      equipmentStatus: "",
+                    });
+                  }} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an entry type..." />
