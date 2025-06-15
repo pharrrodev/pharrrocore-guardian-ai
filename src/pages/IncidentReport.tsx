@@ -1,3 +1,4 @@
+
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -8,6 +9,7 @@ import { useIncidentReport } from '@/hooks/useIncidentReport';
 import ProcessingReportModal from '@/components/incident-reporting/ProcessingReportModal';
 import FinalReport from '@/components/incident-reporting/FinalReport';
 import StepManager from '@/components/incident-reporting/StepManager';
+import ValidationWarningDialog from '@/components/incident-reporting/ValidationWarningDialog';
 
 const IncidentReport = () => {
   const {
@@ -16,12 +18,17 @@ const IncidentReport = () => {
     formData,
     direction,
     isProcessing,
+    isFinallySubmitting,
     isSubmitted,
     updateFormData,
     handleNext,
     handleBack,
     isNextDisabled,
     handleSubmit,
+    submitReport,
+    showValidationWarning,
+    onOpenChangeWarning,
+    validationMessage,
   } = useIncidentReport();
 
   if (isSubmitted) {
@@ -32,9 +39,21 @@ const IncidentReport = () => {
     );
   }
 
+  const getSubmitButtonText = () => {
+    if (isProcessing && !isFinallySubmitting) return 'Validating...';
+    if (isFinallySubmitting) return 'Submitting...';
+    return 'Submit Report';
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <ProcessingReportModal open={isProcessing} />
+      <ProcessingReportModal open={isFinallySubmitting} />
+      <ValidationWarningDialog
+        open={showValidationWarning}
+        onOpenChange={onOpenChangeWarning}
+        message={validationMessage}
+        onConfirm={submitReport}
+      />
       <Card className="w-full max-w-4xl">
         <CardHeader>
           <div className="flex items-center justify-center">
@@ -55,7 +74,7 @@ const IncidentReport = () => {
         <CardFooter className="flex justify-between items-center">
           <div>
             {currentStep > 1 && (
-              <Button variant="outline" size="lg" onClick={handleBack}>
+              <Button variant="outline" size="lg" onClick={handleBack} disabled={isProcessing}>
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Back
               </Button>
@@ -63,11 +82,11 @@ const IncidentReport = () => {
           </div>
 
           {currentStep === TOTAL_STEPS ? (
-            <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled()}>
-              Submit Report
+            <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled() || isProcessing}>
+              {getSubmitButtonText()}
             </Button>
           ) : (
-            <Button size="lg" onClick={handleNext} disabled={isNextDisabled()}>
+            <Button size="lg" onClick={handleNext} disabled={isNextDisabled() || isProcessing}>
               Next
             </Button>
           )}

@@ -11,7 +11,10 @@ export const useIncidentReport = () => {
   });
   const [direction, setDirection] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isFinallySubmitting, setIsFinallySubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showValidationWarning, setShowValidationWarning] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
 
   const updateFormData = (data: object) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -52,8 +55,10 @@ export const useIncidentReport = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const submitReport = async () => {
     setIsProcessing(true);
+    setIsFinallySubmitting(true);
+    setShowValidationWarning(false);
 
     // WARNING: API Key is hardcoded below for demonstration purposes.
     // This is not secure for a real application.
@@ -108,7 +113,63 @@ Original description: "${formData.description}"`;
       });
     } finally {
       setIsProcessing(false);
+      setIsFinallySubmitting(false);
       setIsSubmitted(true);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsProcessing(true);
+    const apiKey = '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';
+    
+    try {
+      const validationPrompt = `Given the incident type "${formData.incidentType}" and the description: "${formData.description}", does the description accurately match the incident type? The user might have made a mistake. Please analyze and respond with only a JSON object in the format: { "match": boolean, "reason": "A brief explanation for your decision." }. For example, if the type is "Theft" but description is about a fire, "match" should be false.`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant that validates form data. Respond only with the requested JSON object.'
+            },
+            {
+              role: 'user',
+              content: validationPrompt
+            }
+          ],
+          temperature: 0.1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Validation API error: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      const jsonString = content.replace(/```json/g, '').replace(/```/g, '').trim();
+      const result = JSON.parse(jsonString);
+
+      if (result.match) {
+        await submitReport();
+      } else {
+        setValidationMessage(result.reason || "The description does not seem to match the selected incident type.");
+        setShowValidationWarning(true);
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error('Error during validation:', error);
+      toast.warning("Could not validate description.", {
+        description: "Proceeding with submission without AI check.",
+      });
+      await submitReport();
     }
   };
 
@@ -118,11 +179,16 @@ Original description: "${formData.description}"`;
     formData,
     direction,
     isProcessing,
+    isFinallySubmitting,
     isSubmitted,
     updateFormData,
     handleNext,
     handleBack,
     isNextDisabled,
     handleSubmit,
+    submitReport,
+    showValidationWarning,
+    onOpenChangeWarning: setShowValidationWarning,
+    validationMessage,
   };
 };
