@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -44,11 +43,11 @@ export const useIncidentReport = () => {
       case 4:
         return !formData.incidentType;
       case 5:
-        return !formData.description || formData.description.trim() === '';
-      case 6:
         return !formData.peopleInvolved || formData.peopleInvolved.length === 0;
-      case 7:
+      case 6:
         return !formData.actionsTaken || formData.actionsTaken.length === 0;
+      case 7:
+        return !formData.description || formData.description.trim() === '';
       default:
         return true;
     }
@@ -128,4 +127,3 @@ Original description: "${formData.description}"`;
     handleSubmit,
   };
 };
-

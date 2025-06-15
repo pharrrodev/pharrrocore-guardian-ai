@@ -1,4 +1,3 @@
-
 import { motion, type Easing, type Transition } from 'framer-motion';
 
 import Step1Date from '@/components/incident-reporting/Step1Date';
@@ -37,15 +36,14 @@ const StepManager: React.FC<StepManagerProps> = ({ currentStep, direction, formD
         case 4:
             return <motion.div {...motionProps}><Step4IncidentType formData={formData} updateFormData={updateFormData} /></motion.div>;
         case 5:
-            return <motion.div {...motionProps}><Step5Description formData={formData} updateFormData={updateFormData} /></motion.div>;
-        case 6:
             return <motion.div {...motionProps}><Step6PeopleInvolved formData={formData} updateFormData={updateFormData} /></motion.div>;
-        case 7:
+        case 6:
             return <motion.div {...motionProps}><Step7ActionsTaken formData={formData} updateFormData={updateFormData} /></motion.div>;
+        case 7:
+            return <motion.div {...motionProps}><Step5Description formData={formData} updateFormData={updateFormData} /></motion.div>;
         default:
             return null;
     }
 };
 
 export default StepManager;
-
