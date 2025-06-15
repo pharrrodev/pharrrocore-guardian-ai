@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -166,9 +167,9 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
                   )}
                 />
               )}
+              {watchEntryType && <Button type="submit" className="w-full">Submit Entry</Button>}
             </div>
           </ScrollArea>
-          {watchEntryType && <Button type="submit">Submit Entry</Button>}
         </form>
       </Form>
     </div>
