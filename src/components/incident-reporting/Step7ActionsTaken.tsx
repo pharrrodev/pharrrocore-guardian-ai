@@ -1,10 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { ListChecks } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { allActions, incidentActionsMapping } from '@/data/incidentActionsMapping';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Step7ActionsTakenProps {
   formData: { actionsTaken?: string[]; incidentType?: string };
@@ -43,7 +41,7 @@ const Step7ActionsTaken: React.FC<Step7ActionsTakenProps> = ({ formData, updateF
         {incidentType ? `Actions related to the ${incidentType.toLowerCase()} incident.` : 'Select all that apply.'}
       </p>
       
-      <ScrollArea className="h-[240px] rounded-md border text-left p-4">
+      <div className="rounded-md border text-left p-4">
         <div className="space-y-3 text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
           {relevantActions.map((action) => (
             <div key={action} className="flex items-center space-x-3">
@@ -56,7 +54,7 @@ const Step7ActionsTaken: React.FC<Step7ActionsTakenProps> = ({ formData, updateF
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
        {actionsTaken.length === 0 && (
           <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
             Please select at least one action.

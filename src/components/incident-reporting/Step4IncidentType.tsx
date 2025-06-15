@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Pocket,
@@ -15,7 +14,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Step4IncidentTypeProps {
   formData: { incidentType?: string };
@@ -44,7 +42,7 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       
-      <ScrollArea className="h-[300px] rounded-md border p-4">
+      <div className="rounded-md border p-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {incidentTypes.map((type) => (
             <Button
@@ -61,7 +59,7 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
             </Button>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
       {!selectedType && (
           <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">

@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Users2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Step6PeopleInvolvedProps {
   formData: { peopleInvolved?: string[] };
@@ -58,7 +56,7 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
       <h3 className="text-xl font-semibold mb-2">Who was involved or notified?</h3>
       <p className="text-muted-foreground mb-6">Select all that apply, or N/A.</p>
       
-      <ScrollArea className="h-[240px] rounded-md border text-left p-4">
+      <div className="rounded-md border text-left p-4">
         <div className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
           {peopleOptions.map((person) => (
             <div key={person} className="flex items-center space-x-3">
@@ -71,7 +69,7 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
        {selectedPeople.length === 0 && (
           <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
             Please select at least one option.
