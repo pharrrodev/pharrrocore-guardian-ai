@@ -9,11 +9,11 @@ interface Step1DateProps {
 }
 
 const Step1Date: React.FC<Step1DateProps> = ({ formData, updateFormData }) => {
-  const initialDate = formData.incidentDate;
+  const initialDate = formData.incidentDate || new Date();
 
-  const [year, setYear] = useState<string | undefined>(initialDate ? String(initialDate.getFullYear()) : undefined);
-  const [month, setMonth] = useState<string | undefined>(initialDate ? String(initialDate.getMonth()) : undefined); // 0-indexed month
-  const [day, setDay] = useState<string | undefined>(initialDate ? String(initialDate.getDate()) : undefined);
+  const [year, setYear] = useState<string | undefined>(String(initialDate.getFullYear()));
+  const [month, setMonth] = useState<string | undefined>(String(initialDate.getMonth()));
+  const [day, setDay] = useState<string | undefined>(String(initialDate.getDate()));
   
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
