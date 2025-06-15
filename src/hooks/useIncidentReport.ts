@@ -6,7 +6,6 @@ const TOTAL_STEPS = 7;
 export const useIncidentReport = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<any>({
-    incidentDate: new Date(),
     peopleInvolved: [],
     actionsTaken: [],
   });
