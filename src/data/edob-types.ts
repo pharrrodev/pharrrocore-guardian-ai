@@ -1,7 +1,8 @@
+
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
-export const patrolRoutes = assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [];
+export const patrolRoutes = ["Full Patrol", ...(assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [])];
 export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.subTopics?.map(st => st.label) || [];
 export const equipmentToCheck = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => st.label) || [];
 
