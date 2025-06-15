@@ -1,10 +1,11 @@
+
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
 export const patrolRoutes = ["Full Patrol", ...(assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [])];
 export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.subTopics?.map(st => st.label) || [];
 export const equipmentToCheck = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => st.label) || [];
-export const uniformKitItems = assignmentTopics.find(t => t.id === 'uniform-kit-policy')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
+export const uniformKitItems: { id: string; label: string }[] = assignmentTopics.find(t => t.id === 'uniform-kit-policy')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 
 export const entryTypes = [
   "Patrol",
