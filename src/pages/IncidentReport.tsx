@@ -51,7 +51,7 @@ const IncidentReport = () => {
         message={validationMessage}
         onConfirm={submitReport}
       />
-      <Card className="w-full max-w-4xl">
+      <Card className="w-full max-w-3xl">
         <CardHeader>
           <div className="flex items-center justify-center">
             <h2 className="text-2xl font-bold text-center">New Incident Report</h2>
