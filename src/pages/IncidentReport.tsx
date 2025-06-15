@@ -62,40 +62,42 @@ const IncidentReport = () => {
           <Progress value={(currentStep / TOTAL_STEPS) * 100} className="w-full mt-4" />
         </CardHeader>
         <CardContent className="relative flex justify-center items-center py-8 min-h-[450px] overflow-hidden">
-          {currentStep > 1 && (
+          <div className="flex items-center justify-between w-full max-w-3xl px-2 sm:px-0">
             <Button
               variant="outline"
               size="icon"
               onClick={handleBack}
               disabled={isProcessing}
-              className="absolute left-2 sm:left-4 lg:left-16 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10"
+              className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
+                currentStep > 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-          )}
 
-          <div className="w-full max-w-2xl">
-            <AnimatePresence mode="wait">
-              <StepManager 
-                currentStep={currentStep}
-                direction={direction}
-                formData={formData}
-                updateFormData={updateFormData}
-              />
-            </AnimatePresence>
-          </div>
+            <div className="w-full flex-1 max-w-2xl px-4">
+              <AnimatePresence mode="wait">
+                <StepManager
+                  currentStep={currentStep}
+                  direction={direction}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </AnimatePresence>
+            </div>
 
-          {currentStep < TOTAL_STEPS && (
             <Button
               variant="outline"
               size="icon"
               onClick={handleNext}
               disabled={isNextDisabled() || isProcessing}
-              className="absolute right-2 sm:right-4 lg:right-16 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10"
+              className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
+                currentStep < TOTAL_STEPS ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             >
               <ArrowRight className="h-5 w-5" />
             </Button>
-          )}
+          </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           {currentStep === TOTAL_STEPS ? (
