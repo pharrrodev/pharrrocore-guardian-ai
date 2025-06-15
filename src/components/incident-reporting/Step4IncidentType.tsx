@@ -48,19 +48,19 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       
-      <div className="rounded-md border p-4 h-[320px] overflow-y-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="rounded-md border p-4 h-[320px]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {incidentTypes.map((type) => (
             <Button
               key={type.name}
               variant="outline"
               className={cn(
-                "flex flex-col items-center justify-center h-28 text-center p-4 transition-all",
+                "flex flex-col items-center justify-center h-20 text-center p-2 transition-all",
                 selectedType === type.name ? "border-primary ring-2 ring-primary bg-primary/10" : "hover:bg-accent/50"
               )}
               onClick={() => updateFormData({ incidentType: type.name })}
             >
-              <type.icon className="w-8 h-8 mb-2" />
+              <type.icon className="w-6 h-6 mb-1" />
               <span className="text-sm font-medium">{type.name}</span>
             </Button>
           ))}
