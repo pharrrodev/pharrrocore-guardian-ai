@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface Step3LocationProps {
   formData: { location?: string };
@@ -53,12 +54,13 @@ const Step3Location: React.FC<Step3LocationProps> = ({ formData, updateFormData 
         </SelectContent>
       </Select>
 
-      <div className="min-h-[60px]">
-        {!location && (
-          <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
-            Please select a location.
-          </div>
+      <div
+        className={cn(
+          "min-h-[60px] flex items-center justify-center mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm",
+          location ? "invisible" : "visible"
         )}
+      >
+        Please select a location.
       </div>
     </div>
   );

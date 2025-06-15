@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Step5DescriptionProps {
   formData: { description?: string };
@@ -35,12 +36,13 @@ const Step5Description: React.FC<Step5DescriptionProps> = ({ formData, updateFor
         required
       />
 
-      <div className="min-h-[60px]">
-        {!description && (
-          <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
-            Please provide a description of the incident.
-          </div>
+      <div
+        className={cn(
+          "min-h-[60px] flex items-center justify-center mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm",
+          description ? "invisible" : "visible"
         )}
+      >
+        Please provide a description of the incident.
       </div>
     </div>
   );
