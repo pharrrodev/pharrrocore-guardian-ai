@@ -16,7 +16,7 @@ const EDOB = () => {
         id: new Date().toISOString(),
         timestamp: new Date(),
         type: values.entryType,
-        details: values.details,
+        details: values.details || "",
         route: values.entryType === 'Patrol' ? values.patrolRoute : undefined,
         accessType: values.entryType === 'Access Control' ? values.accessType : undefined,
         personName: values.entryType === 'Access Control' ? values.personName : undefined,

@@ -20,7 +20,7 @@ export const equipmentStatuses = ["OK", "Needs Attention"];
 export const formSchema = z.object({
   entryType: z.string().min(1, { message: "Please select an entry type." }),
   patrolRoute: z.string().optional(),
-  details: z.string().min(1, { message: "Details are required." }),
+  details: z.string().optional(),
   accessType: z.string().optional(),
   personName: z.string().optional(),
   company: z.string().optional(),
