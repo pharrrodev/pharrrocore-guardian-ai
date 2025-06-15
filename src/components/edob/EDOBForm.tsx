@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -45,6 +44,25 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
     onSubmit(values);
     form.reset();
   }
+
+  const handleAioSubmit = () => {
+    const patrolRouteValue = form.getValues("patrolRoute");
+    if (!patrolRouteValue || patrolRouteValue === "") {
+      form.setError("patrolRoute", {
+        type: "manual",
+        message: "Please select a patrol route to log A.I.O.",
+      });
+      return;
+    }
+    form.clearErrors("patrolRoute");
+
+    const aioValues: FormValues = {
+      entryType: "Patrol",
+      patrolRoute: patrolRouteValue,
+      details: "", // Explicitly empty for A.I.O.
+    };
+    handleFormSubmit(aioValues);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -122,14 +140,14 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
           )}
           {watchEntryType === 'Alarm Activation' && (
             <>
-              <FormField control={form.control} name="alarmZone" render={({ field }) => (<FormItem><FormLabel>Alarm Zone</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select alarm zone..." /></SelectTrigger></FormControl><SelectContent>{alarmZones.map(zone => (<SelectItem key={zone} value={zone}>{zone}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-              <FormField control={form.control} name="alarmType" render={({ field }) => (<FormItem><FormLabel>Alarm Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select alarm type..." /></SelectTrigger></FormControl><SelectContent>{alarmTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="alarmZone" render={({ field }) => (<FormItem><FormLabel>Alarm Zone</FormLabel><Select onValuechange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select alarm zone..." /></SelectTrigger></FormControl><SelectContent>{alarmZones.map(zone => (<SelectItem key={zone} value={zone}>{zone}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="alarmType" render={({ field }) => (<FormItem><FormLabel>Alarm Type</FormLabel><Select onValuechange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select alarm type..." /></SelectTrigger></FormControl><SelectContent>{alarmTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
             </>
           )}
            {watchEntryType === 'Equipment Check' && (
             <>
-              <FormField control={form.control} name="equipmentChecked" render={({ field }) => (<FormItem><FormLabel>Equipment Checked</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select equipment..." /></SelectTrigger></FormControl><SelectContent>{equipmentToCheck.map(item => (<SelectItem key={item} value={item}>{item}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-              <FormField control={form.control} name="equipmentStatus" render={({ field }) => (<FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select status..." /></SelectTrigger></FormControl><SelectContent>{equipmentStatuses.map(status => (<SelectItem key={status} value={status}>{status}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="equipmentChecked" render={({ field }) => (<FormItem><FormLabel>Equipment Checked</FormLabel><Select onValuechange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select equipment..." /></SelectTrigger></FormControl><SelectContent>{equipmentToCheck.map(item => (<SelectItem key={item} value={item}>{item}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="equipmentStatus" render={({ field }) => (<FormItem><FormLabel>Status</FormLabel><Select onValuechange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select status..." /></SelectTrigger></FormControl><SelectContent>{equipmentStatuses.map(status => (<SelectItem key={status} value={status}>{status}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
             </>
           )}
           {watchEntryType && watchEntryType !== "Incident / Observation" && (
@@ -168,7 +186,18 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
               )}
             />
           )}
-          {watchEntryType && <Button type="submit">Submit Entry</Button>}
+          {watchEntryType === 'Patrol' ? (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button type="button" variant="secondary" onClick={handleAioSubmit} className="flex-1">
+                Log A.I.O.
+              </Button>
+              <Button type="submit" className="flex-1">
+                Submit with Details
+              </Button>
+            </div>
+          ) : (
+            watchEntryType && <Button type="submit">Submit Entry</Button>
+          )}
         </form>
       </Form>
     </div>
