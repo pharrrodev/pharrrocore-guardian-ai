@@ -1,9 +1,8 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Home, ArrowLeft, RotateCcw } from "lucide-react";
+import { Bot, Home, ArrowLeft, RotateCcw, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { assignmentTopics, Topic } from "@/data/assignmentTopics";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -94,11 +93,18 @@ const AssignmentInstructions = () => {
             <CardTitle className="text-2xl">AI Assignment Instructions</CardTitle>
             <CardDescription>Get instant information about site procedures.</CardDescription>
           </div>
-          <Button asChild variant="ghost" size="icon" className="ml-auto">
-            <Link to="/" aria-label="Go to dashboard">
-              <Home className="h-5 w-5" />
-            </Link>
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon">
+              <Link to="/edob" aria-label="Go to EDOB">
+                <FileText className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon">
+              <Link to="/" aria-label="Go to dashboard">
+                <Home className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">

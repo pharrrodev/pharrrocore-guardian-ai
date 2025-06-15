@@ -1,5 +1,3 @@
-
-
 export type Topic = {
   id: string;
   label: string;
@@ -28,17 +26,39 @@ export const assignmentTopics: Topic[] = [
   {
     id: 'patrol-duties',
     label: 'Patrol Duties',
-    response: 'Patrols are a key responsibility. What about patrols?',
+    response: 'Patrols are a key responsibility. This section covers patrol routes and reporting procedures.',
     subTopics: [
       { 
-        id: 'patrol-routes', 
-        label: 'Patrol Routes', 
-        response: 'Designated patrol routes are marked on the map in the main office. Deviations are not permitted without authorization.' 
+        id: 'patrol-routes-info', 
+        label: 'About Patrol Routes', 
+        response: 'Designated patrol routes are established for comprehensive site coverage. Guards must adhere to these routes unless directed otherwise by a supervisor. All routes are available as options in the Electronic Daily Occurrence Book (EDOB) when logging a patrol.' 
       },
       { 
         id: 'reporting-observations', 
         label: 'Reporting Observations', 
-        response: 'Any unusual activity must be reported immediately to the shift supervisor via radio.' 
+        response: 'Any unusual activity must be logged in the EDOB immediately. For urgent matters, also report directly to the shift supervisor via radio.' 
+      },
+    ],
+  },
+  {
+    id: 'patrol-routes',
+    label: 'Patrol Routes',
+    response: 'The following patrol routes are established for comprehensive site coverage. Please familiarize yourself with them.',
+    subTopics: [
+      { 
+        id: 'alpha-route', 
+        label: 'Alpha Route (Perimeter)', 
+        response: 'Covers the entire external perimeter fence line, Gate A, and the warehouse loading docks. Duration: 30 minutes.' 
+      },
+      { 
+        id: 'bravo-route', 
+        label: 'Bravo Route (Internal - Ground Floor)', 
+        response: 'Covers the main lobby, all ground floor corridors, lab access points, and the main office. Duration: 25 minutes.' 
+      },
+      { 
+        id: 'charlie-route', 
+        label: 'Charlie Route (Internal - Upper Floors)', 
+        response: 'Covers all upper floor corridors, server room exterior, and fire exit stairwells. Duration: 20 minutes.' 
       },
     ],
   },
