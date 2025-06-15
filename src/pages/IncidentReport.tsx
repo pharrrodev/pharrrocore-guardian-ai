@@ -5,10 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Step1Date from '@/components/incident-reporting/Step1Date';
+import Step2Time from '@/components/incident-reporting/Step2Time';
+import Step3Location from '@/components/incident-reporting/Step3Location';
+import Step4IncidentType from '@/components/incident-reporting/Step4IncidentType';
 
 interface ReportData {
   incidentType?: string;
   incidentDate?: Date;
+  incidentTime?: string;
+  location?: string;
   // Future fields will be added here
 }
 
@@ -46,6 +51,12 @@ const IncidentReport = () => {
     switch (currentStep) {
       case 1:
         return <Step1Date formData={formData} updateFormData={updateFormData} />;
+      case 2:
+        return <Step2Time formData={formData} updateFormData={updateFormData} />;
+      case 3:
+        return <Step3Location formData={formData} updateFormData={updateFormData} />;
+      case 4:
+        return <Step4IncidentType formData={formData} updateFormData={updateFormData} />;
       default:
         return (
           <div className="text-center">
@@ -58,6 +69,21 @@ const IncidentReport = () => {
 
   const currentStepInfo = STEPS[currentStep - 1];
   const isLastStep = currentStep === STEPS.length;
+
+  const isNextDisabled = () => {
+    switch (currentStep) {
+      case 1:
+        return !formData.incidentDate;
+      case 2:
+        return !formData.incidentTime;
+      case 3:
+        return !formData.location || formData.location.trim() === '';
+      case 4:
+        return !formData.incidentType;
+      default:
+        return false;
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
@@ -86,7 +112,7 @@ const IncidentReport = () => {
             )}
             
             {!isLastStep ? (
-              <Button onClick={nextStep} disabled={currentStep === 1 && !formData.incidentDate}>
+              <Button onClick={nextStep} disabled={isNextDisabled()}>
                 Next
               </Button>
             ) : (
