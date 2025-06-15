@@ -20,16 +20,29 @@ const peopleOptions = [
     'Contractors',
     'Witnesses',
     'Suspect(s)',
-    'Other (specify in description)'
+    'Other (specify in description)',
+    'N/A (Not Applicable)'
 ];
 
 const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, updateFormData }) => {
   const [selectedPeople, setSelectedPeople] = useState<string[]>(formData.peopleInvolved || []);
 
   const handleCheckboxChange = (person: string) => {
-    const newSelectedPeople = selectedPeople.includes(person)
-      ? selectedPeople.filter((p) => p !== person)
-      : [...selectedPeople, person];
+    let newSelectedPeople: string[];
+
+    if (person === 'N/A (Not Applicable)') {
+      // If "N/A" is clicked, it becomes the only selection, or clears selection if already active.
+      newSelectedPeople = selectedPeople.includes('N/A (Not Applicable)') ? [] : ['N/A (Not Applicable)'];
+    } else {
+      // Toggle the selected person
+      const updatedSelection = selectedPeople.includes(person)
+        ? selectedPeople.filter((p) => p !== person)
+        : [...selectedPeople, person];
+      
+      // If another option is selected, "N/A" should be deselected.
+      newSelectedPeople = updatedSelection.filter(p => p !== 'N/A (Not Applicable)');
+    }
+    
     setSelectedPeople(newSelectedPeople);
     updateFormData({ peopleInvolved: newSelectedPeople });
   };
@@ -42,7 +55,7 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
         </div>
       </div>
       <h3 className="text-xl font-semibold mb-2">Who was involved or notified?</h3>
-      <p className="text-muted-foreground mb-6">Select all that apply.</p>
+      <p className="text-muted-foreground mb-6">Select all that apply, or N/A.</p>
       
       <div className="space-y-3 text-left grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
         {peopleOptions.map((person) => (
