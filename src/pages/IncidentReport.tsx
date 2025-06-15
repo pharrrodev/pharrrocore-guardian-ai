@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, type Transition } from 'framer-motion';
 
 import Step1Date from '@/components/incident-reporting/Step1Date';
 import Step2Time from '@/components/incident-reporting/Step2Time';
@@ -66,12 +66,13 @@ const IncidentReport = () => {
 
   const renderStepContent = () => {
     const key = `${currentStep}-${direction}`;
+    const transition: Transition = { duration: 0.3, ease: 'easeInOut' };
     const motionProps = {
         key: key,
         initial: { opacity: 0, x: direction * 100 },
         animate: { opacity: 1, x: 0 },
         exit: { opacity: 0, x: -direction * 100 },
-        transition: { duration: 0.3, ease: 'easeInOut' },
+        transition: transition,
     };
 
     switch (currentStep) {
