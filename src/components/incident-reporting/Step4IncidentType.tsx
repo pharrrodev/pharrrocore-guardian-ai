@@ -6,9 +6,12 @@ import {
   KeyRound,
   Users,
   HeartPulse,
-  BellRing,
   TriangleAlert,
-  MoreHorizontal
+  MoreHorizontal,
+  Flame,
+  Bomb,
+  PowerOff,
+  Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,10 +25,13 @@ const incidentTypes = [
   { name: 'Theft', icon: Pocket },
   { name: 'Vandalism', icon: Hammer },
   { name: 'Access Breach', icon: KeyRound },
-  { name: 'Patron Concern', icon: Users },
+  { name: 'Disturbance', icon: Users },
   { name: 'Medical Emergency', icon: HeartPulse },
-  { name: 'Alarm Activation', icon: BellRing },
+  { name: 'Fire / Alarm', icon: Flame },
   { name: 'Health & Safety', icon: TriangleAlert },
+  { name: 'Bomb Threat', icon: Bomb },
+  { name: 'Power Failure', icon: PowerOff },
+  { name: 'Equipment Fault', icon: Wrench },
   { name: 'Other', icon: MoreHorizontal },
 ];
 
@@ -33,11 +39,11 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
   const selectedType = formData.incidentType;
 
   return (
-    <div className="w-full max-w-lg text-center">
+    <div className="w-full max-w-2xl text-center">
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {incidentTypes.map((type) => (
           <Button
             key={type.name}
