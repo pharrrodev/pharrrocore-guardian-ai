@@ -25,7 +25,13 @@ const EDOB = () => {
         alarmType: values.entryType === 'Alarm Activation' ? values.alarmType : undefined,
         equipmentChecked: values.entryType === 'Equipment Check' ? values.equipmentChecked : undefined,
         equipmentStatus: values.entryType === 'Equipment Check' ? values.equipmentStatus : undefined,
-        uniformChecklist: values.entryType === 'Uniform Check' ? values.uniformChecklist : undefined,
+        uniformChecklist: values.entryType === 'Uniform Check'
+          ? values.uniformChecklist?.filter(
+              // This type guard ensures that only valid checklist items are processed.
+              (item): item is { id: string; label: string; confirmed: boolean; comment?: string; } => 
+                typeof item.id === 'string' && typeof item.label === 'string'
+            )
+          : undefined,
     };
     setEntries(prev => [newEntry, ...prev]);
   }
