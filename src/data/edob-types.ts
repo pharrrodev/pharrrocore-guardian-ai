@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
@@ -48,6 +47,17 @@ export const formSchema = z.object({
   if (data.entryType === 'Equipment Check') {
     if (!data.equipmentChecked) ctx.addIssue({ code: 'custom', path: ['equipmentChecked'], message: 'Equipment selection is required.' });
     if (!data.equipmentStatus) ctx.addIssue({ code: 'custom', path: ['equipmentStatus'], message: 'Equipment status is required.' });
+  }
+
+  // Require details for all types except 'Patrol'
+  if (data.entryType && data.entryType !== 'Patrol' && (!data.details || data.details.trim() === '')) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['details'],
+      message: data.entryType === 'Incident / Observation'
+          ? 'Incident details are required.'
+          : 'Additional details/observations are required for this entry type.',
+    });
   }
 });
 
