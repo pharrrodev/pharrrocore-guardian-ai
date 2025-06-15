@@ -114,8 +114,10 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
           {watchEntryType === 'Access Control' && (
             <>
               <FormField control={form.control} name="accessType" render={({ field }) => (<FormItem><FormLabel>Access Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select access type..." /></SelectTrigger></FormControl><SelectContent>{accessTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-              <FormField control={form.control} name="personName" render={({ field }) => (<FormItem><FormLabel>Person's Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
-              <FormField control={form.control} name="company" render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input placeholder="e.g., ACME Inc." {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="personName" render={({ field }) => (<FormItem><FormLabel>Person's Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="company" render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input placeholder="e.g., ACME Inc." {...field} /></FormControl><FormMessage /></FormItem>)} />
+              </div>
             </>
           )}
           {watchEntryType === 'Alarm Activation' && (
