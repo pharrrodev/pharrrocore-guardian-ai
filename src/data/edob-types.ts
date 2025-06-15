@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
@@ -13,7 +12,6 @@ export const entryTypes = [
   "Access Control",
   "Alarm Activation",
   "Equipment Check",
-  "Uniform Check",
 ];
 export const accessTypes = ["Visitor Entry", "Contractor Entry", "Delivery"];
 export const alarmTypes = ["Intruder", "Fire", "Panic", "Environmental"];
@@ -57,23 +55,9 @@ export const formSchema = z.object({
     if (!data.equipmentChecked) ctx.addIssue({ code: 'custom', path: ['equipmentChecked'], message: 'Equipment selection is required.' });
     if (!data.equipmentStatus) ctx.addIssue({ code: 'custom', path: ['equipmentStatus'], message: 'Equipment status is required.' });
   }
-  if (data.entryType === 'Uniform Check') {
-    if (!data.personName || data.personName.trim() === "") {
-        ctx.addIssue({ code: 'custom', path: ['personName'], message: 'Guard name is required.' });
-    }
-    data.uniformChecklist?.forEach((item, index) => {
-        if (!item.confirmed && (!item.comment || item.comment.trim() === '')) {
-            ctx.addIssue({
-                code: 'custom',
-                path: [`uniformChecklist.${index}.comment`],
-                message: "Comment required if not confirmed.",
-            });
-        }
-    });
-  }
 
-  // Require details for all types except 'Patrol' and 'Uniform Check'
-  if (data.entryType && !['Patrol', 'Uniform Check'].includes(data.entryType) && (!data.details || data.details.trim() === '')) {
+  // Require details for all types except 'Patrol'
+  if (data.entryType && !['Patrol'].includes(data.entryType) && (!data.details || data.details.trim() === '')) {
     ctx.addIssue({
       code: 'custom',
       path: ['details'],
@@ -99,10 +83,4 @@ export type EDOBEntry = {
     alarmType?: string;
     equipmentChecked?: string;
     equipmentStatus?: string;
-    uniformChecklist?: {
-        id: string;
-        label: string;
-        confirmed: boolean;
-        comment?: string;
-    }[];
 }

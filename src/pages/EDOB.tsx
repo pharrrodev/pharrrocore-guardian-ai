@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, FileText } from "lucide-react";
@@ -19,19 +18,12 @@ const EDOB = () => {
         details: (values.entryType === 'Patrol' && (!values.details || values.details.trim() === '')) ? "A.I.O." : (values.details || ""),
         route: values.entryType === 'Patrol' ? values.patrolRoute : undefined,
         accessType: values.entryType === 'Access Control' ? values.accessType : undefined,
-        personName: ['Access Control', 'Uniform Check'].includes(values.entryType) ? values.personName : undefined,
+        personName: values.entryType === 'Access Control' ? values.personName : undefined,
         company: values.entryType === 'Access Control' ? values.company : undefined,
         alarmZone: values.entryType === 'Alarm Activation' ? values.alarmZone : undefined,
         alarmType: values.entryType === 'Alarm Activation' ? values.alarmType : undefined,
         equipmentChecked: values.entryType === 'Equipment Check' ? values.equipmentChecked : undefined,
         equipmentStatus: values.entryType === 'Equipment Check' ? values.equipmentStatus : undefined,
-        uniformChecklist: values.entryType === 'Uniform Check'
-          ? values.uniformChecklist?.filter(
-              // This type guard ensures that only valid checklist items are processed.
-              (item): item is { id: string; label: string; confirmed: boolean; comment?: string; } => 
-                typeof item.id === 'string' && typeof item.label === 'string'
-            )
-          : undefined,
     };
     setEntries(prev => [newEntry, ...prev]);
   }

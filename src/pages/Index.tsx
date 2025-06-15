@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck } from "lucide-react";
 
 const Index = () => {
   return (
@@ -11,7 +11,7 @@ const Index = () => {
         <h1 className="text-5xl font-bold tracking-tighter mb-2">Pharrrocore</h1>
         <p className="text-xl text-muted-foreground">Advanced AI Security Management</p>
       </header>
-      <main className="grid gap-8 md:grid-cols-3 max-w-6xl w-full">
+      <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl w-full">
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -69,9 +69,29 @@ const Index = () => {
             </Button>
           </CardContent>
         </Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <ClipboardCheck className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Uniform & Kit Check</CardTitle>
+                <CardDescription>Perform daily uniform and kit inspection.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              A quick checklist to ensure all security personnel are properly equipped and compliant with uniform standards before their shift.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/uniform-check">Start Check</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
 };
 
 export default Index;
+
