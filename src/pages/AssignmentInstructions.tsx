@@ -3,9 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Send, Bot, Home } from "lucide-react";
+import { Bot, Home, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { assignmentTopics, Topic } from "@/data/assignmentTopics";
 
 type Message = {
   sender: 'user' | 'ai';
@@ -14,10 +14,11 @@ type Message = {
 
 const AssignmentInstructions = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. How can I help you today?" }
+    { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. Please select a topic below to get started." }
   ]);
-  const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [currentTopics, setCurrentTopics] = useState<Topic[]>(assignmentTopics);
+  const [history, setHistory] = useState<Topic[][]>([assignmentTopics]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,20 +28,26 @@ const AssignmentInstructions = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim() === '') return;
+  const handleTopicSelect = (topic: Topic) => {
+    const userMessage: Message = { sender: 'user', text: topic.label };
+    const aiResponse: Message = { sender: 'ai', text: topic.response };
 
-    const userMessage: Message = { sender: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage, aiResponse]);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = { sender: 'ai', text: `This is a placeholder response for: "${input}". The AI is not connected yet.` };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    if (topic.subTopics && topic.subTopics.length > 0) {
+      setCurrentTopics(topic.subTopics);
+      setHistory(prev => [...prev, topic.subTopics!]);
+    }
+  };
 
-    setInput('');
+  const handleBack = () => {
+    if (history.length > 1) {
+      const newHistory = [...history];
+      newHistory.pop();
+      const prevTopics = newHistory[newHistory.length - 1];
+      setCurrentTopics(prevTopics);
+      setHistory(newHistory);
+    }
   };
 
   return (
@@ -82,19 +89,25 @@ const AssignmentInstructions = () => {
           ))}
           <div ref={messagesEndRef} />
         </CardContent>
-        <CardFooter>
-          <form onSubmit={handleSendMessage} className="flex w-full items-center space-x-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your question here..."
-              autoComplete="off"
-            />
-            <Button type="submit" size="icon" disabled={!input.trim()}>
-              <Send className="h-4 w-4" />
-              <span className="sr-only">Send message</span>
+        <CardFooter className="flex-col items-center justify-center gap-4 pt-4 border-t">
+           <div className="flex flex-wrap justify-center gap-2">
+            {currentTopics.map((topic) => (
+              <Button
+                key={topic.id}
+                variant="outline"
+                size="sm"
+                onClick={() => handleTopicSelect(topic)}
+              >
+                {topic.label}
+              </Button>
+            ))}
+          </div>
+          {history.length > 1 && (
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to previous topics
             </Button>
-          </form>
+          )}
         </CardFooter>
       </Card>
     </div>
