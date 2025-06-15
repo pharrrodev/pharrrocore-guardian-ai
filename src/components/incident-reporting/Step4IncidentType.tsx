@@ -48,7 +48,7 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       
-      <div className="rounded-md border p-4 h-[320px]">
+      <div className="rounded-md border p-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {incidentTypes.map((type) => (
             <Button
