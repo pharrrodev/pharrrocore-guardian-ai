@@ -1,4 +1,3 @@
-
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -38,14 +37,8 @@ const IncidentReport = () => {
       <ProcessingReportModal open={isProcessing} />
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            {currentStep > 1 ? (
-              <Button variant="ghost" size="icon" onClick={handleBack}>
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            ) : <div className="w-10 h-10" /> /* Placeholder to keep alignment */}
+          <div className="flex items-center justify-center">
             <h2 className="text-2xl font-bold text-center">New Incident Report</h2>
-            <div className="w-10 h-10" /> {/* Placeholder */}
           </div>
           <Progress value={(currentStep / TOTAL_STEPS) * 100} className="w-full mt-4" />
         </CardHeader>
@@ -59,7 +52,16 @@ const IncidentReport = () => {
             />
           </AnimatePresence>
         </CardContent>
-        <CardFooter className="flex justify-end gap-4">
+        <CardFooter className="flex justify-between items-center">
+          <div>
+            {currentStep > 1 && (
+              <Button variant="outline" size="lg" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Back
+              </Button>
+            )}
+          </div>
+
           {currentStep === TOTAL_STEPS ? (
             <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled()}>
               Submit Report
@@ -76,4 +78,3 @@ const IncidentReport = () => {
 };
 
 export default IncidentReport;
-
