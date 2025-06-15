@@ -37,8 +37,8 @@ const EDOB = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl h-[85vh] flex flex-col">
+    <div className="min-h-screen bg-background flex items-stretch justify-center p-4">
+      <Card className="w-full max-w-4xl flex flex-col">
         <CardHeader className="flex flex-row items-center gap-4">
           <FileText className="w-10 h-10 text-primary" />
           <div>
