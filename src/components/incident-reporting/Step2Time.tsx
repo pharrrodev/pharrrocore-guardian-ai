@@ -68,11 +68,13 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
         </Select>
       </div>
 
-      {!formData.incidentTime && (
-        <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
-          Please select an incident time.
-        </div>
-      )}
+      <div className="min-h-[60px]">
+        {!formData.incidentTime && (
+          <div className="mt-4 p-3 bg-orange-100 dark:bg-orange-900/50 border border-orange-200 dark:border-orange-800/70 rounded-md text-orange-700 dark:text-orange-300 text-sm">
+            Please select an incident time.
+          </div>
+        )}
+      </div>
     </div>
   );
 };
