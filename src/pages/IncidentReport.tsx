@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { AnimatePresence, motion, type Easing, type Transition } from 'framer-motion';
+import { toast } from 'sonner';
 
 import Step1Date from '@/components/incident-reporting/Step1Date';
 import Step2Time from '@/components/incident-reporting/Step2Time';
@@ -99,14 +99,75 @@ const IncidentReport = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsProcessing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      console.log('Final Report Data:', formData);
+
+    const apiKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
+
+    if (!apiKey) {
+      toast.warning("AI enhancement skipped: API key not found.", {
+        description: "Please create a .env.local file and add VITE_PERPLEXITY_API_KEY='your-key-here' to enable this.",
+        duration: 8000,
+      });
+      // Fallback to the old behavior with a short delay for UX
+      setTimeout(() => {
+        console.log('Final Report Data (without AI):', formData);
+        setIsProcessing(false);
+        setIsSubmitted(true);
+      }, 2000);
+      return;
+    }
+
+    try {
+      const prompt = `Rewrite the following incident description into a professional, formal report narrative suitable for a UK security context. The output should be a single paragraph. Be clear, concise, and objective. Use formal language and structure the information logically.
+Original description: "${formData.description}"`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-large-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert in writing professional UK security incident reports. Your tone is formal, objective, and clear. You convert informal notes into official report narratives. Provide only the rewritten paragraph, without any introductory phrases like "Here is the rewritten description:".'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 400,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Perplexity API error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      let professionalDescription = data.choices[0].message.content.trim();
+
+      professionalDescription = professionalDescription.replace(/^"|"$/g, '').trim();
+      
+      const updatedFormData = { ...formData, description: professionalDescription };
+      setFormData(updatedFormData);
+      console.log('Final Report Data with AI enhancement:', updatedFormData);
+
+    } catch (error) {
+      console.error('Error processing report with AI:', error);
+      toast.error("AI enhancement failed. Submitting original report.", {
+        description: "There was an issue communicating with the AI service.",
+      });
+    } finally {
       setIsProcessing(false);
       setIsSubmitted(true);
-    }, 4000);
+    }
   };
 
   if (isSubmitted) {
