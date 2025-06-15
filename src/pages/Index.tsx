@@ -11,7 +11,7 @@ const Index = () => {
         <h1 className="text-5xl font-bold tracking-tighter mb-2">Pharrrocore</h1>
         <p className="text-xl text-muted-foreground">Advanced AI Security Management</p>
       </header>
-      <main className="grid gap-8 md:grid-cols-2 max-w-4xl w-full">
+      <main className="grid gap-8 md:grid-cols-3 max-w-6xl w-full">
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -50,7 +50,7 @@ const Index = () => {
             </Button>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300 md:col-span-2">
+        <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <div className="flex items-center gap-4">
               <ClipboardList className="w-10 h-10 text-primary" />
