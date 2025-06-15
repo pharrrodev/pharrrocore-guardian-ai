@@ -39,7 +39,7 @@ const Step4IncidentType: React.FC<Step4IncidentTypeProps> = ({ formData, updateF
   const selectedType = formData.incidentType;
 
   return (
-    <div className="w-full max-w-2xl text-center">
+    <div className="w-full text-center">
       <h3 className="text-xl font-semibold mb-2">What type of incident is this?</h3>
       <p className="text-muted-foreground mb-6">Select the category that best describes the incident.</p>
       

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,7 +35,7 @@ const Step2Time: React.FC<Step2TimeProps> = ({ formData, updateFormData }) => {
   const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
   return (
-    <div className="w-full max-w-md text-center">
+    <div className="w-full text-center">
       <div className="flex justify-center mb-6">
         <div className="bg-blue-100 dark:bg-primary/20 rounded-full p-3">
           <Clock className="w-10 h-10 text-primary" />

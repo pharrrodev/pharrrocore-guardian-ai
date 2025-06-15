@@ -1,4 +1,3 @@
-
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -69,7 +68,7 @@ const IncidentReport = () => {
               onClick={handleBack}
               disabled={isProcessing}
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
-                currentStep > 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                currentStep > 1 ? 'opacity-100' : 'invisible'
               }`}
             >
               <ArrowLeft className="h-5 w-5" />
@@ -92,7 +91,7 @@ const IncidentReport = () => {
               onClick={handleNext}
               disabled={isNextDisabled() || isProcessing}
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
-                currentStep < TOTAL_STEPS ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                currentStep < TOTAL_STEPS ? 'opacity-100' : 'invisible'
               }`}
             >
               <ArrowRight className="h-5 w-5" />

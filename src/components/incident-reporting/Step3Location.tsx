@@ -34,7 +34,7 @@ const Step3Location: React.FC<Step3LocationProps> = ({ formData, updateFormData 
   };
 
   return (
-    <div className="w-full max-w-md text-center">
+    <div className="w-full text-center">
       <div className="flex justify-center mb-6">
         <div className="bg-blue-100 dark:bg-primary/20 rounded-full p-3">
           <MapPin className="w-10 h-10 text-primary" />
