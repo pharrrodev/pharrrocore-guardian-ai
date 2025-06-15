@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot } from "lucide-react";
+import { FileText, Bot, ClipboardList } from "lucide-react";
 
 const Index = () => {
   return (
@@ -47,6 +47,25 @@ const Index = () => {
             </p>
             <Button asChild className="w-full">
               <Link to="/assignment-instructions">Open Chatbot</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300 md:col-span-2">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <ClipboardList className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Electronic Daily Occurrence Book</CardTitle>
+                <CardDescription>Log all site activities and observations.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              A comprehensive digital log for security personnel to record events, patrols, and checks in a structured and consistent manner.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/edob">Open EDOB</Link>
             </Button>
           </CardContent>
         </Card>
