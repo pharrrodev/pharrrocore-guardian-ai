@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { assignmentTopics } from "@/data/assignmentTopics";
 
@@ -13,7 +14,7 @@ export const entryTypes = [
   "Alarm Activation",
 ];
 export const accessTypes = ["Visitor Entry", "Contractor Entry", "Delivery"];
-export const alarmTypes = ["Intruder", "Fire", "Panic", "Environmental"];
+export const alarmTypes = ["Intruder", "Fire", "Panic", "Environmental", "False Alarm"];
 export const equipmentStatuses = ["OK", "Needs Attention"];
 
 export const formSchema = z.object({
