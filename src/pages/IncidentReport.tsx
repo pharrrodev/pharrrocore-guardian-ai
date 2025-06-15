@@ -61,7 +61,7 @@ const IncidentReport = () => {
           </div>
           <Progress value={(currentStep / TOTAL_STEPS) * 100} className="w-full mt-4" />
         </CardHeader>
-        <CardContent className="flex justify-center items-start py-8 min-h-[450px] overflow-hidden">
+        <CardContent className="flex justify-center items-center py-8 min-h-[450px] overflow-hidden">
           <AnimatePresence mode="wait">
             <StepManager 
               currentStep={currentStep}
@@ -71,25 +71,27 @@ const IncidentReport = () => {
             />
           </AnimatePresence>
         </CardContent>
-        <CardFooter className="flex justify-between items-center">
-          <div>
-            {currentStep > 1 && (
-              <Button variant="outline" size="lg" onClick={handleBack} disabled={isProcessing}>
-                <ArrowLeft className="mr-2 h-5 w-5" />
-                Back
+        <CardFooter className="flex justify-center">
+          <div className="flex w-full max-w-lg justify-between items-center">
+            <div>
+              {currentStep > 1 && (
+                <Button variant="outline" size="lg" onClick={handleBack} disabled={isProcessing}>
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  Back
+                </Button>
+              )}
+            </div>
+
+            {currentStep === TOTAL_STEPS ? (
+              <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled() || isProcessing}>
+                {getSubmitButtonText()}
+              </Button>
+            ) : (
+              <Button size="lg" onClick={handleNext} disabled={isNextDisabled() || isProcessing}>
+                Next
               </Button>
             )}
           </div>
-
-          {currentStep === TOTAL_STEPS ? (
-            <Button size="lg" onClick={handleSubmit} disabled={isNextDisabled() || isProcessing}>
-              {getSubmitButtonText()}
-            </Button>
-          ) : (
-            <Button size="lg" onClick={handleNext} disabled={isNextDisabled() || isProcessing}>
-              Next
-            </Button>
-          )}
         </CardFooter>
       </Card>
     </div>
