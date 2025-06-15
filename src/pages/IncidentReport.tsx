@@ -1,7 +1,9 @@
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+import { ArrowLeft, ArrowRight, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 
 import { useIncidentReport } from '@/hooks/useIncidentReport';
 import ProcessingReportModal from '@/components/incident-reporting/ProcessingReportModal';
@@ -30,8 +32,11 @@ const IncidentReport = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <FinalReport formData={formData} />
+        <Button asChild className="mt-8">
+          <Link to="/">Return to Dashboard</Link>
+        </Button>
       </div>
     );
   }
@@ -51,7 +56,12 @@ const IncidentReport = () => {
         message={validationMessage}
         onConfirm={submitReport}
       />
-      <Card className="w-full max-w-3xl">
+      <Card className="w-full max-w-3xl relative">
+        <Button asChild variant="ghost" size="icon" className="absolute top-4 right-4 z-10">
+          <Link to="/" aria-label="Go to dashboard">
+            <Home className="h-5 w-5" />
+          </Link>
+        </Button>
         <CardHeader>
           <div className="flex items-center justify-center">
             <h2 className="text-2xl font-bold text-center">New Incident Report</h2>
