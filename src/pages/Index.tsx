@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <ClipboardList className="w-10 h-10 text-primary" />
               <div>
-                <CardTitle className="text-2xl">Electronic Daily Occurrence Book</CardTitle>
+                <CardTitle className="text-2xl">Daily Occurrence Book</CardTitle>
                 <CardDescription>Log all site activities and observations.</CardDescription>
               </div>
             </div>
