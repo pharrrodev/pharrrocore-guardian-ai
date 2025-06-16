@@ -9,6 +9,7 @@ import { Mail, Copy, RefreshCw, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { copyToClipboard } from '@/utils/clipboard';
+import { formatEmail } from '@/utils/emailFormat';
 
 const EmailFormatter = () => {
   const [rawText, setRawText] = useState('');
@@ -25,24 +26,13 @@ const EmailFormatter = () => {
 
     setIsFormatting(true);
     try {
-      const response = await fetch('/api/email-format', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rawText: rawText.trim(),
-          recipientName: recipientName.trim() || 'Recipient',
-          guardName: guardName.trim() || 'Security Guard',
-        }),
+      const result = await formatEmail({
+        rawText: rawText.trim(),
+        recipientName: recipientName.trim() || 'Recipient',
+        guardName: guardName.trim() || 'Security Guard',
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to format email');
-      }
-
-      const data = await response.json();
-      setFormattedEmail(data.formatted);
+      setFormattedEmail(result.formatted);
       toast.success('Email formatted successfully!');
     } catch (error) {
       console.error('Error formatting email:', error);
