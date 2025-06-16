@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +20,14 @@ export default {
 		},
 		extend: {
 			colors: {
+				base: '#0D1117',                       // deep navy backdrop
+				glass: 'rgba(255,255,255,0.12)',      // glass card
+				accent: {
+					primary: '#00F0FF',                // hyper‑cyan
+					secondary: '#FFB547',              // amber
+				},
+				success: '#2EFF7D',                    // neon green
+				danger: '#FF356F',                     // magenta
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -62,6 +71,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+				display: ['"Space Grotesk"', 'Inter', 'sans-serif'],
+				mono: ['"JetBrains Mono"', 'monospace'],
+			},
+			backdropBlur: { 
+				glass: '12px' 
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
