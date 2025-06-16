@@ -3,17 +3,18 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar, FileText, Download, RefreshCw } from 'lucide-react';
+import { Calendar, FileText, RefreshCw } from 'lucide-react';
 import { generateDailySummary, getSavedReport, getAllSavedReports } from '@/scripts/dailySummary';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
+import SummaryReportModal from '@/components/SummaryReportModal';
 
 const DailySummary = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [summaryContent, setSummaryContent] = useState('');
   const [savedReports, setSavedReports] = useState<{ date: string; path: string }[]>([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadSavedReports();
@@ -41,6 +42,7 @@ const DailySummary = () => {
       const summary = await generateDailySummary();
       setSummaryContent(summary);
       loadSavedReports(); // Refresh the list
+      setShowModal(true); // Show the modal with the generated summary
       toast.success('Daily summary generated successfully!');
     } catch (error) {
       console.error('Error generating summary:', error);
@@ -50,22 +52,12 @@ const DailySummary = () => {
     }
   };
 
-  const handleDownload = () => {
-    if (!summaryContent) {
-      toast.error('No summary content to download');
-      return;
+  const handleViewReport = () => {
+    if (summaryContent) {
+      setShowModal(true);
+    } else {
+      toast.error('No summary available for selected date');
     }
-
-    const blob = new Blob([summaryContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `security-summary-${selectedDate}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Summary downloaded successfully!');
   };
 
   return (
@@ -153,6 +145,22 @@ const DailySummary = () => {
                 </SelectContent>
               </Select>
               
+              {summaryContent ? (
+                <Button onClick={handleViewReport} className="w-full">
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Report
+                </Button>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground">
+                    No summary available for selected date
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Generate a new summary or select a different date
+                  </p>
+                </div>
+              )}
+              
               {savedReports.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   No saved reports found. Generate your first summary above.
@@ -162,40 +170,12 @@ const DailySummary = () => {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Security Summary Report</CardTitle>
-                <CardDescription>
-                  {selectedDate ? `Report for ${dayjs(selectedDate).format('dddd, MMMM D, YYYY')}` : 'Select a date to view report'}
-                </CardDescription>
-              </div>
-              {summaryContent && (
-                <Button onClick={handleDownload} variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {summaryContent ? (
-              <Textarea
-                value={summaryContent}
-                readOnly
-                className="min-h-[400px] font-mono text-sm"
-                placeholder="Summary content will appear here..."
-              />
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No summary available for selected date</p>
-                <p className="text-sm mt-1">Generate a new summary or select a different date</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <SummaryReportModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          summaryContent={summaryContent}
+          selectedDate={selectedDate}
+        />
       </div>
     </div>
   );
