@@ -1,13 +1,18 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap, AlertTriangle, BookOpen, Mail, PenTool, Shield } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-background p-3 overflow-hidden">
-      <header className="text-center mb-4 flex-shrink-0">
+      <header className="text-center mb-4 flex-shrink-0 relative">
+        <div className="absolute top-0 right-0">
+          <ThemeToggle />
+        </div>
         <h1 className="text-3xl font-bold tracking-tighter mb-1">Pharrrocore</h1>
         <p className="text-base text-muted-foreground">Advanced AI Security Management</p>
       </header>
