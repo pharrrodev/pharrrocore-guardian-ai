@@ -3,8 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, Play, CheckCircle, XCircle, Clock, Home, Loader2, Download, FileText } from "lucide-react";
+import { Settings, Play, CheckCircle, XCircle, Clock, Home, Loader2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { generateKPIReport } from '@/scripts/kpiTracker';
@@ -13,7 +12,7 @@ import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
 import { runLicenceChecker, getLicenceAlerts } from '@/scripts/licenceChecker';
 import { runPayrollValidator, getLatestPayrollVarianceReport } from '@/scripts/payrollValidator';
 import { checkNoShows, getAlertsLast24Hours } from '@/scripts/noShowCheck';
-import dayjs from 'dayjs';
+import ScriptReportModal from '@/components/ScriptReportModal';
 
 interface ScriptStatus {
   name: string;
@@ -35,6 +34,7 @@ const AdminTools = () => {
 
   const [scriptStatuses, setScriptStatuses] = useState<Record<string, ScriptStatus>>(initialStatuses);
   const [runningScripts, setRunningScripts] = useState<Set<string>>(new Set());
+  const [selectedScript, setSelectedScript] = useState<{ key: string; script: ScriptStatus } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -179,180 +179,10 @@ const AdminTools = () => {
     return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
-  const renderScriptOutput = (scriptKey: string, script: ScriptStatus) => {
-    if (!script.data || script.status !== 'success') return null;
-
-    switch (scriptKey) {
-      case 'kpi':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">KPI Metrics</h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Metric</TableHead>
-                  <TableHead>Value</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Patrol Compliance</TableCell>
-                  <TableCell>{script.data.patrolComplianceRate}%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Uniform Compliance</TableCell>
-                  <TableCell>{script.data.uniformCompliance}%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Total Patrols</TableCell>
-                  <TableCell>{script.data.totalPatrols}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Breaks Taken</TableCell>
-                  <TableCell>{script.data.breaksTaken}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        );
-
-      case 'daily-summary':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">Daily Summary Report</h4>
-            <pre className="bg-muted p-4 rounded-md text-xs overflow-auto max-h-48 whitespace-pre-wrap">
-              {script.data.content}
-            </pre>
-          </div>
-        );
-
-      case 'weekly-report':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">Weekly Client Report</h4>
-            <div className="flex items-center gap-2 text-sm">
-              <FileText className="w-4 h-4" />
-              <span>Report generated successfully</span>
-              <Button size="sm" variant="outline">
-                <Download className="w-3 h-3 mr-1" />
-                Download
-              </Button>
-            </div>
-            <div className="bg-muted p-3 rounded-md text-xs">
-              <strong>Preview:</strong>
-              <br />
-              {script.data.content.split('\n').slice(0, 5).join('\n')}...
-            </div>
-          </div>
-        );
-
-      case 'licence-check':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">Licence Alerts ({script.data.alerts.length})</h4>
-            {script.data.alerts.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Guard</TableHead>
-                    <TableHead>Expiry Date</TableHead>
-                    <TableHead>Days Left</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {script.data.alerts.map((alert: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{alert.guardName}</TableCell>
-                      <TableCell>{dayjs(alert.expiresDate).format('YYYY-MM-DD')}</TableCell>
-                      <TableCell>{alert.daysLeft}</TableCell>
-                      <TableCell>
-                        <Badge variant={alert.daysLeft < 0 ? "destructive" : alert.daysLeft < 30 ? "secondary" : "default"}>
-                          {alert.daysLeft < 0 ? "Expired" : alert.daysLeft < 30 ? "Expiring Soon" : "OK"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="text-sm text-muted-foreground">No licence alerts - all licences valid for next 60 days</p>
-            )}
-          </div>
-        );
-
-      case 'payroll-check':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">Payroll Variances ({script.data.variances.length})</h4>
-            {script.data.variances.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Guard</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actual Hours</TableHead>
-                    <TableHead>Paid Hours</TableHead>
-                    <TableHead>Difference</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {script.data.variances.map((variance: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{variance.guardId}</TableCell>
-                      <TableCell>{variance.date}</TableCell>
-                      <TableCell>{variance.actualHours}</TableCell>
-                      <TableCell>{variance.hoursPaid}</TableCell>
-                      <TableCell>
-                        <span className={variance.variance > 0 ? "text-green-600" : "text-red-600"}>
-                          {variance.variance > 0 ? '+' : ''}{variance.variance} hrs
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="text-sm text-muted-foreground">No significant payroll variances found</p>
-            )}
-          </div>
-        );
-
-      case 'no-show-check':
-        return (
-          <div className="mt-4 space-y-3">
-            <h4 className="text-sm font-medium">No-Show Alerts ({script.data.alerts.length})</h4>
-            {script.data.alerts.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Guard</TableHead>
-                    <TableHead>Shift Date</TableHead>
-                    <TableHead>Expected Time</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {script.data.alerts.map((alert: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{alert.guardName}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
-                      <TableCell>{alert.shiftStartTime}</TableCell>
-                      <TableCell>
-                        <Badge variant="destructive">Not Signed In</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="text-sm text-muted-foreground">No no-show alerts - all guards checked in on time</p>
-            )}
-          </div>
-        );
-
-      default:
-        return null;
+  const handleViewReport = (scriptKey: string) => {
+    const script = scriptStatuses[scriptKey];
+    if (script.status === 'success' && script.data) {
+      setSelectedScript({ key: scriptKey, script });
     }
   };
 
@@ -454,35 +284,45 @@ const AdminTools = () => {
                   </div>
                 )}
                 
-                <Button
-                  onClick={() => {
-                    const endpoints = {
-                      'kpi': 'run-kpi',
-                      'daily-summary': 'run-daily-summary',
-                      'weekly-report': 'run-weekly-report',
-                      'licence-check': 'run-licence-check',
-                      'payroll-check': 'run-payroll-check',
-                      'no-show-check': 'run-no-show-check'
-                    };
-                    runScript(key, endpoints[key as keyof typeof endpoints]);
-                  }}
-                  disabled={runningScripts.has(key)}
-                  className="w-full"
-                >
-                  {runningScripts.has(key) ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Running...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Run {script.name}
-                    </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      const endpoints = {
+                        'kpi': 'run-kpi',
+                        'daily-summary': 'run-daily-summary',
+                        'weekly-report': 'run-weekly-report',
+                        'licence-check': 'run-licence-check',
+                        'payroll-check': 'run-payroll-check',
+                        'no-show-check': 'run-no-show-check'
+                      };
+                      runScript(key, endpoints[key as keyof typeof endpoints]);
+                    }}
+                    disabled={runningScripts.has(key)}
+                    className="flex-1"
+                  >
+                    {runningScripts.has(key) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 mr-2" />
+                        Run
+                      </>
+                    )}
+                  </Button>
+                  
+                  {script.status === 'success' && script.data && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleViewReport(key)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </Button>
                   )}
-                </Button>
-
-                {renderScriptOutput(key, script)}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -519,6 +359,16 @@ const AdminTools = () => {
           </CardContent>
         </Card>
       </div>
+
+      {selectedScript && (
+        <ScriptReportModal
+          isOpen={!!selectedScript}
+          onClose={() => setSelectedScript(null)}
+          scriptKey={selectedScript.key}
+          scriptName={selectedScript.script.name}
+          scriptData={selectedScript.script.data}
+        />
+      )}
     </div>
   );
 };
