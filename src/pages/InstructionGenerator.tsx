@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { generateInstructions } from "@/api/instruction-generate";
 import { saveInstructions } from "@/api/instruction-save";
-import { Topic } from "@/data/assignmentTopics";
+import { Topic } from "@/data/centralData";
 import TopicSelector from "@/components/TopicSelector";
 
 const InstructionGenerator = () => {

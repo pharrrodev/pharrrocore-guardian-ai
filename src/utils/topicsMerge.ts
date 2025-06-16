@@ -1,5 +1,4 @@
-
-import { Topic } from "@/data/assignmentTopics";
+import { Topic } from "@/data/centralData";
 
 /**
  * Merges new topics with existing topics, avoiding duplicates

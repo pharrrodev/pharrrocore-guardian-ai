@@ -1,6 +1,8 @@
 
 import { z } from "zod";
-import { assignmentTopics } from "@/data/assignmentTopics";
+import { centralData } from "@/data/centralData";
+
+const assignmentTopics = centralData.assignmentTopics;
 
 export const patrolRoutes = ["Full Patrol", ...(assignmentTopics.find(t => t.id === 'patrol-routes')?.subTopics?.map(st => st.label) || [])];
 export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.subTopics?.map(st => st.label) || [];
@@ -9,13 +11,14 @@ export const uniformKitItems: { id: string; label: string }[] = assignmentTopics
 
 // Dynamic function to get current patrol routes (includes newly added ones)
 export const getCurrentPatrolRoutes = () => {
-  const patrolTopics = assignmentTopics.find(t => t.id === 'patrol-routes' || t.label.toLowerCase().includes('patrol'));
+  const currentTopics = centralData.assignmentTopics;
+  const patrolTopics = currentTopics.find(t => t.id === 'patrol-routes' || t.label.toLowerCase().includes('patrol'));
   if (patrolTopics?.subTopics) {
     return ["Full Patrol", ...patrolTopics.subTopics.map(st => st.label)];
   }
   
   // Also check for any other patrol-related topics that might have been added
-  const allPatrolRoutes = assignmentTopics.reduce((routes: string[], topic) => {
+  const allPatrolRoutes = currentTopics.reduce((routes: string[], topic) => {
     if (topic.label.toLowerCase().includes('patrol') && topic.subTopics) {
       routes.push(...topic.subTopics.map(st => st.label));
     }

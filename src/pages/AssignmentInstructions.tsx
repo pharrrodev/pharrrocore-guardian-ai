@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Home, ArrowLeft, RotateCcw, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { assignmentTopics, Topic } from "@/data/assignmentTopics";
+import { centralData, type Topic } from "@/data/centralData";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Message = {
@@ -18,8 +18,8 @@ const AssignmentInstructions = () => {
   ]);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [currentTopics, setCurrentTopics] = useState<Topic[]>(assignmentTopics);
-  const [history, setHistory] = useState<Topic[][]>([assignmentTopics]);
+  const [currentTopics, setCurrentTopics] = useState<Topic[]>(centralData.assignmentTopics);
+  const [history, setHistory] = useState<Topic[][]>([centralData.assignmentTopics]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,8 +60,8 @@ const AssignmentInstructions = () => {
     setMessages([
       { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. Please select a topic below to get started." }
     ]);
-    setCurrentTopics(assignmentTopics);
-    setHistory([assignmentTopics]);
+    setCurrentTopics(centralData.assignmentTopics);
+    setHistory([centralData.assignmentTopics]);
   };
 
   const renderMessageText = (text: string) => {
