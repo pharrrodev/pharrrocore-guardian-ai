@@ -72,6 +72,10 @@ const AdminTools = () => {
     });
   };
 
+  const handleHomeClick = () => {
+    resetAdminState();
+  };
+
   const runScript = async (scriptKey: string, endpoint: string) => {
     // Check admin authorization (hardcoded for demo)
     const userRole = localStorage.getItem('user-role') || 'user';
@@ -199,7 +203,7 @@ const AdminTools = () => {
               <h1 className="text-3xl font-bold">Admin Tools</h1>
               <p className="text-muted-foreground mt-2">Access Denied</p>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" onClick={handleHomeClick}>
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
@@ -247,7 +251,7 @@ const AdminTools = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" onClick={handleHomeClick}>
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
