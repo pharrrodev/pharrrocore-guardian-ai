@@ -70,7 +70,7 @@ const Index = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <p className="mb-3 text-xs text-muted-foreground">
-                      Instantly check break times using shift rota data.
+                      Instantly check break times and coverage using shift rota data and schedules.
                     </p>
                     <Button asChild className="w-full" size="sm">
                       <Link to="/break-checker">Check Breaks</Link>
