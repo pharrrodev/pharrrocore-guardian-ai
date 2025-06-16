@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import dayjs from 'dayjs';
@@ -19,6 +20,20 @@ interface TrainingFormData {
   completedDate: string;
   expiresDate: string;
 }
+
+// Predefined list of guards - in a real app this would come from a database
+const GUARD_NAMES = [
+  'John Smith',
+  'Sarah Johnson',
+  'Michael Brown',
+  'Emma Wilson',
+  'David Davis',
+  'Lisa Anderson',
+  'Robert Taylor',
+  'Jennifer Martinez',
+  'William Garcia',
+  'Ashley Rodriguez'
+];
 
 const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdded }) => {
   const { toast } = useToast();
@@ -158,14 +173,18 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="guardName">Guard Name</Label>
-            <Input
-              id="guardName"
-              type="text"
-              value={formData.guardName}
-              onChange={(e) => handleInputChange('guardName', e.target.value)}
-              placeholder="Enter guard name"
-              disabled={loading}
-            />
+            <Select value={formData.guardName} onValueChange={(value) => handleInputChange('guardName', value)} disabled={loading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a guard" />
+              </SelectTrigger>
+              <SelectContent>
+                {GUARD_NAMES.map((guardName) => (
+                  <SelectItem key={guardName} value={guardName}>
+                    {guardName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
