@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,14 +15,16 @@ interface ScriptStatus {
 }
 
 const AdminTools = () => {
-  const [scriptStatuses, setScriptStatuses] = useState<Record<string, ScriptStatus>>({
-    'kpi': { name: 'KPI Tracker', status: 'never' },
-    'daily-summary': { name: 'Daily Summary', status: 'never' },
-    'weekly-report': { name: 'Weekly Client Report', status: 'never' },
-    'licence-check': { name: 'Licence Checker', status: 'never' },
-    'payroll-check': { name: 'Payroll Validator', status: 'never' },
-    'no-show-check': { name: 'No-Show Checker', status: 'never' }
-  });
+  const initialStatuses = {
+    'kpi': { name: 'KPI Tracker', status: 'never' as const },
+    'daily-summary': { name: 'Daily Summary', status: 'never' as const },
+    'weekly-report': { name: 'Weekly Client Report', status: 'never' as const },
+    'licence-check': { name: 'Licence Checker', status: 'never' as const },
+    'payroll-check': { name: 'Payroll Validator', status: 'never' as const },
+    'no-show-check': { name: 'No-Show Checker', status: 'never' as const }
+  };
+
+  const [scriptStatuses, setScriptStatuses] = useState<Record<string, ScriptStatus>>(initialStatuses);
   const [runningScripts, setRunningScripts] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -50,6 +51,16 @@ const AdminTools = () => {
     };
     setScriptStatuses(updated);
     localStorage.setItem('admin-script-statuses', JSON.stringify(updated));
+  };
+
+  const resetAdminState = () => {
+    setScriptStatuses(initialStatuses);
+    setRunningScripts(new Set());
+    localStorage.removeItem('admin-script-statuses');
+    toast({
+      title: "Admin State Reset",
+      description: "All script statuses have been cleared.",
+    });
   };
 
   const runScript = async (scriptKey: string, endpoint: string) => {
@@ -146,7 +157,7 @@ const AdminTools = () => {
               <h1 className="text-3xl font-bold">Admin Tools</h1>
               <p className="text-muted-foreground mt-2">Access Denied</p>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" onClick={resetAdminState}>
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
@@ -194,7 +205,7 @@ const AdminTools = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" onClick={resetAdminState}>
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
