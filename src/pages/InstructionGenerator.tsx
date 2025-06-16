@@ -163,24 +163,41 @@ const InstructionGenerator = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="bg-muted p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Generated Structure:</h3>
-                    <pre className="text-sm overflow-auto max-h-[300px]">
-                      {JSON.stringify(generatedTopics, null, 2)}
-                    </pre>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Topic Summary:</h4>
-                    {generatedTopics.map((topic, index) => (
-                      <div key={index} className="text-sm border-l-2 border-primary pl-3">
-                        <div className="font-medium">{topic.label}</div>
-                        <div className="text-muted-foreground">
-                          ID: {topic.id} | {topic.subTopics?.length || 0} subtopics
-                        </div>
+                  {generatedTopics.map((topic, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-lg">{topic.label}</h3>
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                          ID: {topic.id}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div className="text-sm text-muted-foreground">
+                        <strong>Response:</strong> {topic.response}
+                      </div>
+                      
+                      {topic.subTopics && topic.subTopics.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Subtopics ({topic.subTopics.length}):</h4>
+                          <div className="space-y-2 pl-4 border-l-2 border-muted">
+                            {topic.subTopics.map((subTopic, subIndex) => (
+                              <div key={subIndex} className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium text-sm">{subTopic.label}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {subTopic.id}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {subTopic.response}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
 
                   <Button 
                     onClick={handleSave} 
