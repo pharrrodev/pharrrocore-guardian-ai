@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FileText, Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const TenderWriter = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const TenderWriter = () => {
     siteAddress: '',
     guardingHoursPerWeek: '',
     keyRisks: '',
-    mobilisationDate: '',
+    mobilisationDate: undefined as Date | undefined,
     siteSpecifics: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -25,6 +26,13 @@ const TenderWriter = () => {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setFormData(prev => ({
+      ...prev,
+      mobilisationDate: date
     }));
   };
 
@@ -48,7 +56,10 @@ const TenderWriter = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          mobilisationDate: formData.mobilisationDate?.toISOString().split('T')[0] || ''
+        }),
       });
 
       if (!response.ok) {
@@ -129,12 +140,13 @@ const TenderWriter = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mobilisationDate">Mobilisation Date</Label>
-              <Input
-                id="mobilisationDate"
-                type="date"
+              <Label>Mobilisation Date</Label>
+              <DatePicker
                 value={formData.mobilisationDate}
-                onChange={(e) => handleInputChange('mobilisationDate', e.target.value)}
+                onChange={handleDateChange}
+                placeholder="Select mobilisation date"
+                allowFuture={true}
+                className="w-full"
               />
             </div>
 
