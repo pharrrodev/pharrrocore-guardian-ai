@@ -1,4 +1,3 @@
-
 import dayjs from 'dayjs';
 import { getLogsFromStorage } from '@/utils/appendCsv';
 import { getTodaysVisitorLogs } from '@/utils/csvHelpers';
@@ -56,13 +55,14 @@ const loadTodaysData = async (today: string): Promise<DailySummaryData> => {
   // Load visitor logs for today
   const visitors = getTodaysVisitorLogs();
   
-  // Load shift start logs
-  const shiftLogs = getLogsFromStorage('logs/shiftStart.csv').filter(log => {
+  // Load shift start logs - now properly handling CSV format
+  const allShiftLogs = getLogsFromStorage('logs/shiftStart.csv');
+  const shiftLogs = allShiftLogs.filter(log => {
     const logDate = dayjs(log.timestamp).format('YYYY-MM-DD');
-    return logDate === today;
+    return logDate === today && log.action === 'Shift Start';
   });
   
-  // Load no-show alerts
+  // Load no-show alerts - now properly handling JSON format
   const noShowAlerts = getNoShowAlertsForDate(today);
   
   return {
@@ -112,6 +112,7 @@ const getNoShowAlertsForDate = (date: string): any[] => {
     const stored = localStorage.getItem('logs/noShowAlerts.csv');
     if (!stored) return [];
     
+    // No-show alerts are stored as JSON, not CSV despite the filename
     const alerts = JSON.parse(stored);
     return alerts.filter((alert: any) => {
       const alertDate = dayjs(alert.alertTime).format('YYYY-MM-DD');
