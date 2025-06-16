@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +19,7 @@ import ShiftConfirm from "./pages/ShiftConfirm";
 import RotaDashboard from "./pages/RotaDashboard";
 import VisitorForm from "./pages/VisitorForm";
 import VisitorLogToday from "./pages/VisitorLogToday";
+import TrainingDashboard from "./pages/TrainingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +45,7 @@ const App = () => (
             <Route path="/rota-dashboard" element={<RotaDashboard />} />
             <Route path="/visitor-form" element={<VisitorForm />} />
             <Route path="/visitor-log-today" element={<VisitorLogToday />} />
+            <Route path="/training-dashboard" element={<TrainingDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
