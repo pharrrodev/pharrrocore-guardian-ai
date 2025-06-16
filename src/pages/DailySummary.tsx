@@ -1,13 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, FileText, RefreshCw } from 'lucide-react';
+import { Calendar, FileText, RefreshCw, Home } from 'lucide-react';
 import { generateDailySummary, getSavedReport, getAllSavedReports } from '@/scripts/dailySummary';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import SummaryReportModal from '@/components/SummaryReportModal';
+import { Link } from 'react-router-dom';
 
 const DailySummary = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -70,9 +70,17 @@ const DailySummary = () => {
               Generate and view comprehensive daily security reports
             </p>
           </div>
-          <Button onClick={() => window.history.back()} variant="outline">
-            ← Back
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to="/">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Link>
+            </Button>
+            <Button onClick={() => window.history.back()} variant="outline">
+              ← Back
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
