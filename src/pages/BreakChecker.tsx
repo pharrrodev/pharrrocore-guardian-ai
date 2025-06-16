@@ -1,148 +1,149 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Clock, Coffee } from 'lucide-react';
-import { checkBreakStatus, logBreakQuery, type BreakCheckResponse } from '../api/break-check';
-import { guards } from '../data/rota-data';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Coffee, Home, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { DatePicker } from '@/components/ui/date-picker';
+import { TimePicker } from '@/components/ui/time-picker';
+import { checkBreakStatus } from '@/api/break-check';
 
 const BreakChecker = () => {
-  const [selectedGuardId, setSelectedGuardId] = useState('');
-  const [breakStatus, setBreakStatus] = useState<BreakCheckResponse | null>(null);
+  const [guardName, setGuardName] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [currentTime, setCurrentTime] = useState('');
+  const [breakStatus, setBreakStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCheckBreak = async () => {
-    if (!selectedGuardId) return;
-    
+  const checkBreak = async () => {
+    if (!guardName || !selectedDate || !currentTime) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const result = checkBreakStatus(selectedGuardId);
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const result = await checkBreakStatus({
+        guardName: guardName.trim(),
+        date: dateStr,
+        currentTime
+      });
       setBreakStatus(result);
-      logBreakQuery(selectedGuardId, result.reply);
     } catch (error) {
       console.error('Error checking break status:', error);
-      setBreakStatus({
-        reply: 'Error checking break status. Please try again.',
-        onBreak: false
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedGuard = guards.find(guard => guard.id === selectedGuardId);
-
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex items-center gap-4 mb-8">
-          <Button variant="outline" size="icon" asChild>
+      <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Break Time Checker</h1>
+          <Button asChild variant="outline">
             <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
+              <Home className="w-4 h-4 mr-2" />
+              Dashboard
             </Link>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Break Time Checker</h1>
-            <p className="text-muted-foreground">Check when your next break is scheduled</p>
-          </div>
-        </header>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
-                <CardTitle>Check Break Schedule</CardTitle>
-              </div>
-              <CardDescription>
-                Select your guard ID to see your current break status
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="guardSelect">Select Guard</Label>
-                <select
-                  id="guardSelect"
-                  value={selectedGuardId}
-                  onChange={(e) => setSelectedGuardId(e.target.value)}
-                  className="w-full p-2 border border-input bg-background rounded-md"
-                >
-                  <option value="">Choose a guard...</option>
-                  {guards.map(guard => (
-                    <option key={guard.id} value={guard.id}>
-                      {guard.id} - {guard.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <Button 
-                onClick={handleCheckBreak} 
-                disabled={!selectedGuardId || isLoading}
-                className="w-full"
-              >
-                {isLoading ? 'Checking...' : 'Check Break Status'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {breakStatus && (
-            <Card className={breakStatus.onBreak ? 'border-green-500 bg-green-50 dark:bg-green-950' : ''}>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Coffee className={`h-5 w-5 ${breakStatus.onBreak ? 'text-green-600' : 'text-primary'}`} />
-                  <CardTitle className={breakStatus.onBreak ? 'text-green-700 dark:text-green-300' : ''}>
-                    {breakStatus.onBreak ? 'On Break Now!' : 'Break Schedule'}
-                  </CardTitle>
-                </div>
-                {selectedGuard && (
-                  <CardDescription>
-                    Status for {selectedGuard.name} ({selectedGuard.id})
-                  </CardDescription>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className={`p-4 rounded-lg ${breakStatus.onBreak ? 'bg-green-100 dark:bg-green-900' : 'bg-muted'}`}>
-                    <p className="font-medium">{breakStatus.reply}</p>
-                  </div>
-                  
-                  {breakStatus.nextBreakTime && (
-                    <div className="text-sm text-muted-foreground">
-                      <p><strong>Next Break:</strong> {breakStatus.nextBreakTime}</p>
-                      <p><strong>Time Until:</strong> {breakStatus.timeUntilNext}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
-        <Card className="mt-6">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>How it Works</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Check Break Status
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <h3 className="font-semibold mb-2">Current Break Detection</h3>
-                <p className="text-sm text-muted-foreground">
-                  Checks if you're currently within any scheduled break time and shows how much time is left.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Next Break Calculation</h3>
-                <p className="text-sm text-muted-foreground">
-                  Shows your next scheduled break time and calculates how long until it starts.
-                </p>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="guardName">Guard Name</Label>
+              <Input
+                id="guardName"
+                value={guardName}
+                onChange={(e) => setGuardName(e.target.value)}
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <div>
+              <Label>Date</Label>
+              <div className="mt-2">
+                <DatePicker
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                />
               </div>
             </div>
+
+            <div>
+              <Label>Current Time</Label>
+              <div className="mt-2">
+                <TimePicker
+                  value={currentTime}
+                  onChange={setCurrentTime}
+                />
+              </div>
+            </div>
+
+            <Button 
+              onClick={checkBreak} 
+              className="w-full"
+              disabled={!guardName || !selectedDate || !currentTime || isLoading}
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              {isLoading ? 'Checking...' : 'Check Break Status'}
+            </Button>
           </CardContent>
         </Card>
+
+        {breakStatus && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Coffee className="w-5 h-5" />
+                Break Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant={breakStatus.onBreak ? "default" : "secondary"}>
+                    {breakStatus.onBreak ? "On Break" : "Not on Break"}
+                  </Badge>
+                </div>
+
+                {breakStatus.message && (
+                  <p className="text-muted-foreground">{breakStatus.message}</p>
+                )}
+
+                {breakStatus.nextBreak && (
+                  <div className="p-3 bg-muted rounded-lg">
+                    <div className="font-medium">Next Break:</div>
+                    <div className="text-sm text-muted-foreground">
+                      {breakStatus.nextBreak.startTime} - {breakStatus.nextBreak.endTime}
+                      {breakStatus.nextBreak.position && ` (${breakStatus.nextBreak.position})`}
+                    </div>
+                  </div>
+                )}
+
+                {breakStatus.currentShift && (
+                  <div className="p-3 bg-muted rounded-lg">
+                    <div className="font-medium">Current Shift:</div>
+                    <div className="text-sm text-muted-foreground">
+                      {breakStatus.currentShift.startTime} - {breakStatus.currentShift.endTime}
+                      {breakStatus.currentShift.position && ` (${breakStatus.currentShift.position})`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

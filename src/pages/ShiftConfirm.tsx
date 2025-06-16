@@ -1,219 +1,194 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/components/ui/sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, X, Home, User } from 'lucide-react';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Check, X, Clock } from 'lucide-react';
-import { Shift, guards } from '@/data/rota-data';
-import { loadRotaData, loadConfirmations, RotaConfirmation } from '@/utils/rotaStore';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Shift } from '@/data/rota-data';
+import { loadRotaData, loadConfirmations } from '@/utils/rotaStore';
 import { confirmShift } from '@/api/rota-confirm';
-import dayjs from 'dayjs';
 
 const ShiftConfirm = () => {
-  const [selectedGuardId, setSelectedGuardId] = useState<string>('');
+  const [guardId, setGuardId] = useState('');
+  const [guardName, setGuardName] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [confirmations, setConfirmations] = useState<RotaConfirmation[]>([]);
+  const [confirmations, setConfirmations] = useState<any[]>([]);
+  const [filteredShifts, setFilteredShifts] = useState<Shift[]>([]);
 
   useEffect(() => {
     // Load rota data and confirmations
     const rotaData = loadRotaData();
-    const confirmData = loadConfirmations();
+    const existingConfirmations = loadConfirmations();
     setShifts(rotaData);
-    setConfirmations(confirmData);
+    setConfirmations(existingConfirmations);
   }, []);
 
-  const getGuardShifts = (guardId: string): Shift[] => {
-    return shifts.filter(shift => shift.guardId === guardId);
-  };
+  useEffect(() => {
+    // Filter shifts based on guard and date
+    if (guardName && selectedDate) {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const relevant = shifts.filter(shift => 
+        shift.guardName.toLowerCase().includes(guardName.toLowerCase()) && 
+        shift.date === dateStr
+      );
+      setFilteredShifts(relevant);
+    } else {
+      setFilteredShifts([]);
+    }
+  }, [guardName, selectedDate, shifts]);
 
-  const getShiftConfirmation = (shiftId: string): RotaConfirmation | undefined => {
-    return confirmations.find(c => c.shiftId === shiftId);
-  };
-
-  const handleConfirmShift = async (shift: Shift, confirmed: boolean) => {
-    const guard = guards.find(g => g.id === shift.guardId);
-    if (!guard) return;
+  const handleConfirmation = async (shift: Shift, confirmed: boolean) => {
+    if (!guardId.trim()) {
+      toast.error('Please enter your Guard ID');
+      return;
+    }
 
     try {
       const response = await confirmShift({
-        guardId: shift.guardId,
-        guardName: guard.name,
+        guardId: guardId.trim(),
+        guardName: guardName,
         date: shift.date,
         shiftId: shift.id,
         confirmed
       });
 
       if (response.status === 'ok') {
-        // Update local confirmations
+        toast.success(confirmed ? 'Shift confirmed!' : 'Shift declined');
+        // Reload confirmations
         const updatedConfirmations = loadConfirmations();
         setConfirmations(updatedConfirmations);
-        
-        toast.success(
-          confirmed 
-            ? 'Shift confirmed successfully' 
-            : 'Shift declined successfully'
-        );
       } else {
-        toast.error(response.message || 'Failed to update shift status');
+        toast.error(response.message || 'Failed to update confirmation');
       }
     } catch (error) {
-      toast.error('Error updating shift status');
+      toast.error('Error updating confirmation');
       console.error('Confirmation error:', error);
     }
   };
 
-  const getShiftStatus = (shift: Shift) => {
-    const confirmation = getShiftConfirmation(shift.id);
-    if (!confirmation) return 'pending';
-    return confirmation.confirmed ? 'confirmed' : 'declined';
+  const getConfirmationStatus = (shift: Shift) => {
+    const confirmation = confirmations.find(c => 
+      c.guardId === guardId && 
+      c.date === shift.date && 
+      c.shiftId === shift.id
+    );
+    return confirmation;
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'text-green-600 bg-green-50';
-      case 'declined': return 'text-red-600 bg-red-50';
-      default: return 'text-yellow-600 bg-yellow-50';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'confirmed': return <Check className="w-4 h-4" />;
-      case 'declined': return <X className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const guardShifts = selectedGuardId ? getGuardShifts(selectedGuardId) : [];
-  const selectedGuard = guards.find(g => g.id === selectedGuardId);
 
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" size="sm" asChild>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Shift Confirmation</h1>
+          <Button asChild variant="outline">
             <Link to="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              <Home className="w-4 h-4 mr-2" />
+              Dashboard
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold">Shift Confirmation</h1>
         </div>
 
-        {/* Guard Selection */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Select Your Profile</CardTitle>
-            <CardDescription>Choose your name to view and confirm your shifts</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Guard Information
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Select value={selectedGuardId} onValueChange={setSelectedGuardId}>
-              <SelectTrigger className="max-w-md">
-                <SelectValue placeholder="Select your name" />
-              </SelectTrigger>
-              <SelectContent>
-                {guards.map(guard => (
-                  <SelectItem key={guard.id} value={guard.id}>
-                    {guard.name} - {guard.position}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="guardId">Guard ID</Label>
+                <Input
+                  id="guardId"
+                  value={guardId}
+                  onChange={(e) => setGuardId(e.target.value)}
+                  placeholder="Enter your Guard ID"
+                />
+              </div>
+              <div>
+                <Label htmlFor="guardName">Guard Name</Label>
+                <Input
+                  id="guardName"
+                  value={guardName}
+                  onChange={(e) => setGuardName(e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div>
+                <Label>Date</Label>
+                <div className="mt-2">
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                  />
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Shifts List */}
-        {selectedGuardId && (
+        {filteredShifts.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Your Scheduled Shifts</CardTitle>
-              <CardDescription>
-                {selectedGuard?.name} - {guardShifts.length} shifts assigned
-              </CardDescription>
+              <CardTitle>Your Shifts for {selectedDate?.toLocaleDateString()}</CardTitle>
             </CardHeader>
             <CardContent>
-              {guardShifts.length === 0 ? (
-                <div className="text-center py-8">
-                  <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground">No Shifts Assigned</h3>
-                  <p className="text-sm text-muted-foreground">
-                    You don't have any shifts assigned yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {guardShifts
-                    .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
-                    .map(shift => {
-                      const status = getShiftStatus(shift);
-                      const confirmation = getShiftConfirmation(shift.id);
-                      const isPastDate = dayjs(shift.date).isBefore(dayjs(), 'day');
-                      
-                      return (
-                        <div key={shift.id} className="border rounded-lg p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-3">
-                                <h3 className="font-medium">
-                                  {dayjs(shift.date).format('dddd, MMMM D, YYYY')}
-                                </h3>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(status)}`}>
-                                  {getStatusIcon(status)}
-                                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </span>
-                              </div>
-                              
-                              <div className="text-sm text-muted-foreground space-y-1">
-                                <div>
-                                  <strong>Time:</strong> {shift.startTime} - {shift.endTime} ({shift.shiftType})
-                                </div>
-                                <div>
-                                  <strong>Position:</strong> {shift.position}
-                                </div>
-                                {confirmation && (
-                                  <div>
-                                    <strong>Confirmed:</strong> {dayjs(confirmation.timestamp).format('MMM D, YYYY h:mm A')}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {!isPastDate && (
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant={status === 'confirmed' ? 'default' : 'outline'}
-                                  onClick={() => handleConfirmShift(shift, true)}
-                                  disabled={status === 'confirmed'}
-                                >
-                                  <Check className="w-4 h-4 mr-1" />
-                                  Confirm
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={status === 'declined' ? 'destructive' : 'outline'}
-                                  onClick={() => handleConfirmShift(shift, false)}
-                                  disabled={status === 'declined'}
-                                >
-                                  <X className="w-4 h-4 mr-1" />
-                                  Decline
-                                </Button>
-                              </div>
-                            )}
-
-                            {isPastDate && (
-                              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                Past Date
-                              </span>
-                            )}
-                          </div>
+              <div className="space-y-4">
+                {filteredShifts.map((shift) => {
+                  const confirmation = getConfirmationStatus(shift);
+                  return (
+                    <div key={shift.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium">{shift.position}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {shift.startTime} - {shift.endTime}
                         </div>
-                      );
-                    })}
-                </div>
-              )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {confirmation ? (
+                          <Badge variant={confirmation.confirmed ? "default" : "destructive"}>
+                            {confirmation.confirmed ? "Confirmed" : "Declined"}
+                          </Badge>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleConfirmation(shift, true)}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              Confirm
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleConfirmation(shift, false)}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Decline
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {guardName && selectedDate && filteredShifts.length === 0 && (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              No shifts found for {guardName} on {selectedDate.toLocaleDateString()}
             </CardContent>
           </Card>
         )}
