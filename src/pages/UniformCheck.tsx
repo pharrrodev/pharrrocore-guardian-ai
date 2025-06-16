@@ -12,7 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { uniformKitItems } from "@/data/edob-types";
 import { guards } from "@/data/rota-data";
 
@@ -100,34 +99,32 @@ const UniformCheck = () => {
                   <h3 className="text-lg font-semibold tracking-tight">Uniform & Kit Checklist</h3>
                   <p className="text-sm text-muted-foreground">Check all items that are present and in good condition.</p>
                 </div>
-                <ScrollArea className="h-64">
-                  <div className="space-y-3 pr-4">
-                    {uniformFields.map((item, index) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name={`uniformChecklist.${index}.confirmed`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border bg-background/30 p-3">
-                            <FormControl>
-                              <Checkbox 
-                                checked={field.value} 
-                                onCheckedChange={field.onChange} 
-                                id={`uniform-check-${item.id}`} 
-                              />
-                            </FormControl>
-                            <FormLabel 
-                              htmlFor={`uniform-check-${item.id}`} 
-                              className="font-normal cursor-pointer text-sm flex-1"
-                            >
-                              {item.label}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {uniformFields.map((item, index) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name={`uniformChecklist.${index}.confirmed`}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border bg-background/30 p-3">
+                          <FormControl>
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={field.onChange} 
+                              id={`uniform-check-${item.id}`} 
+                            />
+                          </FormControl>
+                          <FormLabel 
+                            htmlFor={`uniform-check-${item.id}`} 
+                            className="font-normal cursor-pointer text-sm flex-1"
+                          >
+                            {item.label}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Additional Comments */}
