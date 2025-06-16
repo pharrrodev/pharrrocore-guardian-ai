@@ -1,0 +1,10 @@
+
+{
+  "weekEnding": "2024-06-10",
+  "totalIncidents": 4,
+  "mostCommonIncident": "Access Breach",
+  "alarmsTriggered": 2,
+  "visitorCheckIns": 31,
+  "equipmentFaults": 1,
+  "notes": "Recommend reviewing visitor pre-clearance process and alarm response times."
+}
