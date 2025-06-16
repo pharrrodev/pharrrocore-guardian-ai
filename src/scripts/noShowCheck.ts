@@ -1,4 +1,5 @@
 
+
 import dayjs from 'dayjs';
 import { loadRotaData } from '@/utils/rotaStore';
 import { guards } from '@/data/rota-data';
@@ -120,7 +121,7 @@ export const checkNoShows = (): NoShowAlert[] => {
 
 export const getNoShowAlerts = (): NoShowAlert[] => {
   try {
-    const stored = localStorage.getItem('logs/noShowAlerts.csv');
+    const stored = localStorage.getItem('logs/noShowAlerts.json');
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
     console.error('Error loading no-show alerts:', error);
@@ -132,7 +133,7 @@ export const saveNoShowAlerts = (newAlerts: NoShowAlert[]): void => {
   try {
     const existing = getNoShowAlerts();
     const combined = [...existing, ...newAlerts];
-    localStorage.setItem('logs/noShowAlerts.csv', JSON.stringify(combined));
+    localStorage.setItem('logs/noShowAlerts.json', JSON.stringify(combined));
     console.log(`Saved ${newAlerts.length} new no-show alerts`);
   } catch (error) {
     console.error('Error saving no-show alerts:', error);
@@ -145,3 +146,4 @@ export const getAlertsLast24Hours = (): NoShowAlert[] => {
   
   return alerts.filter(alert => dayjs(alert.alertTime).isAfter(yesterday));
 };
+
