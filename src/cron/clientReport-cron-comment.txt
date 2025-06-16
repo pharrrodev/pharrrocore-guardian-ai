@@ -1,0 +1,115 @@
+
+# Weekly Client Report Generation Cron Job Setup
+
+This file explains how to set up automated weekly client report generation for the security management system.
+
+## Purpose
+Generate comprehensive weekly client reports every Monday at 08:00, combining the previous week's KPI data and daily incident summaries into professional PDF reports.
+
+## Cron Schedule
+```bash
+# Run weekly client report generation every Monday at 08:00
+0 8 * * 1 /path/to/node /path/to/your/project/dist/scripts/weeklyClientReport.js
+```
+
+## Alternative Scheduling Options
+
+### Using PM2 (Recommended for Node.js apps)
+```bash
+pm2 start ecosystem.config.js
+```
+
+Where ecosystem.config.js contains:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'weekly-client-report-generator',
+    script: './dist/scripts/weeklyClientReport.js',
+    cron_restart: '0 8 * * 1',
+    watch: false,
+    autorestart: false
+  }]
+}
+```
+
+### Using systemd timer (Linux)
+Create a service file and timer to run the weekly report generation every Monday at 08:00.
+
+### Manual Testing
+You can manually trigger the weekly client report generation by running:
+```bash
+node dist/scripts/weeklyClientReport.js
+```
+
+## Data Sources
+The script automatically compiles data from:
+- `/reports/kpi-YYYY-MM-DD.json` (Daily KPI compliance metrics)
+- `/reports/summary-YYYY-MM-DD.txt` (Daily incident summaries)
+
+## Report Generation Process
+1. **Week Calculation**: Determines the previous Monday-Sunday ISO week range
+2. **Data Collection**: Loads all available KPI and summary files for that week
+3. **Analysis**: Calculates weekly averages and compliance metrics
+4. **Markdown Generation**: Creates structured report with:
+   - Executive summary with key metrics
+   - Daily KPI breakdown table
+   - Incident highlights from daily summaries
+   - Operational notes and recommendations
+5. **PDF Export**: Converts markdown to professional PDF format
+
+## Output Files
+- **Markdown**: `/reports/client-weekly-YYYY-WWW.md`
+- **PDF**: `/reports/client-weekly-YYYY-WWW.pdf`
+
+Where:
+- YYYY = Year (e.g., 2024)
+- WWW = ISO week number (e.g., W12)
+
+## Report Content Structure
+Each weekly report includes:
+- **Executive Summary**: High-level overview of the week's security operations
+- **KPI Dashboard**: Daily breakdown of patrols, breaks, uniform compliance
+- **Incident Analysis**: Highlights from daily incident summaries
+- **Compliance Assessment**: Performance against security standards
+- **Operational Recommendations**: Areas for improvement or commendation
+
+## PDF Generation Dependencies
+For production deployment, install one of these packages:
+```bash
+# Option 1: Puppeteer (recommended)
+npm install puppeteer
+
+# Option 2: Markdown-PDF
+npm install markdown-pdf
+
+# Option 3: wkhtmltopdf wrapper
+npm install wkhtmltopdf
+```
+
+## Error Handling
+- Missing KPI files: Day is skipped, report continues with available data
+- Missing summary files: Day marked as "No summary available"
+- No data for entire week: Generates report indicating no data collected
+- PDF generation failure: Falls back to markdown-only report
+
+## Client Delivery
+Generated PDF reports are professional-grade documents suitable for:
+- Client monthly/quarterly reviews
+- Compliance audits
+- Performance assessments
+- Contract renewals
+- Stakeholder presentations
+
+## Customization Options
+The report template can be customized for:
+- Company branding and logos
+- Specific KPI requirements
+- Custom incident categorization
+- Additional metrics or charts
+- Multi-language support
+
+## Monitoring and Alerts
+- Console logs track successful generation
+- Failed generations can trigger email alerts
+- Report availability notifications to management
+- File size and content validation checks
