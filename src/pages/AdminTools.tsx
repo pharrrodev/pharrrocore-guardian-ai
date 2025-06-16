@@ -192,14 +192,14 @@ const AdminTools = () => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <div className="h-screen bg-background p-4 overflow-hidden">
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold">Admin Tools</h1>
               <p className="text-muted-foreground mt-2">Access Denied</p>
             </div>
-            <Button asChild variant="outline" onClick={resetAdminState}>
+            <Button asChild variant="outline">
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
@@ -207,8 +207,8 @@ const AdminTools = () => {
             </Button>
           </div>
           
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="flex-1 flex flex-col">
+            <CardContent className="pt-6 flex-1 flex items-center justify-center">
               <div className="text-center">
                 <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Administrator Access Required</h2>
@@ -234,9 +234,9 @@ const AdminTools = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+    <div className="h-screen bg-background p-4 overflow-hidden">
+      <div className="max-w-6xl mx-auto h-full flex flex-col">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Settings className="w-8 h-8 text-primary" />
@@ -247,7 +247,7 @@ const AdminTools = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline" onClick={resetAdminState}>
+            <Button asChild variant="outline">
               <Link to="/">
                 <Home className="w-4 h-4 mr-2" />
                 Home
@@ -259,22 +259,22 @@ const AdminTools = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 overflow-auto">
           {Object.entries(scriptStatuses).map(([key, script]) => (
-            <Card key={key}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+            <Card key={key} className="h-fit">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
                   <span className="flex items-center gap-2">
                     {getStatusIcon(script.status)}
                     {script.name}
                   </span>
                   {getStatusBadge(script.status)}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   Last run: {formatLastRun(script.lastRun)}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 pt-0">
                 {script.message && (
                   <div className="text-sm">
                     <span className="font-medium">Status: </span>
@@ -299,6 +299,7 @@ const AdminTools = () => {
                     }}
                     disabled={runningScripts.has(key)}
                     className="flex-1"
+                    size="sm"
                   >
                     {runningScripts.has(key) ? (
                       <>
@@ -317,6 +318,7 @@ const AdminTools = () => {
                     <Button
                       variant="outline"
                       onClick={() => handleViewReport(key)}
+                      size="sm"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       View
@@ -328,11 +330,11 @@ const AdminTools = () => {
           ))}
         </div>
 
-        <Separator />
+        <Separator className="my-4" />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Script Information</CardTitle>
+        <Card className="mt-auto">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Script Information</CardTitle>
             <CardDescription>
               Background scripts and their purposes
             </CardDescription>
