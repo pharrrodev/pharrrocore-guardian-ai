@@ -107,7 +107,7 @@ const PayrollVariance = () => {
             <CardContent>
               <div className="text-2xl font-bold">{variances.length}</div>
               <p className="text-xs text-muted-foreground">
-                Records with variance > 0.25h
+                Records with variance {'>'}  0.25h
               </p>
             </CardContent>
           </Card>
@@ -149,7 +149,7 @@ const PayrollVariance = () => {
           <CardHeader>
             <CardTitle>Payroll Variances</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Showing all records where |variance| > 0.25 hours
+              Showing all records where |variance| {'>'} 0.25 hours
             </p>
           </CardHeader>
           <CardContent>
