@@ -1,9 +1,8 @@
-
 // Mock API handler to simulate server responses
 // This intercepts fetch requests and provides local responses
 
 import { addTrainingRecord } from '@/api/training-add';
-import { runKPITracker } from '@/scripts/kpiTracker';
+import { generateKPIReport } from '@/scripts/kpiTracker';
 import { generateDailySummary } from '@/scripts/dailySummary';
 import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
 import { runLicenceChecker } from '@/scripts/licenceChecker';
@@ -66,7 +65,7 @@ window.fetch = async (url: string | URL | Request, options?: RequestInit): Promi
       switch (endpoint) {
         case 'run-kpi':
           console.log('🔄 Running KPI Tracker...');
-          result = await runKPITracker();
+          result = await generateKPIReport();
           console.log('✅ KPI Tracker completed');
           return new Response(JSON.stringify({ message: 'KPI tracking completed successfully' }), {
             status: 200,
