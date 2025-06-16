@@ -1,5 +1,4 @@
 
-
 import dayjs from 'dayjs';
 import { loadRotaData } from '@/utils/rotaStore';
 import { guards } from '@/data/rota-data';
@@ -33,14 +32,20 @@ const parseShiftStartLogs = (csvData: string): ShiftStartLog[] => {
     
     // Skip header row and parse each line
     return lines.slice(1).map(line => {
-      const [id, guardId, guardName, action, timestamp, location, notes] = line.split(',');
+      const parts = line.split(',');
+      if (parts.length < 5) {
+        console.warn('Malformed CSV line:', line);
+        return null;
+      }
+      
+      const [id, guardId, guardName, action, timestamp] = parts;
       return {
         id: id?.trim() || '',
         guardId: guardId?.trim() || '',
         timestamp: timestamp?.trim() || '',
         action: action?.trim() || ''
       };
-    }).filter(log => log.action === 'Shift Start');
+    }).filter(log => log !== null && log.action === 'Shift Start') as ShiftStartLog[];
   } catch (error) {
     console.error('Error parsing shift start logs:', error);
     return [];
@@ -146,4 +151,3 @@ export const getAlertsLast24Hours = (): NoShowAlert[] => {
   
   return alerts.filter(alert => dayjs(alert.alertTime).isAfter(yesterday));
 };
-
