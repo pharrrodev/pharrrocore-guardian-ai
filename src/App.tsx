@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +28,7 @@ import ReportsList from "./pages/ReportsList";
 import LicenceDashboard from "./pages/LicenceDashboard";
 import PayrollVariance from "./pages/PayrollVariance";
 import TenderWriter from "./pages/TenderWriter";
+import AdminTools from "./pages/AdminTools";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +62,7 @@ const App = () => (
             <Route path="/licence-dashboard" element={<LicenceDashboard />} />
             <Route path="/payroll-variance" element={<PayrollVariance />} />
             <Route path="/tender-writer" element={<TenderWriter />} />
+            <Route path="/admin-tools" element={<AdminTools />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
