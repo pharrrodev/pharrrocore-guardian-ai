@@ -114,16 +114,16 @@ const SummaryReportModal = ({ isOpen, onClose, summaryContent, selectedDate }: S
         <ScrollArea className="flex-1 pr-4">
           <div className="py-4">
             {formattedSections.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-fr">
                 {formattedSections.map((section, index) => (
-                  <div key={index} className="bg-muted/30 rounded-lg p-4 border h-fit">
+                  <div key={index} className="bg-muted/30 rounded-lg p-4 border flex flex-col min-h-[200px]">
                     {section.title && (
-                      <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-primary">
+                      <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-primary flex-shrink-0">
                         <FileText className="w-4 h-4" />
                         {section.title}
                       </h3>
                     )}
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-1">
                       {section.content.map((line, lineIndex) => (
                         <p key={lineIndex} className="text-sm leading-relaxed text-foreground/90">
                           {line.startsWith('•') || line.startsWith('-') ? (
