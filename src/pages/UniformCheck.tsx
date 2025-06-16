@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { uniformKitItems, equipmentToCheck, equipmentStatuses } from "@/data/edob-types";
 
@@ -83,8 +82,8 @@ const UniformCheck = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader className="flex flex-row items-center gap-4">
+      <Card className="w-full max-w-6xl h-[80vh]">
+        <CardHeader className="flex flex-row items-center gap-4 pb-4">
           <ClipboardCheck className="w-10 h-10 text-primary" />
           <div>
             <CardTitle className="text-2xl">Uniform & Equipment Check</CardTitle>
@@ -96,96 +95,100 @@ const UniformCheck = () => {
             </Link>
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-full overflow-hidden">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField control={form.control} name="personName" render={({ field }) => (<FormItem><FormLabel>Guard Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col">
+              <FormField control={form.control} name="personName" render={({ field }) => (<FormItem className="mb-4"><FormLabel>Guard Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
               
-              <div className="space-y-2 rounded-md border p-4">
-                <h3 className="text-base font-semibold tracking-tight">Uniform & Kit Checklist</h3>
-                <p className="text-sm text-muted-foreground">Confirm each item. Add a comment for any issues.</p>
-                <ScrollArea className="h-64 pr-4 -mr-4">
-                  <div className="space-y-4 pt-2">
-                    {uniformFields.map((item, index) => (
-                      <div key={item.id} className="space-y-3 rounded-lg border bg-background/30 p-3">
-                        <FormField
-                          control={form.control}
-                          name={`uniformChecklist.${index}.confirmed`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox checked={field.value} onCheckedChange={field.onChange} id={`uniform-check-${item.id}`} />
-                              </FormControl>
-                              <FormLabel htmlFor={`uniform-check-${item.id}`} className="font-normal cursor-pointer">{item.label}</FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`uniformChecklist.${index}.comment`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input placeholder="Add comment if not confirmed..." {...field} className="h-9 text-xs" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    ))}
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden">
+                {/* Uniform Checklist */}
+                <div className="space-y-2 rounded-md border p-4 flex flex-col overflow-hidden">
+                  <h3 className="text-base font-semibold tracking-tight">Uniform & Kit Checklist</h3>
+                  <p className="text-sm text-muted-foreground">Confirm each item. Add a comment for any issues.</p>
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    <div className="space-y-3">
+                      {uniformFields.map((item, index) => (
+                        <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
+                          <FormField
+                            control={form.control}
+                            name={`uniformChecklist.${index}.confirmed`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox checked={field.value} onCheckedChange={field.onChange} id={`uniform-check-${item.id}`} />
+                                </FormControl>
+                                <FormLabel htmlFor={`uniform-check-${item.id}`} className="font-normal cursor-pointer text-sm">{item.label}</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`uniformChecklist.${index}.comment`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Add comment if not confirmed..." {...field} className="h-8 text-xs" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </ScrollArea>
-              </div>
+                </div>
 
-              <div className="space-y-2 rounded-md border p-4">
-                <h3 className="text-base font-semibold tracking-tight">Equipment Checklist</h3>
-                <p className="text-sm text-muted-foreground">Set status for each item. Add a comment for any issues.</p>
-                <ScrollArea className="h-64 pr-4 -mr-4">
-                  <div className="space-y-4 pt-2">
-                    {equipmentFields.map((item, index) => (
-                      <div key={item.id} className="space-y-3 rounded-lg border bg-background/30 p-3">
-                        <FormField
-                          control={form.control}
-                          name={`equipmentChecklist.${index}.status`}
-                          render={({ field }) => (
-                            <FormItem>
-                               <FormLabel className="font-normal">{item.label}</FormLabel>
+                {/* Equipment Checklist */}
+                <div className="space-y-2 rounded-md border p-4 flex flex-col overflow-hidden">
+                  <h3 className="text-base font-semibold tracking-tight">Equipment Checklist</h3>
+                  <p className="text-sm text-muted-foreground">Set status for each item. Add a comment for any issues.</p>
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    <div className="space-y-3">
+                      {equipmentFields.map((item, index) => (
+                        <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
+                          <FormField
+                            control={form.control}
+                            name={`equipmentChecklist.${index}.status`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="font-normal text-sm">{item.label}</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status..." />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {equipmentStatuses.map(status => (
-                                            <SelectItem key={status} value={status}>{status}</SelectItem>
-                                        ))}
-                                    </SelectContent>
+                                  <FormControl>
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue placeholder="Select status..." />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {equipmentStatuses.map(status => (
+                                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                                    ))}
+                                  </SelectContent>
                                 </Select>
-                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`equipmentChecklist.${index}.comment`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input placeholder="Add comment if status is 'Needs Attention'..." {...field} className="h-9 text-xs" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    ))}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`equipmentChecklist.${index}.comment`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Add comment if status is 'Needs Attention'..." {...field} className="h-8 text-xs" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </ScrollArea>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full">Submit Check</Button>
+              <Button type="submit" className="w-full mt-4">Submit Check</Button>
             </form>
           </Form>
         </CardContent>
