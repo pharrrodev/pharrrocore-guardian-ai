@@ -146,4 +146,3 @@ export const centralData = {
 
 // Export the assignment topics for backward compatibility
 export const assignmentTopics = centralData.assignmentTopics;
-export type { Topic };
