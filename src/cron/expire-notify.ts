@@ -3,7 +3,7 @@
 // This would be a scheduled job that runs daily to check for expiring training records
 
 import dayjs from 'dayjs';
-import { getExpiringTrainingRecords, getExpiredTrainingRecords } from '@/utils/csvHelpers';
+import { getExpiringTrainingRecords, getExpiredTrainingRecords, TrainingRecord } from '@/utils/csvHelpers';
 
 // Future implementation: Email service integration
 interface EmailService {
@@ -63,7 +63,7 @@ export const checkExpiringTraining = async () => {
 /**
  * Group training records by guard name
  */
-const groupRecordsByGuard = (records: any[]) => {
+const groupRecordsByGuard = (records: TrainingRecord[]): Record<string, TrainingRecord[]> => {
   return records.reduce((groups, record) => {
     const guardName = record.guardName;
     if (!groups[guardName]) {
@@ -71,13 +71,13 @@ const groupRecordsByGuard = (records: any[]) => {
     }
     groups[guardName].push(record);
     return groups;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, TrainingRecord[]>);
 };
 
 /**
  * Generate email body for individual guard notifications
  */
-const generateEmailBody = (records: any[]): string => {
+const generateEmailBody = (records: TrainingRecord[]): string => {
   // TODO: Create HTML email template
   return `
     Dear Guard,
@@ -100,7 +100,7 @@ const generateEmailBody = (records: any[]): string => {
 /**
  * Generate admin summary email
  */
-const generateAdminSummary = (expiring: any[], expired: any[]): string => {
+const generateAdminSummary = (expiring: TrainingRecord[], expired: TrainingRecord[]): string => {
   // TODO: Create HTML email template with detailed summary
   return `
     Training Records Summary
