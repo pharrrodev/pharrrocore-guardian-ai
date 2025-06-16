@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { Shift } from '@/data/rota-data';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shift, guards } from '@/data/rota-data';
 import { loadRotaData } from '@/utils/rotaStore';
 import { updateRotaData } from '@/api/rota-update';
 
@@ -43,9 +44,13 @@ const RotaBuilder = () => {
       return;
     }
 
+    // Find the guard ID based on the selected name
+    const selectedGuard = guards.find(guard => guard.name === newShift.guardName);
+    const guardId = selectedGuard ? selectedGuard.id : crypto.randomUUID();
+
     const shift: Shift = {
       id: crypto.randomUUID(),
-      guardId: crypto.randomUUID(), // Generate a guardId
+      guardId: guardId,
       guardName: newShift.guardName,
       date: newShift.date.toISOString().split('T')[0],
       startTime: newShift.startTime,
@@ -111,12 +116,18 @@ const RotaBuilder = () => {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="guardName">Guard Name</Label>
-                <Input
-                  id="guardName"
-                  value={newShift.guardName}
-                  onChange={(e) => setNewShift({ ...newShift, guardName: e.target.value })}
-                  placeholder="Enter guard name"
-                />
+                <Select onValueChange={(value) => setNewShift({ ...newShift, guardName: value })} value={newShift.guardName}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select guard name" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {guards.map((guard) => (
+                      <SelectItem key={guard.id} value={guard.name}>
+                        {guard.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

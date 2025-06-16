@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { uniformKitItems, equipmentToCheck, equipmentStatuses } from "@/data/edob-types";
+import { guards } from "@/data/rota-data";
 
 const uniformEquipmentCheckSchema = z.object({
   personName: z.string().min(1, { message: "Guard name is required." }),
@@ -105,9 +106,20 @@ const UniformCheck = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Guard Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., John Doe" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select guard name" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {guards.map((guard) => (
+                          <SelectItem key={guard.id} value={guard.name}>
+                            {guard.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )} 

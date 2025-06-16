@@ -9,7 +9,8 @@ import { Check, X, Home, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
-import { Shift } from '@/data/rota-data';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shift, guards } from '@/data/rota-data';
 import { loadRotaData, loadConfirmations } from '@/utils/rotaStore';
 import { confirmShift } from '@/api/rota-confirm';
 
@@ -43,9 +44,18 @@ const ShiftConfirm = () => {
     }
   }, [guardName, selectedDate, shifts]);
 
+  const handleGuardNameChange = (selectedName: string) => {
+    setGuardName(selectedName);
+    // Find the corresponding guard ID
+    const selectedGuard = guards.find(guard => guard.name === selectedName);
+    if (selectedGuard) {
+      setGuardId(selectedGuard.id);
+    }
+  };
+
   const handleConfirmation = async (shift: Shift, confirmed: boolean) => {
     if (!guardId.trim()) {
-      toast.error('Please enter your Guard ID');
+      toast.error('Please select a guard');
       return;
     }
 
@@ -102,24 +112,21 @@ const ShiftConfirm = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="guardId">Guard ID</Label>
-                <Input
-                  id="guardId"
-                  value={guardId}
-                  onChange={(e) => setGuardId(e.target.value)}
-                  placeholder="Enter your Guard ID"
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="guardName">Guard Name</Label>
-                <Input
-                  id="guardName"
-                  value={guardName}
-                  onChange={(e) => setGuardName(e.target.value)}
-                  placeholder="Enter your full name"
-                />
+                <Select onValueChange={handleGuardNameChange} value={guardName}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select guard name" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {guards.map((guard) => (
+                      <SelectItem key={guard.id} value={guard.name}>
+                        {guard.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Date</Label>
