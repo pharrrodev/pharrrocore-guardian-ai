@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -22,7 +21,7 @@ export default {
 			colors: {
 				// GuardAI Dashboard Colors
 				guard: {
-					primary: '#3b82f6',    // blue
+					primary: '#4f83cc',    // professional blue instead of neon
 					success: '#22c55e',    // green
 					warning: '#f59e0b',    // amber
 					danger: '#ef4444',     // red
