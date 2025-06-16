@@ -54,17 +54,17 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
   };
 
   const validateForm = (): string | null => {
-    if (!formData.guardName.trim()) return 'Guard name is required';
-    if (!formData.courseName.trim()) return 'Course name is required';
-    if (!formData.completedDate) return 'Completed date is required';
-    if (!formData.expiresDate) return 'Expires date is required';
+    if (!formData.guardName.trim()) return 'Please select a guard name';
+    if (!formData.courseName.trim()) return 'Please enter a course name';
+    if (!formData.completedDate) return 'Please select when the training was completed';
+    if (!formData.expiresDate) return 'Please select when the training expires';
     
     const completedDate = dayjs(formData.completedDate);
     const expiresDate = dayjs(formData.expiresDate);
     
-    if (!completedDate.isValid()) return 'Invalid completed date';
-    if (!expiresDate.isValid()) return 'Invalid expires date';
-    if (expiresDate.isBefore(completedDate)) return 'Expires date must be after completed date';
+    if (!completedDate.isValid()) return 'Please select a valid completion date';
+    if (!expiresDate.isValid()) return 'Please select a valid expiry date';
+    if (expiresDate.isBefore(completedDate)) return 'Expiry date must be after completion date';
     
     return null;
   };
@@ -214,6 +214,7 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
               onChange={(date) => handleInputChange('completedDate', date)}
               placeholder="Select completed date"
               disabled={loading}
+              allowFuture={false}
             />
           </div>
 
@@ -224,6 +225,7 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
               onChange={(date) => handleInputChange('expiresDate', date)}
               placeholder="Select expires date"
               disabled={loading}
+              allowFuture={true}
             />
           </div>
 

@@ -10,6 +10,7 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  allowFuture?: boolean;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({ 
@@ -17,7 +18,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange, 
   placeholder = "Select date", 
   disabled = false,
-  className 
+  className,
+  allowFuture = false
 }) => {
   const [year, setYear] = useState<string | undefined>(value ? String(value.getFullYear()) : undefined);
   const [month, setMonth] = useState<string | undefined>(value ? String(value.getMonth()) : undefined);
@@ -25,8 +27,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: currentYear - 1900 + 1 }, (_, i) => String(currentYear - i));
-  }, []);
+    const endYear = allowFuture ? currentYear + 10 : currentYear;
+    return Array.from({ length: endYear - 1900 + 1 }, (_, i) => String(endYear - i));
+  }, [allowFuture]);
 
   const months = useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => ({
@@ -56,8 +59,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   useEffect(() => {
       if (year && month && day) {
           const selectedDate = new Date(Number(year), Number(month), Number(day));
-          // Prevent future dates & invalid dates (e.g. Feb 30th)
-          if (selectedDate > new Date() || selectedDate.getMonth() !== Number(month)) {
+          // Prevent future dates only if allowFuture is false & invalid dates (e.g. Feb 30th)
+          if ((!allowFuture && selectedDate > new Date()) || selectedDate.getMonth() !== Number(month)) {
             onChange(undefined);
           } else {
             onChange(selectedDate);
@@ -65,7 +68,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       } else {
           onChange(undefined);
       }
-  }, [year, month, day, onChange]);
+  }, [year, month, day, onChange, allowFuture]);
 
   const handleYearChange = (newYear: string) => {
     setYear(newYear);
