@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, User, BookOpen } from 'lucide-react';
+import { Plus, Calendar, User, BookOpen, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
 import AddTraining from './AddTraining';
@@ -83,11 +84,19 @@ const TrainingDashboard = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Training Dashboard</h1>
-          <p className="text-muted-foreground">
-            Track training records and certifications
-          </p>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Training Dashboard</h1>
+            <p className="text-muted-foreground">
+              Track training records and certifications
+            </p>
+          </div>
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
