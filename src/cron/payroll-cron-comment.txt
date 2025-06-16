@@ -1,0 +1,93 @@
+
+# Payroll Validator Cron Job Setup
+
+This file explains how to set up automated payroll variance checking.
+
+## Purpose
+Compare actual worked hours (from shift start/end logs) against paid hours from payroll data for the previous ISO week.
+
+## Cron Schedule
+```bash
+# Run payroll validator every Monday at 04:00 (before business hours)
+0 4 * * 1 /path/to/node /path/to/your/project/dist/scripts/payrollValidator.js
+```
+
+## Alternative Scheduling Options
+
+### Using PM2 (Recommended for Node.js apps)
+```bash
+pm2 start ecosystem.config.js
+```
+
+Where ecosystem.config.js contains:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'payroll-validator',
+    script: './dist/scripts/payrollValidator.js',
+    cron_restart: '0 4 * * 1',
+    watch: false,
+    autorestart: false
+  }]
+}
+```
+
+### Using systemd timer (Linux)
+Create a service file and timer to run the payroll validator every Monday at 04:00.
+
+### Manual Testing
+You can manually trigger the payroll validator by running:
+```bash
+node dist/scripts/payrollValidator.js
+```
+
+## Data Sources
+The script reads from:
+- `/logs/shiftStart.csv` (Guard shift start times)
+- `/logs/shiftEnd.csv` (Guard shift end times)  
+- `/data/payroll.csv` (Official payroll data)
+
+## Variance Calculation
+- **Actual Hours**: (Latest shift end - First shift start) / 3600000 milliseconds
+- **Variance**: actualHours - hoursPaid
+- **Threshold**: Only reports variances where |variance| > 0.25 hours (15 minutes)
+
+## Output Files
+- **Variance Report**: `/reports/payrollVariance-YYYY-WW.csv`
+
+## Report Columns
+- guardId: Security guard identifier
+- date: Work date (YYYY-MM-DD)
+- actualHours: Calculated hours from logs
+- hoursPaid: Hours from payroll system
+- variance: Difference (+ = unpaid overtime, - = overpaid)
+- siteCode: Work site location
+
+## Variance Severity Levels
+- **Low**: 0.25 - 0.5 hours difference
+- **Medium**: 0.5 - 1.0 hours difference  
+- **High**: > 1.0 hours difference
+
+## Error Handling
+- Missing shift data: Guard/date skipped with warning log
+- Missing payroll data: Guard/date skipped with warning log
+- Invalid timestamps: Logged as error, record skipped
+- File access issues: Logged for system administrator review
+
+## Business Impact
+- Identifies unpaid overtime (positive variance)
+- Detects overpayment situations (negative variance) 
+- Ensures payroll accuracy and compliance
+- Provides audit trail for payroll corrections
+
+## Monitoring and Maintenance
+- Console logs track successful runs and found variances
+- Weekly summary statistics
+- Failed runs can trigger system notifications
+- Historical variance tracking for trend analysis
+
+## Integration Notes
+- Runs early Monday morning (04:00) to process previous week
+- Results available for Monday morning management review
+- Can be integrated with payroll system for automated corrections
+- Dashboard available at `/payroll-variance` for real-time viewing
