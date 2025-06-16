@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { centralData } from "@/data/centralData";
 
@@ -12,20 +11,14 @@ export const uniformKitItems: { id: string; label: string }[] = assignmentTopics
 // Dynamic function to get current patrol routes (includes newly added ones)
 export const getCurrentPatrolRoutes = () => {
   const currentTopics = centralData.assignmentTopics;
-  const patrolTopics = currentTopics.find(t => t.id === 'patrol-routes' || t.label.toLowerCase().includes('patrol'));
-  if (patrolTopics?.subTopics) {
-    return ["Full Patrol", ...patrolTopics.subTopics.map(st => st.label)];
+  const patrolRoutesTopics = currentTopics.find(t => t.id === 'patrol-routes');
+  
+  if (patrolRoutesTopics?.subTopics) {
+    return ["Full Patrol", ...patrolRoutesTopics.subTopics.map(st => st.label)];
   }
   
-  // Also check for any other patrol-related topics that might have been added
-  const allPatrolRoutes = currentTopics.reduce((routes: string[], topic) => {
-    if (topic.label.toLowerCase().includes('patrol') && topic.subTopics) {
-      routes.push(...topic.subTopics.map(st => st.label));
-    }
-    return routes;
-  }, ["Full Patrol"]);
-  
-  return [...new Set(allPatrolRoutes)]; // Remove duplicates
+  // Fallback to static routes if no patrol routes found
+  return ["Full Patrol", "Alpha Route (Perimeter)", "Bravo Route (Internal - Ground Floor)", "Charlie Route (Internal - Upper Floors)"];
 };
 
 export const entryTypes = [
