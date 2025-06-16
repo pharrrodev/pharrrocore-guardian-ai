@@ -1,0 +1,29 @@
+
+# KPI Tracker Cron Job Configuration
+# 
+# This cron job should run the KPI tracker script nightly at 00:10 (10 minutes past midnight)
+# to generate compliance reports for the previous day.
+#
+# Cron syntax: 10 0 * * *
+# - Minute: 10
+# - Hour: 0 (midnight)
+# - Day of month: * (every day)
+# - Month: * (every month)  
+# - Day of week: * (every day of week)
+#
+# Command to add to crontab:
+# 10 0 * * * /usr/bin/node /path/to/project/scripts/kpiTracker.ts
+#
+# Alternative using npm/yarn:
+# 10 0 * * * cd /path/to/project && npm run kpi-tracker
+#
+# Note: Ensure the script has proper file system permissions to:
+# - Read from logs/ directory (edob.csv, uniformCheck.csv, visitorLog.csv)
+# - Write to reports/ directory (kpi-YYYY-MM-DD.json files)
+#
+# The script analyzes:
+# - Patrol compliance (target: 3 patrols per 12-hour shift)
+# - Break tracking from EDOB logs
+# - Uniform check compliance rates
+#
+# Output: JSON report with date, compliance metrics, and performance indicators
