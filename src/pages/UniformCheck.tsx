@@ -9,10 +9,9 @@ import { Home, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { uniformKitItems, equipmentToCheck, equipmentStatuses } from "@/data/edob-types";
 import { guards } from "@/data/rota-data";
 
@@ -22,34 +21,13 @@ const uniformEquipmentCheckSchema = z.object({
     id: z.string(),
     label: z.string(),
     confirmed: z.boolean(),
-    comment: z.string().optional(),
-  })).superRefine((data, ctx) => {
-    data.forEach((item, index) => {
-      if (!item.confirmed && (!item.comment || item.comment.trim() === '')) {
-        ctx.addIssue({
-          code: 'custom',
-          path: [index, 'comment'],
-          message: "Comment required if not confirmed.",
-        });
-      }
-    });
-  }),
+  })),
   equipmentChecklist: z.array(z.object({
     id: z.string(),
     label: z.string(),
     status: z.string().min(1, { message: "Status is required." }),
-    comment: z.string().optional(),
-  })).superRefine((data, ctx) => {
-    data.forEach((item, index) => {
-      if (item.status === 'Needs Attention' && (!item.comment || item.comment.trim() === '')) {
-        ctx.addIssue({
-          code: 'custom',
-          path: [index, 'comment'],
-          message: "Comment required if status is 'Needs Attention'.",
-        });
-      }
-    });
-  }),
+  })),
+  additionalComments: z.string().optional(),
 });
 
 type UniformEquipmentCheckValues = z.infer<typeof uniformEquipmentCheckSchema>;
@@ -59,8 +37,9 @@ const UniformCheck = () => {
     resolver: zodResolver(uniformEquipmentCheckSchema),
     defaultValues: {
       personName: "",
-      uniformChecklist: uniformKitItems.map(item => ({ ...item, confirmed: false, comment: '' })),
-      equipmentChecklist: equipmentToCheck.map(item => ({ ...item, status: '', comment: '' }))
+      uniformChecklist: uniformKitItems.map(item => ({ ...item, confirmed: false })),
+      equipmentChecklist: equipmentToCheck.map(item => ({ ...item, status: '' })),
+      additionalComments: "",
     },
   });
 
@@ -125,114 +104,99 @@ const UniformCheck = () => {
                 )} 
               />
               
-              <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+              <div className="flex-1 grid grid-cols-2 gap-4 min-h-0 overflow-hidden">
                 {/* Uniform Checklist */}
-                <div className="rounded-md border p-4 flex flex-col min-h-0">
+                <div className="rounded-md border p-4 flex flex-col overflow-hidden">
                   <div className="mb-3">
                     <h3 className="text-base font-semibold tracking-tight">Uniform & Kit Checklist</h3>
-                    <p className="text-sm text-muted-foreground">Confirm each item. Add a comment for any issues.</p>
+                    <p className="text-sm text-muted-foreground">Check all items that are present and in good condition.</p>
                   </div>
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-3 pr-4">
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="space-y-2 pr-2">
                       {uniformFields.map((item, index) => (
-                        <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
-                          <FormField
-                            control={form.control}
-                            name={`uniformChecklist.${index}.confirmed`}
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox 
-                                    checked={field.value} 
-                                    onCheckedChange={field.onChange} 
-                                    id={`uniform-check-${item.id}`} 
-                                  />
-                                </FormControl>
-                                <FormLabel 
-                                  htmlFor={`uniform-check-${item.id}`} 
-                                  className="font-normal cursor-pointer text-sm flex-1"
-                                >
-                                  {item.label}
-                                </FormLabel>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`uniformChecklist.${index}.comment`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="Add comment if not confirmed..." 
-                                    {...field} 
-                                    className="h-8 text-xs" 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name={`uniformChecklist.${index}.confirmed`}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border bg-background/30 p-3">
+                              <FormControl>
+                                <Checkbox 
+                                  checked={field.value} 
+                                  onCheckedChange={field.onChange} 
+                                  id={`uniform-check-${item.id}`} 
+                                />
+                              </FormControl>
+                              <FormLabel 
+                                htmlFor={`uniform-check-${item.id}`} 
+                                className="font-normal cursor-pointer text-sm flex-1"
+                              >
+                                {item.label}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
                       ))}
                     </div>
-                  </ScrollArea>
+                  </div>
                 </div>
 
                 {/* Equipment Checklist */}
-                <div className="rounded-md border p-4 flex flex-col min-h-0">
+                <div className="rounded-md border p-4 flex flex-col overflow-hidden">
                   <div className="mb-3">
                     <h3 className="text-base font-semibold tracking-tight">Equipment Checklist</h3>
-                    <p className="text-sm text-muted-foreground">Set status for each item. Add a comment for any issues.</p>
+                    <p className="text-sm text-muted-foreground">Set status for each equipment item.</p>
                   </div>
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-3 pr-4">
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="space-y-2 pr-2">
                       {equipmentFields.map((item, index) => (
-                        <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
-                          <FormField
-                            control={form.control}
-                            name={`equipmentChecklist.${index}.status`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="font-normal text-sm">{item.label}</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="h-8">
-                                      <SelectValue placeholder="Select status..." />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {equipmentStatuses.map(status => (
-                                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`equipmentChecklist.${index}.comment`}
-                            render={({ field }) => (
-                              <FormItem>
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name={`equipmentChecklist.${index}.status`}
+                          render={({ field }) => (
+                            <FormItem className="rounded-lg border bg-background/30 p-3">
+                              <FormLabel className="font-normal text-sm">{item.label}</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                  <Input 
-                                    placeholder="Add comment if status is 'Needs Attention'..." 
-                                    {...field} 
-                                    className="h-8 text-xs" 
-                                  />
+                                  <SelectTrigger className="h-8 mt-1">
+                                    <SelectValue placeholder="Select status..." />
+                                  </SelectTrigger>
                                 </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                                <SelectContent>
+                                  {equipmentStatuses.map(status => (
+                                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       ))}
                     </div>
-                  </ScrollArea>
+                  </div>
                 </div>
               </div>
+
+              {/* Additional Comments */}
+              <FormField
+                control={form.control}
+                name="additionalComments"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Additional Comments (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add any comments about missing items, issues, or observations..."
+                        className="h-20 resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button type="submit" className="w-full">Submit Check</Button>
             </form>
