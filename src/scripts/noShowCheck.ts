@@ -30,13 +30,23 @@ export const checkNoShows = (): NoShowAlert[] => {
   // Load rota data
   const rotaShifts = loadRotaData();
   
-  // Load existing shift start logs (from EDOB)
-  const shiftStartLogs: ShiftStartLog[] = getLogsFromStorage('logs/shiftStart.csv').map(log => ({
-    id: log.id,
-    guardId: log.guardId,
-    timestamp: log.timestamp,
-    action: log.action
-  }));
+  // Load existing shift start logs (from EDOB) - handle CSV format properly
+  let shiftStartLogs: ShiftStartLog[] = [];
+  try {
+    const rawLogs = getLogsFromStorage('logs/shiftStart.csv');
+    // Convert CSV logs to ShiftStartLog format
+    shiftStartLogs = rawLogs
+      .filter(log => log.action === 'Shift Start')
+      .map(log => ({
+        id: log.id,
+        guardId: log.guardId,
+        timestamp: log.timestamp,
+        action: log.action
+      }));
+  } catch (error) {
+    console.log('No shift start logs found or error reading logs:', error);
+    shiftStartLogs = [];
+  }
   
   // Load existing no-show alerts to avoid duplicates
   const existingAlerts: NoShowAlert[] = getNoShowAlerts();
