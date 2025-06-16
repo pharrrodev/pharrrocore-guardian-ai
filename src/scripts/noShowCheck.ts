@@ -1,7 +1,6 @@
 
 import dayjs from 'dayjs';
 import { loadRotaData } from '@/utils/rotaStore';
-import { getLogsFromStorage } from '@/utils/appendCsv';
 import { guards } from '@/data/rota-data';
 
 export interface NoShowAlert {
@@ -23,6 +22,30 @@ export interface ShiftStartLog {
 // Get grace period from environment or default to 10 minutes
 const GRACE_PERIOD_MINUTES = parseInt(import.meta.env.VITE_GRACE_PERIOD_MINUTES || '10');
 
+// Helper function to parse CSV data to ShiftStartLog objects
+const parseShiftStartLogs = (csvData: string): ShiftStartLog[] => {
+  if (!csvData || csvData.trim() === '') return [];
+  
+  try {
+    const lines = csvData.trim().split('\n');
+    if (lines.length <= 1) return [];
+    
+    // Skip header row and parse each line
+    return lines.slice(1).map(line => {
+      const [id, guardId, guardName, action, timestamp, location, notes] = line.split(',');
+      return {
+        id: id?.trim() || '',
+        guardId: guardId?.trim() || '',
+        timestamp: timestamp?.trim() || '',
+        action: action?.trim() || ''
+      };
+    }).filter(log => log.action === 'Shift Start');
+  } catch (error) {
+    console.error('Error parsing shift start logs:', error);
+    return [];
+  }
+};
+
 export const checkNoShows = (): NoShowAlert[] => {
   const now = dayjs();
   const alerts: NoShowAlert[] = [];
@@ -30,19 +53,13 @@ export const checkNoShows = (): NoShowAlert[] => {
   // Load rota data
   const rotaShifts = loadRotaData();
   
-  // Load existing shift start logs (from EDOB) - handle CSV format properly
+  // Load existing shift start logs from localStorage (CSV format)
   let shiftStartLogs: ShiftStartLog[] = [];
   try {
-    const rawLogs = getLogsFromStorage('logs/shiftStart.csv');
-    // Convert CSV logs to ShiftStartLog format
-    shiftStartLogs = rawLogs
-      .filter(log => log.action === 'Shift Start')
-      .map(log => ({
-        id: log.id,
-        guardId: log.guardId,
-        timestamp: log.timestamp,
-        action: log.action
-      }));
+    const csvData = localStorage.getItem('logs/shiftStart.csv');
+    if (csvData) {
+      shiftStartLogs = parseShiftStartLogs(csvData);
+    }
   } catch (error) {
     console.log('No shift start logs found or error reading logs:', error);
     shiftStartLogs = [];
