@@ -3,15 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Play, CheckCircle, XCircle, Clock, Home, Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Settings, Play, CheckCircle, XCircle, Clock, Home, Loader2, Download, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { generateKPIReport } from '@/scripts/kpiTracker';
+import { generateDailySummary } from '@/scripts/dailySummary';
+import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
+import { runLicenceChecker, getLicenceAlerts } from '@/scripts/licenceChecker';
+import { runPayrollValidator, getLatestPayrollVarianceReport } from '@/scripts/payrollValidator';
+import { checkNoShows, getAlertsLast24Hours } from '@/scripts/noShowCheck';
+import dayjs from 'dayjs';
 
 interface ScriptStatus {
   name: string;
   lastRun?: string;
   status: 'success' | 'error' | 'running' | 'never';
   message?: string;
+  data?: any;
 }
 
 const AdminTools = () => {
@@ -79,26 +88,52 @@ const AdminTools = () => {
     saveScriptStatus(scriptKey, { status: 'running' });
 
     try {
-      const response = await fetch(`/api/admin/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      let result: any = {};
+      let scriptData: any = null;
 
-      const result = await response.json();
-
-      if (response.ok) {
-        saveScriptStatus(scriptKey, {
-          status: 'success',
-          lastRun: new Date().toISOString(),
-          message: result.message || 'Script completed successfully'
-        });
-        toast({
-          title: "Script Completed",
-          description: `${scriptStatuses[scriptKey].name} ran successfully`,
-        });
-      } else {
-        throw new Error(result.message || 'Script failed');
+      // Execute the actual script functions instead of making API calls
+      switch (scriptKey) {
+        case 'kpi':
+          result = await generateKPIReport();
+          scriptData = result;
+          break;
+        case 'daily-summary':
+          result = { content: await generateDailySummary() };
+          scriptData = result;
+          break;
+        case 'weekly-report':
+          result = { content: await generateWeeklyClientReport() };
+          scriptData = result;
+          break;
+        case 'licence-check':
+          runLicenceChecker();
+          result = { alerts: getLicenceAlerts() };
+          scriptData = result;
+          break;
+        case 'payroll-check':
+          runPayrollValidator();
+          result = { variances: getLatestPayrollVarianceReport() };
+          scriptData = result;
+          break;
+        case 'no-show-check':
+          result = { alerts: checkNoShows() };
+          scriptData = result;
+          break;
+        default:
+          throw new Error('Unknown script');
       }
+
+      saveScriptStatus(scriptKey, {
+        status: 'success',
+        lastRun: new Date().toISOString(),
+        message: 'Script completed successfully',
+        data: scriptData
+      });
+      
+      toast({
+        title: "Script Completed",
+        description: `${scriptStatuses[scriptKey].name} ran successfully`,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       saveScriptStatus(scriptKey, {
@@ -142,6 +177,183 @@ const AdminTools = () => {
     if (!lastRun) return 'Never';
     const date = new Date(lastRun);
     return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const renderScriptOutput = (scriptKey: string, script: ScriptStatus) => {
+    if (!script.data || script.status !== 'success') return null;
+
+    switch (scriptKey) {
+      case 'kpi':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">KPI Metrics</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Metric</TableHead>
+                  <TableHead>Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Patrol Compliance</TableCell>
+                  <TableCell>{script.data.patrolComplianceRate}%</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Uniform Compliance</TableCell>
+                  <TableCell>{script.data.uniformCompliance}%</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Total Patrols</TableCell>
+                  <TableCell>{script.data.totalPatrols}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Breaks Taken</TableCell>
+                  <TableCell>{script.data.breaksTaken}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        );
+
+      case 'daily-summary':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">Daily Summary Report</h4>
+            <pre className="bg-muted p-4 rounded-md text-xs overflow-auto max-h-48 whitespace-pre-wrap">
+              {script.data.content}
+            </pre>
+          </div>
+        );
+
+      case 'weekly-report':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">Weekly Client Report</h4>
+            <div className="flex items-center gap-2 text-sm">
+              <FileText className="w-4 h-4" />
+              <span>Report generated successfully</span>
+              <Button size="sm" variant="outline">
+                <Download className="w-3 h-3 mr-1" />
+                Download
+              </Button>
+            </div>
+            <div className="bg-muted p-3 rounded-md text-xs">
+              <strong>Preview:</strong>
+              <br />
+              {script.data.content.split('\n').slice(0, 5).join('\n')}...
+            </div>
+          </div>
+        );
+
+      case 'licence-check':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">Licence Alerts ({script.data.alerts.length})</h4>
+            {script.data.alerts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Expiry Date</TableHead>
+                    <TableHead>Days Left</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {script.data.alerts.map((alert: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{alert.guardName}</TableCell>
+                      <TableCell>{dayjs(alert.expiresDate).format('YYYY-MM-DD')}</TableCell>
+                      <TableCell>{alert.daysLeft}</TableCell>
+                      <TableCell>
+                        <Badge variant={alert.daysLeft < 0 ? "destructive" : alert.daysLeft < 30 ? "secondary" : "default"}>
+                          {alert.daysLeft < 0 ? "Expired" : alert.daysLeft < 30 ? "Expiring Soon" : "OK"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No licence alerts - all licences valid for next 60 days</p>
+            )}
+          </div>
+        );
+
+      case 'payroll-check':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">Payroll Variances ({script.data.variances.length})</h4>
+            {script.data.variances.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actual Hours</TableHead>
+                    <TableHead>Paid Hours</TableHead>
+                    <TableHead>Difference</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {script.data.variances.map((variance: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{variance.guardId}</TableCell>
+                      <TableCell>{variance.date}</TableCell>
+                      <TableCell>{variance.actualHours}</TableCell>
+                      <TableCell>{variance.hoursPaid}</TableCell>
+                      <TableCell>
+                        <span className={variance.variance > 0 ? "text-green-600" : "text-red-600"}>
+                          {variance.variance > 0 ? '+' : ''}{variance.variance} hrs
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No significant payroll variances found</p>
+            )}
+          </div>
+        );
+
+      case 'no-show-check':
+        return (
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-medium">No-Show Alerts ({script.data.alerts.length})</h4>
+            {script.data.alerts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Shift Date</TableHead>
+                    <TableHead>Expected Time</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {script.data.alerts.map((alert: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{alert.guardName}</TableCell>
+                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{alert.shiftStartTime}</TableCell>
+                      <TableCell>
+                        <Badge variant="destructive">Not Signed In</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No no-show alerts - all guards checked in on time</p>
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   // Check if user is admin
@@ -269,6 +481,8 @@ const AdminTools = () => {
                     </>
                   )}
                 </Button>
+
+                {renderScriptOutput(key, script)}
               </CardContent>
             </Card>
           ))}
