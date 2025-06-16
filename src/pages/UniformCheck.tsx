@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { uniformKitItems, equipmentToCheck, equipmentStatuses } from "@/data/edob-types";
 
 const uniformEquipmentCheckSchema = z.object({
@@ -95,18 +96,32 @@ const UniformCheck = () => {
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="h-full overflow-hidden">
+        <CardContent className="p-6 pt-0 h-[calc(80vh-120px)]">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col">
-              <FormField control={form.control} name="personName" render={({ field }) => (<FormItem className="mb-4"><FormLabel>Guard Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col gap-4">
+              <FormField 
+                control={form.control} 
+                name="personName" 
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Guard Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} 
+              />
               
-              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden">
+              <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
                 {/* Uniform Checklist */}
-                <div className="space-y-2 rounded-md border p-4 flex flex-col overflow-hidden">
-                  <h3 className="text-base font-semibold tracking-tight">Uniform & Kit Checklist</h3>
-                  <p className="text-sm text-muted-foreground">Confirm each item. Add a comment for any issues.</p>
-                  <div className="flex-1 overflow-y-auto pr-2">
-                    <div className="space-y-3">
+                <div className="rounded-md border p-4 flex flex-col min-h-0">
+                  <div className="mb-3">
+                    <h3 className="text-base font-semibold tracking-tight">Uniform & Kit Checklist</h3>
+                    <p className="text-sm text-muted-foreground">Confirm each item. Add a comment for any issues.</p>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    <div className="space-y-3 pr-4">
                       {uniformFields.map((item, index) => (
                         <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
                           <FormField
@@ -115,9 +130,18 @@ const UniformCheck = () => {
                             render={({ field }) => (
                               <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                                 <FormControl>
-                                  <Checkbox checked={field.value} onCheckedChange={field.onChange} id={`uniform-check-${item.id}`} />
+                                  <Checkbox 
+                                    checked={field.value} 
+                                    onCheckedChange={field.onChange} 
+                                    id={`uniform-check-${item.id}`} 
+                                  />
                                 </FormControl>
-                                <FormLabel htmlFor={`uniform-check-${item.id}`} className="font-normal cursor-pointer text-sm">{item.label}</FormLabel>
+                                <FormLabel 
+                                  htmlFor={`uniform-check-${item.id}`} 
+                                  className="font-normal cursor-pointer text-sm flex-1"
+                                >
+                                  {item.label}
+                                </FormLabel>
                               </FormItem>
                             )}
                           />
@@ -127,7 +151,11 @@ const UniformCheck = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input placeholder="Add comment if not confirmed..." {...field} className="h-8 text-xs" />
+                                  <Input 
+                                    placeholder="Add comment if not confirmed..." 
+                                    {...field} 
+                                    className="h-8 text-xs" 
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -136,15 +164,17 @@ const UniformCheck = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </ScrollArea>
                 </div>
 
                 {/* Equipment Checklist */}
-                <div className="space-y-2 rounded-md border p-4 flex flex-col overflow-hidden">
-                  <h3 className="text-base font-semibold tracking-tight">Equipment Checklist</h3>
-                  <p className="text-sm text-muted-foreground">Set status for each item. Add a comment for any issues.</p>
-                  <div className="flex-1 overflow-y-auto pr-2">
-                    <div className="space-y-3">
+                <div className="rounded-md border p-4 flex flex-col min-h-0">
+                  <div className="mb-3">
+                    <h3 className="text-base font-semibold tracking-tight">Equipment Checklist</h3>
+                    <p className="text-sm text-muted-foreground">Set status for each item. Add a comment for any issues.</p>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    <div className="space-y-3 pr-4">
                       {equipmentFields.map((item, index) => (
                         <div key={item.id} className="space-y-2 rounded-lg border bg-background/30 p-3">
                           <FormField
@@ -175,7 +205,11 @@ const UniformCheck = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input placeholder="Add comment if status is 'Needs Attention'..." {...field} className="h-8 text-xs" />
+                                  <Input 
+                                    placeholder="Add comment if status is 'Needs Attention'..." 
+                                    {...field} 
+                                    className="h-8 text-xs" 
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -184,11 +218,11 @@ const UniformCheck = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </ScrollArea>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full mt-4">Submit Check</Button>
+              <Button type="submit" className="w-full">Submit Check</Button>
             </form>
           </Form>
         </CardContent>
