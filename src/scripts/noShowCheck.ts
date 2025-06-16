@@ -21,7 +21,7 @@ export interface ShiftStartLog {
 }
 
 // Get grace period from environment or default to 10 minutes
-const GRACE_PERIOD_MINUTES = parseInt(process.env.GRACE_PERIOD_MINUTES || '10');
+const GRACE_PERIOD_MINUTES = parseInt(import.meta.env.VITE_GRACE_PERIOD_MINUTES || '10');
 
 export const checkNoShows = (): NoShowAlert[] => {
   const now = dayjs();
