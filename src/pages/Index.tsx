@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap, AlertTriangle } from "lucide-react";
 
 const Index = () => {
   return (
@@ -222,6 +222,26 @@ const Index = () => {
             </p>
             <Button asChild className="w-full">
               <Link to="/rota-dashboard">View Dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <AlertTriangle className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">No-Show Dashboard</CardTitle>
+                <CardDescription>Monitor guards who fail to check in.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Automatically track and alert when guards don't check in for their shifts within the grace period, helping ensure coverage.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/no-show-dashboard">View Alerts</Link>
             </Button>
           </CardContent>
         </Card>

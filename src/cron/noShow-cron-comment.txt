@@ -1,0 +1,54 @@
+
+# No-Show Alert Cron Job Setup
+
+This file explains how to set up automated no-show checking for the security rota system.
+
+## Purpose
+Run the no-show check script every 5 minutes to automatically detect when guards fail to check in for their shifts within the grace period (default: 10 minutes).
+
+## Cron Schedule
+```bash
+# Run no-show check every 5 minutes
+*/5 * * * * /path/to/node /path/to/your/project/dist/scripts/noShowCheck.js
+```
+
+## Alternative Scheduling Options
+
+### Using PM2 (Recommended for Node.js apps)
+```bash
+pm2 start ecosystem.config.js
+```
+
+Where ecosystem.config.js contains:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'noshow-checker',
+    script: './dist/scripts/noShowCheck.js',
+    cron_restart: '*/5 * * * *',
+    watch: false,
+    autorestart: false
+  }]
+}
+```
+
+### Using systemd timer (Linux)
+Create a service file and timer to run the check every 5 minutes.
+
+### Manual Testing
+You can manually trigger the no-show check by running:
+```bash
+node dist/scripts/noShowCheck.js
+```
+
+## Environment Variables
+- `GRACE_PERIOD_MINUTES`: Number of minutes after shift start to wait before alerting (default: 10)
+
+## Integration Notes
+- The script reads from rota-data.json (built by Rota Builder)
+- Checks against logs/shiftStart.csv (written by EDOB when guards log "Shift Start")
+- Outputs alerts to logs/noShowAlerts.csv
+- Console logs serve as placeholders for future SMS/email notifications
+
+## Monitoring
+Check the No-Show Dashboard in the web application to view all alerts and their status.
