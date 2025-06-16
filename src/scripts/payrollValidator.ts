@@ -1,9 +1,10 @@
-
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import isBetween from 'dayjs/plugin/isBetween';
 import { readCSV, appendCSVRow } from '../utils/csvHelpers';
 
 dayjs.extend(weekOfYear);
+dayjs.extend(isBetween);
 
 interface ShiftRecord {
   id: string;
