@@ -6,345 +6,313 @@ import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, U
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      <header className="text-center mb-12">
-        <h1 className="text-5xl font-bold tracking-tighter mb-2">Pharrrocore</h1>
-        <p className="text-xl text-muted-foreground">Advanced AI Security Management</p>
+    <div className="h-screen flex flex-col bg-background p-4 overflow-hidden">
+      <header className="text-center mb-6">
+        <h1 className="text-4xl font-bold tracking-tighter mb-1">Pharrrocore</h1>
+        <p className="text-lg text-muted-foreground">Advanced AI Security Management</p>
       </header>
-      <main className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl w-full">
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <FileText className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">AI Incident Reporting</CardTitle>
-                <CardDescription>Guided 7-step wizard to report incidents.</CardDescription>
-              </div>
+      <main className="grid gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 flex-1 overflow-auto max-w-7xl w-full mx-auto">
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">AI Incident Reporting</CardTitle>
             </div>
+            <CardDescription className="text-xs">Guided 7-step wizard to report incidents.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Use text, voice, or file uploads to create detailed, AI-enhanced incident reports compliant with UK security standards.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Use text, voice, or file uploads to create detailed, AI-enhanced incident reports.
             </p>
-            <Button asChild className="w-full">
-              <Link to="/incident-reporting">Start New Report</Link>
+            <Button asChild className="w-full" size="sm">
+              <Link to="/incident-reporting">Start Report</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <PenTool className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Tender Writer</CardTitle>
-                <CardDescription>Generate professional tender documents with AI.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <PenTool className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Tender Writer</CardTitle>
             </div>
+            <CardDescription className="text-xs">Generate professional tender documents with AI.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Create customized security tender proposals by combining company boilerplate with site-specific requirements using AI assistance.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Create customized security tender proposals using AI assistance.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/tender-writer">Write Tender</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Mail className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Email Formatter</CardTitle>
-                <CardDescription>Convert shorthand to professional emails.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Mail className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Email Formatter</CardTitle>
             </div>
+            <CardDescription className="text-xs">Convert shorthand to professional emails.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Transform quick notes and shorthand messages into professional emails with proper greeting, body, and signature.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Transform quick notes into professional emails with proper formatting.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/email-formatter">Format Email</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Bot className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">AI Assignment Instructions</CardTitle>
-                <CardDescription>Interactive chatbot for site procedures.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">AI Assignment Instructions</CardTitle>
             </div>
+            <CardDescription className="text-xs">Interactive chatbot for site procedures.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Get instant, structured information about schedules, patrol routes, and safety manuals from our dedicated knowledge base.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Get instant information about schedules, patrol routes, and safety manuals.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/assignment-instructions">Open Chatbot</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <ClipboardList className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Daily Occurrence Book</CardTitle>
-                <CardDescription>Log all site activities and observations.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <ClipboardList className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Daily Occurrence Book</CardTitle>
             </div>
+            <CardDescription className="text-xs">Log all site activities and observations.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              A comprehensive digital log for security personnel to record events, patrols, and checks in a structured and consistent manner.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Digital log for security personnel to record events and patrols.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/edob">Open EDOB</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <BookOpen className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Daily Security Summary</CardTitle>
-                <CardDescription>Generate comprehensive daily reports.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Daily Security Summary</CardTitle>
             </div>
+            <CardDescription className="text-xs">Generate comprehensive daily reports.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Automatically compile all daily activities into professional security reports using AI-powered analysis of incidents, patrols, and visitor logs.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Automatically compile daily activities into professional reports.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/daily-summary">View Summary</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <ClipboardCheck className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Uniform & Equipment Check</CardTitle>
-                <CardDescription>Perform daily uniform and equipment inspection.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <ClipboardCheck className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Uniform & Equipment Check</CardTitle>
             </div>
+            <CardDescription className="text-xs">Perform daily uniform and equipment inspection.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              A comprehensive checklist to ensure all security personnel are properly equipped with uniform and safety equipment before their shift.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Comprehensive checklist to ensure proper equipment before shifts.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/uniform-check">Start Check</Link>
             </Button>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Clock className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Break Time Checker</CardTitle>
-                <CardDescription>Check when your next break is scheduled.</CardDescription>
-              </div>
+
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Break Time Checker</CardTitle>
             </div>
+            <CardDescription className="text-xs">Check when your next break is scheduled.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Instantly check if you're currently on break or find out when your next break starts using the shift rota data.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Instantly check break times using shift rota data.
             </p>
-            <Button asChild className="w-full">
-              <Link to="/break-checker">Check Break Times</Link>
+            <Button asChild className="w-full" size="sm">
+              <Link to="/break-checker">Check Breaks</Link>
             </Button>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Radio className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Radio & Handover Tracker</CardTitle>
-                <CardDescription>Log radio tests and shift handovers.</CardDescription>
-              </div>
+
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Radio className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Radio & Handover Tracker</CardTitle>
             </div>
+            <CardDescription className="text-xs">Log radio tests and shift handovers.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Track completion of essential shift activities: radio functionality tests and handover briefings between guards.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Track radio functionality tests and handover briefings.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/radio-handover">Log Actions</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <UserCheck className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Visitor Access Log</CardTitle>
-                <CardDescription>Record visitor check-in and check-out times.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <UserCheck className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Visitor Access Log</CardTitle>
             </div>
+            <CardDescription className="text-xs">Record visitor check-in and check-out times.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Log all visitors entering and leaving the premises with photos and escort information for security tracking.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Log all visitors with photos and escort information.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/visitor-form">Log Visitor</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <GraduationCap className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Training Dashboard</CardTitle>
-                <CardDescription>Track training records and certifications.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <GraduationCap className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Training Dashboard</CardTitle>
             </div>
+            <CardDescription className="text-xs">Track training records and certifications.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Monitor guard training records, certification expiry dates, and ensure compliance with required training standards.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Monitor guard training records and certification expiry dates.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/training-dashboard">View Training</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Calendar className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Rota Builder</CardTitle>
-                <CardDescription>Create and manage shift schedules.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Rota Builder</CardTitle>
             </div>
+            <CardDescription className="text-xs">Create and manage shift schedules.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Supervisor tool to create, edit, and manage shift assignments for all security personnel with flexible scheduling options.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Supervisor tool to create and manage shift assignments.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/rota-builder">Manage Rota</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Users className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Shift Confirmation</CardTitle>
-                <CardDescription>Confirm or decline assigned shifts.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Shift Confirmation</CardTitle>
             </div>
+            <CardDescription className="text-xs">Confirm or decline assigned shifts.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Guards can view their assigned shifts and confirm availability or decline shifts they cannot work, helping maintain staffing levels.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Guards can view and confirm availability for assigned shifts.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/shift-confirm">View My Shifts</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <BarChart3 className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Rota Dashboard</CardTitle>
-                <CardDescription>Monitor shift confirmations and coverage.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Rota Dashboard</CardTitle>
             </div>
+            <CardDescription className="text-xs">Monitor shift confirmations and coverage.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Real-time overview of shift confirmations, pending responses, and staffing gaps to ensure adequate security coverage.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Real-time overview of shift confirmations and staffing gaps.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/rota-dashboard">View Dashboard</Link>
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <AlertTriangle className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">No-Show Dashboard</CardTitle>
-                <CardDescription>Monitor guards who fail to check in.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">No-Show Dashboard</CardTitle>
             </div>
+            <CardDescription className="text-xs">Monitor guards who fail to check in.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Automatically track and alert when guards don't check in for their shifts within the grace period, helping ensure coverage.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Track and alert when guards don't check in for shifts.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/no-show-dashboard">View Alerts</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Settings className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Instruction Generator</CardTitle>
-                <CardDescription>Convert SOPs into chatbot topics.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Settings className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Instruction Generator</CardTitle>
             </div>
+            <CardDescription className="text-xs">Convert SOPs into chatbot topics.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Supervisor tool to convert raw standard operating procedure text into structured chatbot knowledge base topics using AI.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Convert SOPs into structured chatbot knowledge base topics.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/instruction-generator">Generate Instructions</Link>
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Shield className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Admin Tools</CardTitle>
-                <CardDescription>Manually trigger background scripts.</CardDescription>
-              </div>
+        <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-6 h-6 text-primary" />
+              <CardTitle className="text-sm font-semibold">Admin Tools</CardTitle>
             </div>
+            <CardDescription className="text-xs">Manually trigger background scripts.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Administrator dashboard to manually run and monitor background security scripts including KPI tracking, daily summaries, and compliance checks.
+          <CardContent className="pt-0">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Administrator dashboard to run and monitor background scripts.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full" size="sm">
               <Link to="/admin-tools">Open Admin Tools</Link>
             </Button>
           </CardContent>
