@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,23 +13,23 @@ const Index = () => {
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
-        <h1 className="text-3xl font-bold tracking-tighter mb-1 text-gradient-cyber">Pharrrocore</h1>
-        <p className="text-base text-muted-foreground font-neural">Advanced AI Security Management</p>
+        <h1 className="text-3xl font-bold tracking-tighter mb-1 text-gradient-primary">Pharrrocore</h1>
+        <p className="text-base text-muted-foreground">Advanced AI Security Management</p>
       </header>
       
       <main className="flex-1 overflow-hidden">
         <Tabs defaultValue="daily-ops" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-4 mb-4 flex-shrink-0 glass-neural">
-            <TabsTrigger value="daily-ops" className="glass-button">Daily Operations</TabsTrigger>
-            <TabsTrigger value="ai-tools" className="glass-button">AI Tools</TabsTrigger>
-            <TabsTrigger value="management" className="glass-button">Management</TabsTrigger>
-            <TabsTrigger value="admin" className="glass-button">Admin</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 mb-4 flex-shrink-0 guard-tabs">
+            <TabsTrigger value="daily-ops" className="guard-tab">Daily Operations</TabsTrigger>
+            <TabsTrigger value="ai-tools" className="guard-tab">AI Tools</TabsTrigger>
+            <TabsTrigger value="management" className="guard-tab">Management</TabsTrigger>
+            <TabsTrigger value="admin" className="guard-tab">Admin</TabsTrigger>
           </TabsList>
           
           <div className="flex-1 overflow-hidden">
             <TabsContent value="daily-ops" className="h-full overflow-auto">
               <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-7xl mx-auto">
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <ClipboardList className="w-6 h-6 text-primary" />
@@ -40,13 +41,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Digital log for security personnel to record events and patrols.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/edob">Open EDOB</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <ClipboardCheck className="w-6 h-6 text-primary" />
@@ -58,13 +59,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Comprehensive checklist to ensure proper equipment before shifts.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/uniform-check">Start Check</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="w-6 h-6 text-primary" />
@@ -76,13 +77,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Instantly check break times and coverage using shift rota data and schedules.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/break-checker">Check Breaks</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Radio className="w-6 h-6 text-primary" />
@@ -94,13 +95,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Track radio functionality tests and handover briefings.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/radio-handover">Log Actions</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <UserCheck className="w-6 h-6 text-primary" />
@@ -112,13 +113,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Log all visitors with photos and escort information.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/visitor-form">Log Visitor</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Users className="w-6 h-6 text-primary" />
@@ -130,7 +131,7 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Guards can view and confirm availability for assigned shifts.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/shift-confirm">View My Shifts</Link>
                     </Button>
                   </CardContent>
@@ -140,7 +141,7 @@ const Index = () => {
 
             <TabsContent value="ai-tools" className="h-full overflow-auto">
               <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-7xl mx-auto">
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText className="w-6 h-6 text-primary" />
@@ -152,13 +153,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Use text, voice, or file uploads to create detailed, AI-enhanced incident reports.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/incident-reporting">Start Report</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Bot className="w-6 h-6 text-primary" />
@@ -170,13 +171,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Get instant information about schedules, patrol routes, and safety manuals.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/assignment-instructions">Open Chatbot</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <PenTool className="w-6 h-6 text-primary" />
@@ -188,13 +189,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Create customized security tender proposals using AI assistance.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/tender-writer">Write Tender</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Mail className="w-6 h-6 text-primary" />
@@ -206,13 +207,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Transform quick notes into professional emails with proper formatting.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/email-formatter">Format Email</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <BookOpen className="w-6 h-6 text-primary" />
@@ -224,13 +225,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Automatically compile daily activities into professional reports.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/daily-summary">View Summary</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Settings className="w-6 h-6 text-primary" />
@@ -242,7 +243,7 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Convert SOPs into structured chatbot knowledge base topics.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/instruction-generator">Generate Instructions</Link>
                     </Button>
                   </CardContent>
@@ -252,7 +253,7 @@ const Index = () => {
 
             <TabsContent value="management" className="h-full overflow-auto">
               <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-7xl mx-auto">
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-6 h-6 text-primary" />
@@ -264,13 +265,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Supervisor tool to create and manage shift assignments.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/rota-builder">Manage Rota</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <BarChart3 className="w-6 h-6 text-primary" />
@@ -282,13 +283,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Real-time overview of shift confirmations and staffing gaps.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/rota-dashboard">View Dashboard</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <GraduationCap className="w-6 h-6 text-primary" />
@@ -300,13 +301,13 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Monitor guard training records and certification expiry dates.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/training-dashboard">View Training</Link>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="w-6 h-6 text-primary" />
@@ -318,7 +319,7 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Track and alert when guards don't check in for shifts.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/no-show-dashboard">View Alerts</Link>
                     </Button>
                   </CardContent>
@@ -328,7 +329,7 @@ const Index = () => {
 
             <TabsContent value="admin" className="h-full overflow-auto">
               <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-7xl mx-auto">
-                <Card className="glass-card h-fit">
+                <Card className="guard-card h-fit">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-2">
                       <Shield className="w-6 h-6 text-primary" />
@@ -340,7 +341,7 @@ const Index = () => {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Administrator dashboard to run and monitor background scripts.
                     </p>
-                    <Button asChild className="w-full glass-button" size="sm">
+                    <Button asChild className="w-full guard-button" size="sm">
                       <Link to="/admin-tools">Open Admin Tools</Link>
                     </Button>
                   </CardContent>
