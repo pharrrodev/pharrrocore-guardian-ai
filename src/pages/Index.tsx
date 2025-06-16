@@ -1,7 +1,8 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap, AlertTriangle, BookOpen, Mail, PenTool } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap, AlertTriangle, BookOpen, Mail, PenTool, Shield } from "lucide-react";
 
 const Index = () => {
   return (
@@ -325,6 +326,26 @@ const Index = () => {
             </p>
             <Button asChild className="w-full">
               <Link to="/instruction-generator">Generate Instructions</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Shield className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Admin Tools</CardTitle>
+                <CardDescription>Manually trigger background scripts.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Administrator dashboard to manually run and monitor background security scripts including KPI tracking, daily summaries, and compliance checks.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/admin-tools">Open Admin Tools</Link>
             </Button>
           </CardContent>
         </Card>
