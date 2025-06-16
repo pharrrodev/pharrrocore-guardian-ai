@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Download, Loader2 } from "lucide-react";
+import { FileText, Download, Loader2, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Link } from "react-router-dom";
 
 const TenderWriter = () => {
   const [formData, setFormData] = useState({
@@ -88,19 +88,34 @@ const TenderWriter = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Compact Header */}
-      <header className="text-center py-4 border-b">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <FileText className="w-8 h-8 text-primary" />
-          <h1 className="text-2xl font-bold">Tender Writer</h1>
+      {/* Compact Header with Home Button */}
+      <header className="flex items-center justify-between p-4 border-b">
+        <Button
+          asChild
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+        >
+          <Link to="/">
+            <Home className="w-5 h-5" />
+          </Link>
+        </Button>
+        
+        <div className="text-center flex-1">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <FileText className="w-6 h-6 text-primary" />
+            <h1 className="text-xl font-bold">Tender Writer</h1>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Generate professional security tender documents with AI assistance
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Generate professional security tender documents with AI assistance
-        </p>
+        
+        <div className="w-10"></div> {/* Spacer for balance */}
       </header>
 
       {/* Scrollable Content */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-hidden">
         <ScrollArea className="h-full">
           <Card className="max-w-4xl mx-auto">
             <CardHeader className="pb-4">
