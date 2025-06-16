@@ -29,7 +29,7 @@ const Index = () => {
           <div className="flex-1 overflow-hidden">
             <TabsContent value="daily-ops" className="h-full overflow-auto">
               <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <ClipboardList className="w-8 h-8 text-primary" />
@@ -37,8 +37,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Log all site activities and observations.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Digital log for security personnel to record events and patrols.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -47,7 +47,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <ClipboardCheck className="w-8 h-8 text-primary" />
@@ -55,8 +55,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Perform daily uniform and equipment inspection.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Comprehensive checklist to ensure proper equipment before shifts.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -65,7 +65,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Clock className="w-8 h-8 text-primary" />
@@ -73,8 +73,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Check when your next break is scheduled.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Instantly check break times and coverage using shift rota data and schedules.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -83,7 +83,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Radio className="w-8 h-8 text-primary" />
@@ -91,8 +91,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Log radio tests and shift handovers.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Track radio functionality tests and handover briefings.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -101,7 +101,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <UserCheck className="w-8 h-8 text-primary" />
@@ -109,8 +109,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Record visitor check-in and check-out times.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Log all visitors with photos and escort information.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -119,7 +119,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Users className="w-8 h-8 text-primary" />
@@ -127,8 +127,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Confirm or decline assigned shifts.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Guards can view and confirm availability for assigned shifts.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -141,7 +141,7 @@ const Index = () => {
 
             <TabsContent value="ai-tools" className="h-full overflow-auto">
               <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <FileText className="w-8 h-8 text-primary" />
@@ -149,8 +149,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Guided 7-step wizard to report incidents.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Use text, voice, or file uploads to create detailed, AI-enhanced incident reports.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -159,7 +159,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Bot className="w-8 h-8 text-primary" />
@@ -167,8 +167,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Interactive chatbot for site procedures.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Get instant information about schedules, patrol routes, and safety manuals.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -177,7 +177,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <PenTool className="w-8 h-8 text-primary" />
@@ -185,8 +185,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Generate professional tender documents with AI.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Create customized security tender proposals using AI assistance.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -195,7 +195,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Mail className="w-8 h-8 text-primary" />
@@ -203,8 +203,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Convert shorthand to professional emails.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Transform quick notes into professional emails with proper formatting.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -213,7 +213,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <BookOpen className="w-8 h-8 text-primary" />
@@ -221,8 +221,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Generate comprehensive daily reports.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Automatically compile daily activities into professional reports.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -231,7 +231,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Settings className="w-8 h-8 text-primary" />
@@ -239,8 +239,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Convert SOPs into chatbot topics.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Convert SOPs into structured chatbot knowledge base topics.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -253,7 +253,7 @@ const Index = () => {
 
             <TabsContent value="management" className="h-full overflow-auto">
               <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Calendar className="w-8 h-8 text-primary" />
@@ -261,8 +261,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Create and manage shift schedules.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Supervisor tool to create and manage shift assignments.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -271,7 +271,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <BarChart3 className="w-8 h-8 text-primary" />
@@ -279,8 +279,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Monitor shift confirmations and coverage.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Real-time overview of shift confirmations and staffing gaps.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -289,7 +289,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <GraduationCap className="w-8 h-8 text-primary" />
@@ -297,8 +297,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Track training records and certifications.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Monitor guard training records and certification expiry dates.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -307,7 +307,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <AlertTriangle className="w-8 h-8 text-primary" />
@@ -315,8 +315,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Monitor guards who fail to check in.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Track and alert when guards don't check in for shifts.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
@@ -329,7 +329,7 @@ const Index = () => {
 
             <TabsContent value="admin" className="h-full overflow-auto">
               <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-                <Card className="guard-card h-fit">
+                <Card className="guard-card h-[240px]">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Shield className="w-8 h-8 text-primary" />
@@ -337,8 +337,8 @@ const Index = () => {
                     </div>
                     <CardDescription className="text-sm">Manually trigger background scripts.</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="mb-4 text-sm text-muted-foreground">
+                  <CardContent className="pt-0 flex flex-col justify-between h-[132px]">
+                    <p className="text-sm text-muted-foreground">
                       Administrator dashboard to run and monitor background scripts.
                     </p>
                     <Button asChild className="w-full guard-button" size="default">
