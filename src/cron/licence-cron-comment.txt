@@ -1,0 +1,74 @@
+
+# Licence Expiry Checker Cron Job Setup
+
+This file explains how to set up automated licence expiry checking for security guard licences.
+
+## Purpose
+Check all security guard licences monthly and generate alerts for any licences expiring within 60 days.
+
+## Cron Schedule
+```bash
+# Run licence expiry checker on the 1st of every month at 09:00
+0 9 1 * * /path/to/node /path/to/your/project/dist/scripts/licenceChecker.js
+```
+
+## Alternative Scheduling Options
+
+### Using PM2 (Recommended for Node.js apps)
+```bash
+pm2 start ecosystem.config.js
+```
+
+Where ecosystem.config.js contains:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'licence-expiry-checker',
+    script: './dist/scripts/licenceChecker.js',
+    cron_restart: '0 9 1 * *',
+    watch: false,
+    autorestart: false
+  }]
+}
+```
+
+### Using systemd timer (Linux)
+Create a service file and timer to run the licence checker on the 1st of every month at 09:00.
+
+### Manual Testing
+You can manually trigger the licence checker by running:
+```bash
+node dist/scripts/licenceChecker.js
+```
+
+## Data Sources
+The script reads from:
+- `/data/licences.csv` (Master licence database)
+
+## Alert Generation
+- Checks for licences expiring within 60 days
+- Generates alerts with remaining days calculation
+- Saves alerts to `/logs/licenceAlerts.csv`
+
+## Output Files
+- **Alerts Log**: `/logs/licenceAlerts.csv`
+
+## Alert Severity Levels
+- **Yellow Alert**: 30-60 days until expiry
+- **Red Alert**: Less than 30 days until expiry
+
+## Email Notifications
+- Placeholder for future email notification system
+- Will notify relevant personnel of expiring licences
+- Can be integrated with existing email infrastructure
+
+## Error Handling
+- Missing licence data: Script continues with warning
+- Invalid date formats: Skipped with log entry
+- File access issues: Logged for system administrator review
+
+## Monitoring and Maintenance
+- Console logs track successful runs
+- Alert generation statistics
+- Failed runs can trigger system notifications
+- Monthly summary reports available

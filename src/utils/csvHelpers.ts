@@ -183,5 +183,29 @@ export const appendCSVRow = (filePath: string, rowData: string[]): void => {
   console.log(`Appending to ${filePath}: ${csvRow}`);
   
   // In a real implementation, this would append to the actual CSV file
-  // For now, just log the operation
+  // For now, we'll simulate by maintaining CSV content in localStorage
+  try {
+    const existingContent = localStorage.getItem(filePath) || '';
+    const isFirstRow = !existingContent;
+    
+    let newContent = existingContent;
+    if (!isFirstRow) {
+      newContent += '\n';
+    }
+    newContent += csvRow;
+    
+    localStorage.setItem(filePath, newContent);
+  } catch (error) {
+    console.error(`Error appending to ${filePath}:`, error);
+  }
+};
+
+// Function to read CSV content
+export const readCSV = (filePath: string): string => {
+  try {
+    return localStorage.getItem(filePath) || '';
+  } catch (error) {
+    console.error(`Error reading ${filePath}:`, error);
+    return '';
+  }
 };

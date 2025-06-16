@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,7 @@ import NoShowDashboard from "./pages/NoShowDashboard";
 import DailySummary from "./pages/DailySummary";
 import EmailFormatter from "./pages/EmailFormatter";
 import ReportsList from "./pages/ReportsList";
+import LicenceDashboard from "./pages/LicenceDashboard";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +55,7 @@ const App = () => (
             <Route path="/daily-summary" element={<DailySummary />} />
             <Route path="/email-formatter" element={<EmailFormatter />} />
             <Route path="/reports-list" element={<ReportsList />} />
+            <Route path="/licence-dashboard" element={<LicenceDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
