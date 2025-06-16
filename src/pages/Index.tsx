@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -122,6 +122,66 @@ const Index = () => {
             </p>
             <Button asChild className="w-full">
               <Link to="/radio-handover">Log Actions</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Calendar className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Rota Builder</CardTitle>
+                <CardDescription>Create and manage shift schedules.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Supervisor tool to create, edit, and manage shift assignments for all security personnel with flexible scheduling options.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/rota-builder">Manage Rota</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Users className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Shift Confirmation</CardTitle>
+                <CardDescription>Confirm or decline assigned shifts.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Guards can view their assigned shifts and confirm availability or decline shifts they cannot work, helping maintain staffing levels.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/shift-confirm">View My Shifts</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <BarChart3 className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Rota Dashboard</CardTitle>
+                <CardDescription>Monitor shift confirmations and coverage.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Real-time overview of shift confirmations, pending responses, and staffing gaps to ensure adequate security coverage.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/rota-dashboard">View Dashboard</Link>
             </Button>
           </CardContent>
         </Card>

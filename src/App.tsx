@@ -14,6 +14,9 @@ import UniformCheck from "./pages/UniformCheck";
 import BreakChecker from "./pages/BreakChecker";
 import RadioHandover from "./pages/RadioHandover";
 import RadioHandoverLog from "./pages/RadioHandoverLog";
+import RotaBuilder from "./pages/RotaBuilder";
+import ShiftConfirm from "./pages/ShiftConfirm";
+import RotaDashboard from "./pages/RotaDashboard";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +36,9 @@ const App = () => (
             <Route path="/break-checker" element={<BreakChecker />} />
             <Route path="/radio-handover" element={<RadioHandover />} />
             <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
+            <Route path="/rota-builder" element={<RotaBuilder />} />
+            <Route path="/shift-confirm" element={<ShiftConfirm />} />
+            <Route path="/rota-dashboard" element={<RotaDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
