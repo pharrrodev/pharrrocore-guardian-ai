@@ -46,24 +46,27 @@ export const generateDailySummary = async (): Promise<string> => {
 };
 
 const loadTodaysData = async (today: string): Promise<DailySummaryData> => {
+  console.log('Loading data for date:', today);
+  
   // Load EDOB entries (stored in localStorage as JSON)
   const edobEntries = getEdobEntriesForDate(today);
+  console.log('EDOB entries loaded:', edobEntries.length);
   
   // Load incident reports (if any exist)
   const incidents = getIncidentsForDate(today);
+  console.log('Incidents loaded:', incidents.length);
   
   // Load visitor logs for today
   const visitors = getTodaysVisitorLogs();
+  console.log('Visitors loaded:', visitors.length);
   
-  // Load shift start logs - now properly handling CSV format
-  const allShiftLogs = getLogsFromStorage('logs/shiftStart.csv');
-  const shiftLogs = allShiftLogs.filter(log => {
-    const logDate = dayjs(log.timestamp).format('YYYY-MM-DD');
-    return logDate === today && log.action === 'Shift Start';
-  });
+  // Load shift start logs - properly handle CSV format
+  const shiftLogs = getShiftLogsForDate(today);
+  console.log('Shift logs loaded:', shiftLogs.length);
   
   // Load no-show alerts - now properly handling JSON format
   const noShowAlerts = getNoShowAlertsForDate(today);
+  console.log('No-show alerts loaded:', noShowAlerts.length);
   
   return {
     date: today,
@@ -73,6 +76,65 @@ const loadTodaysData = async (today: string): Promise<DailySummaryData> => {
     shiftLogs,
     noShowAlerts
   };
+};
+
+const getShiftLogsForDate = (date: string): any[] => {
+  try {
+    console.log('Loading shift logs for date:', date);
+    const csvData = localStorage.getItem('logs/shiftStart.csv');
+    
+    if (!csvData) {
+      console.log('No shift start CSV data found');
+      return [];
+    }
+    
+    console.log('Raw shift start CSV:', csvData);
+    
+    const lines = csvData.trim().split('\n');
+    if (lines.length <= 1) {
+      console.log('No data rows in shift start CSV');
+      return [];
+    }
+    
+    const logs = lines.slice(1).map((line, index) => {
+      console.log(`Processing shift log line ${index + 1}:`, line);
+      
+      const parts = line.split(',');
+      if (parts.length < 5) {
+        console.warn('Malformed shift log CSV line:', line);
+        return null;
+      }
+      
+      const [id, guardId, guardName, action, timestamp] = parts.map(p => p?.trim() || '');
+      
+      console.log('Parsed shift log parts:', { id, guardId, guardName, action, timestamp });
+      
+      if (action !== 'Shift Start') {
+        return null;
+      }
+      
+      const logDate = dayjs(timestamp).format('YYYY-MM-DD');
+      console.log(`Shift log date: ${logDate}, looking for: ${date}`);
+      
+      if (logDate === date) {
+        return {
+          id,
+          guardId,
+          guardName,
+          action,
+          timestamp
+        };
+      }
+      
+      return null;
+    }).filter(log => log !== null);
+    
+    console.log('Filtered shift logs for date:', logs);
+    return logs;
+  } catch (error) {
+    console.error('Error loading shift logs:', error);
+    return [];
+  }
 };
 
 const getEdobEntriesForDate = (date: string): any[] => {
@@ -109,10 +171,10 @@ const getIncidentsForDate = (date: string): any[] => {
 
 const getNoShowAlertsForDate = (date: string): any[] => {
   try {
-    const stored = localStorage.getItem('logs/noShowAlerts.csv');
+    const stored = localStorage.getItem('logs/noShowAlerts.json');
     if (!stored) return [];
     
-    // No-show alerts are stored as JSON, not CSV despite the filename
+    // No-show alerts are stored as JSON
     const alerts = JSON.parse(stored);
     return alerts.filter((alert: any) => {
       const alertDate = dayjs(alert.alertTime).format('YYYY-MM-DD');
