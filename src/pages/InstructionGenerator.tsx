@@ -6,11 +6,11 @@ import { Home, FileText, Plus, Save, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { generateInstructions } from "@/api/instruction-generate";
 import { saveInstructions } from "@/api/instruction-save";
 import { Topic } from "@/data/assignmentTopics";
+import TopicSelector from "@/components/TopicSelector";
 
 const InstructionGenerator = () => {
   const [rawText, setRawText] = useState("");
@@ -102,21 +102,14 @@ const InstructionGenerator = () => {
                 Generate New Topics
               </CardTitle>
               <CardDescription>
-                Paste your raw SOP text and specify a parent topic label
+                Select an existing topic to update or create a new one, then paste your raw SOP text
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label htmlFor="parent-label" className="text-sm font-medium mb-2 block">
-                  Parent Topic Label
-                </label>
-                <Input
-                  id="parent-label"
-                  placeholder="e.g., Fire Safety Procedures"
-                  value={parentLabel}
-                  onChange={(e) => setParentLabel(e.target.value)}
-                />
-              </div>
+              <TopicSelector 
+                value={parentLabel}
+                onChange={setParentLabel}
+              />
 
               <div>
                 <label htmlFor="raw-text" className="text-sm font-medium mb-2 block">
