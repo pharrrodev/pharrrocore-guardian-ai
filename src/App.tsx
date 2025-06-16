@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/theme-provider";
 import IncidentReport from "./pages/IncidentReport";
 import AssignmentInstructions from "./pages/AssignmentInstructions";
+import InstructionGenerator from "./pages/InstructionGenerator";
 import EDOB from "./pages/EDOB";
 import UniformCheck from "./pages/UniformCheck";
 import BreakChecker from "./pages/BreakChecker";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/incident-reporting" element={<IncidentReport />} />
             <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
+            <Route path="/instruction-generator" element={<InstructionGenerator />} />
             <Route path="/edob" element={<EDOB />} />
             <Route path="/uniform-check" element={<UniformCheck />} />
             <Route path="/break-checker" element={<BreakChecker />} />
