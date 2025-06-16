@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, Users, BarChart3, UserCheck, Settings, GraduationCap, AlertTriangle, BookOpen, Mail, PenTool, Shield } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { HomeButton } from "@/components/HomeButton";
 
 const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-background p-4 overflow-hidden">
       <header className="text-center mb-6 flex-shrink-0 relative">
+        <div className="absolute top-0 left-0">
+          <HomeButton />
+        </div>
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
