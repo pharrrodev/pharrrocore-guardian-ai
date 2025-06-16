@@ -6,7 +6,7 @@ export interface RadioHandoverLogEntry {
   guardId: string;
   guardName: string;
   timestamp: string;
-  action: 'radio' | 'handover';
+  action: 'radio' | 'handover' | 'Shift Start';
 }
 
 // In a real app, this would write to an actual CSV file
