@@ -1,0 +1,84 @@
+
+# Daily Security Summary Cron Job Setup
+
+This file explains how to set up automated daily summary generation for the security management system.
+
+## Purpose
+Generate a comprehensive daily security summary report at the end of each shift, compiling all activities, incidents, visitors, and alerts into a single text report.
+
+## Cron Schedule
+```bash
+# Run daily summary generation at 23:55 (5 minutes before midnight)
+55 23 * * * /path/to/node /path/to/your/project/dist/scripts/dailySummary.js
+```
+
+## Alternative Scheduling Options
+
+### Using PM2 (Recommended for Node.js apps)
+```bash
+pm2 start ecosystem.config.js
+```
+
+Where ecosystem.config.js contains:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'daily-summary-generator',
+    script: './dist/scripts/dailySummary.js',
+    cron_restart: '55 23 * * *',
+    watch: false,
+    autorestart: false
+  }]
+}
+```
+
+### Using systemd timer (Linux)
+Create a service file and timer to run the summary generation at 23:55 daily.
+
+### Manual Testing
+You can manually trigger the daily summary generation by running:
+```bash
+node dist/scripts/dailySummary.js
+```
+
+## Environment Variables
+- `VITE_OPENAI_API_KEY`: OpenAI API key for GPT-4 summary generation (optional - will use template fallback if missing)
+
+## Data Sources
+The script automatically compiles data from:
+- logs/edob.csv (Electronic Daily Occurrence Book entries)
+- logs/incidentLog.csv (Security incident reports)
+- logs/visitorLog.csv (Visitor check-in/check-out records)
+- logs/shiftStart.csv (Guard shift start logs)
+- logs/noShowAlerts.csv (No-show alerts)
+
+## Output Location
+- Reports are saved to: `/reports/summary-YYYY-MM-DD.txt`
+- Each report contains a comprehensive summary of the day's security activities
+- Reports can be accessed programmatically or through the file system
+
+## Report Content
+Each daily summary includes:
+- Shift overview and guard activities
+- Patrol activities and routes covered
+- Security incidents and responses
+- Visitor management summary
+- Alert notifications and issues
+- Overall security status assessment
+
+## GPT-4 Integration
+If OpenAI API key is provided:
+- Uses GPT-4 to generate professional, contextual summaries
+- Automatically falls back to structured template if API fails
+- Customizable prompts for different summary styles
+
+## Monitoring
+- Console logs provide status updates and error reporting
+- Failed generations automatically fall back to template format
+- All reports include generation timestamp for audit trails
+
+## Integration Notes
+- Works seamlessly with existing security management tools
+- No database dependencies - reads directly from CSV logs
+- Lightweight and efficient for daily automated execution
+- Compatible with both development and production environments
