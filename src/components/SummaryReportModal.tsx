@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -84,7 +83,7 @@ const SummaryReportModal = ({ isOpen, onClose, summaryContent, selectedDate }: S
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[95vh] flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="flex items-center justify-between text-2xl">
             <div className="flex items-center gap-3">
@@ -113,32 +112,34 @@ const SummaryReportModal = ({ isOpen, onClose, summaryContent, selectedDate }: S
         </DialogHeader>
         
         <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-6 py-4">
+          <div className="py-4">
             {formattedSections.length > 0 ? (
-              formattedSections.map((section, index) => (
-                <div key={index} className="bg-muted/30 rounded-lg p-4 border">
-                  {section.title && (
-                    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-primary">
-                      <FileText className="w-4 h-4" />
-                      {section.title}
-                    </h3>
-                  )}
-                  <div className="space-y-2">
-                    {section.content.map((line, lineIndex) => (
-                      <p key={lineIndex} className="text-sm leading-relaxed text-foreground/90">
-                        {line.startsWith('•') || line.startsWith('-') ? (
-                          <span className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span>{line.replace(/^[•-]\s*/, '')}</span>
-                          </span>
-                        ) : (
-                          line
-                        )}
-                      </p>
-                    ))}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {formattedSections.map((section, index) => (
+                  <div key={index} className="bg-muted/30 rounded-lg p-4 border h-fit">
+                    {section.title && (
+                      <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-primary">
+                        <FileText className="w-4 h-4" />
+                        {section.title}
+                      </h3>
+                    )}
+                    <div className="space-y-2">
+                      {section.content.map((line, lineIndex) => (
+                        <p key={lineIndex} className="text-sm leading-relaxed text-foreground/90">
+                          {line.startsWith('•') || line.startsWith('-') ? (
+                            <span className="flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{line.replace(/^[•-]\s*/, '')}</span>
+                            </span>
+                          ) : (
+                            line
+                          )}
+                        </p>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="text-center py-12">
                 <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
