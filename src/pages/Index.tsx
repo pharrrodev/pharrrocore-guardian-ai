@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +5,12 @@ import { FileText, Bot, ClipboardList, ClipboardCheck, Clock, Radio, Calendar, U
 
 const Index = () => {
   return (
-    <div className="h-screen flex flex-col bg-background p-4 overflow-hidden">
-      <header className="text-center mb-6">
-        <h1 className="text-4xl font-bold tracking-tighter mb-1">Pharrrocore</h1>
-        <p className="text-lg text-muted-foreground">Advanced AI Security Management</p>
+    <div className="h-screen flex flex-col bg-background p-3 overflow-hidden">
+      <header className="text-center mb-4 flex-shrink-0">
+        <h1 className="text-3xl font-bold tracking-tighter mb-1">Pharrrocore</h1>
+        <p className="text-base text-muted-foreground">Advanced AI Security Management</p>
       </header>
-      <main className="grid gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 flex-1 overflow-auto max-w-7xl w-full mx-auto">
+      <main className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 flex-1 max-w-7xl w-full mx-auto overflow-hidden">
         <Card className="hover:shadow-lg transition-shadow duration-300 h-fit">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 mb-2">
