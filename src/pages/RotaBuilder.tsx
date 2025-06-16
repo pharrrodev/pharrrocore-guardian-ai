@@ -16,7 +16,13 @@ import { updateRotaData } from '@/api/rota-update';
 
 const RotaBuilder = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [newShift, setNewShift] = useState<Partial<Shift>>({
+  const [newShift, setNewShift] = useState<{
+    guardName: string;
+    date: Date | undefined;
+    startTime: string;
+    endTime: string;
+    position: string;
+  }>({
     guardName: '',
     date: undefined,
     startTime: '',
@@ -39,11 +45,16 @@ const RotaBuilder = () => {
 
     const shift: Shift = {
       id: crypto.randomUUID(),
+      guardId: crypto.randomUUID(), // Generate a guardId
       guardName: newShift.guardName,
       date: newShift.date.toISOString().split('T')[0],
       startTime: newShift.startTime,
       endTime: newShift.endTime,
-      position: newShift.position
+      position: newShift.position,
+      shiftType: 'Day', // Default to Day shift
+      breakTimes: [
+        { breakStart: '12:00', breakEnd: '12:30', breakType: 'Lunch' }
+      ] // Default break time
     };
 
     setShifts([...shifts, shift]);
@@ -102,7 +113,7 @@ const RotaBuilder = () => {
                 <Label htmlFor="guardName">Guard Name</Label>
                 <Input
                   id="guardName"
-                  value={newShift.guardName || ''}
+                  value={newShift.guardName}
                   onChange={(e) => setNewShift({ ...newShift, guardName: e.target.value })}
                   placeholder="Enter guard name"
                 />
@@ -142,7 +153,7 @@ const RotaBuilder = () => {
                 <Label htmlFor="position">Position</Label>
                 <Input
                   id="position"
-                  value={newShift.position || ''}
+                  value={newShift.position}
                   onChange={(e) => setNewShift({ ...newShift, position: e.target.value })}
                   placeholder="e.g., Main Gate, Reception, Patrol"
                 />
