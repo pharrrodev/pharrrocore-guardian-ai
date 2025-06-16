@@ -160,7 +160,7 @@ const RadioHandoverLog = () => {
                       </TableCell>
                       <TableCell>
                         {isRadioTestLate(log) ? (
-                          <span className="text-red-600 font-medium">Late (>5min after shift)</span>
+                          <span className="text-red-600 font-medium">Late (&gt;5min after shift)</span>
                         ) : (
                           <span className="text-green-600 font-medium">On Time</span>
                         )}

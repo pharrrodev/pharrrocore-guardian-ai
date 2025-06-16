@@ -12,6 +12,8 @@ import AssignmentInstructions from "./pages/AssignmentInstructions";
 import EDOB from "./pages/EDOB";
 import UniformCheck from "./pages/UniformCheck";
 import BreakChecker from "./pages/BreakChecker";
+import RadioHandover from "./pages/RadioHandover";
+import RadioHandoverLog from "./pages/RadioHandoverLog";
 
 const queryClient = new QueryClient();
 
