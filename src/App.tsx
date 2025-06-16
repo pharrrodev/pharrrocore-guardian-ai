@@ -22,6 +22,7 @@ import VisitorForm from "./pages/VisitorForm";
 import VisitorLogToday from "./pages/VisitorLogToday";
 import TrainingDashboard from "./pages/TrainingDashboard";
 import NoShowDashboard from "./pages/NoShowDashboard";
+import DailySummary from "./pages/DailySummary";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/visitor-log-today" element={<VisitorLogToday />} />
             <Route path="/training-dashboard" element={<TrainingDashboard />} />
             <Route path="/no-show-dashboard" element={<NoShowDashboard />} />
+            <Route path="/daily-summary" element={<DailySummary />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
