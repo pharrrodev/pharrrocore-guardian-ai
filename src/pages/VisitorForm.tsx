@@ -52,7 +52,10 @@ const VisitorForm = () => {
     setIsSubmitting(true);
     try {
       const response = await submitVisitorLog({
-        ...values,
+        visitorName: values.visitorName,
+        company: values.company,
+        escort: values.escort,
+        mode: values.mode,
         photo: photo || undefined,
       });
 
