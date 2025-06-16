@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import {
   formSchema, 
   FormValues,
   entryTypes,
-  patrolRoutes,
+  getCurrentPatrolRoutes,
   accessTypes,
   alarmZones,
   alarmTypes,
@@ -37,6 +36,7 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
   });
 
   const watchEntryType = form.watch("entryType");
+  const currentPatrolRoutes = getCurrentPatrolRoutes();
 
   const handleFormSubmit = (values: FormValues) => {
     onSubmit(values);
@@ -106,7 +106,7 @@ const EDOBForm = ({ onSubmit }: EDOBFormProps) => {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            {patrolRoutes.map(route => (
+                            {currentPatrolRoutes.map(route => (
                             <SelectItem key={route} value={route}>{route}</SelectItem>
                             ))}
                         </SelectContent>

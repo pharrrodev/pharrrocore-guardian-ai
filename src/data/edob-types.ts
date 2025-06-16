@@ -7,6 +7,24 @@ export const alarmZones = assignmentTopics.find(t => t.id === 'alarm-systems')?.
 export const equipmentToCheck: { id: string; label: string }[] = assignmentTopics.find(t => t.id === 'equipment-checks')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 export const uniformKitItems: { id: string; label: string }[] = assignmentTopics.find(t => t.id === 'uniform-kit-policy')?.subTopics?.map(st => ({ id: st.id, label: st.label })) || [];
 
+// Dynamic function to get current patrol routes (includes newly added ones)
+export const getCurrentPatrolRoutes = () => {
+  const patrolTopics = assignmentTopics.find(t => t.id === 'patrol-routes' || t.label.toLowerCase().includes('patrol'));
+  if (patrolTopics?.subTopics) {
+    return ["Full Patrol", ...patrolTopics.subTopics.map(st => st.label)];
+  }
+  
+  // Also check for any other patrol-related topics that might have been added
+  const allPatrolRoutes = assignmentTopics.reduce((routes: string[], topic) => {
+    if (topic.label.toLowerCase().includes('patrol') && topic.subTopics) {
+      routes.push(...topic.subTopics.map(st => st.label));
+    }
+    return routes;
+  }, ["Full Patrol"]);
+  
+  return [...new Set(allPatrolRoutes)]; // Remove duplicates
+};
+
 export const entryTypes = [
   "Patrol",
   "Incident / Observation",
