@@ -29,6 +29,9 @@ import LicenceDashboard from "./pages/LicenceDashboard";
 import PayrollVariance from "./pages/PayrollVariance";
 import TenderWriter from "./pages/TenderWriter";
 import AdminTools from "./pages/AdminTools";
+import Auth from "./pages/Auth";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -39,33 +42,36 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/incident-reporting" element={<IncidentReport />} />
-            <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
-            <Route path="/instruction-generator" element={<InstructionGenerator />} />
-            <Route path="/edob" element={<EDOB />} />
-            <Route path="/uniform-check" element={<UniformCheck />} />
-            <Route path="/break-checker" element={<BreakChecker />} />
-            <Route path="/radio-handover" element={<RadioHandover />} />
-            <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
-            <Route path="/rota-builder" element={<RotaBuilder />} />
-            <Route path="/shift-confirm" element={<ShiftConfirm />} />
-            <Route path="/rota-dashboard" element={<RotaDashboard />} />
-            <Route path="/visitor-form" element={<VisitorForm />} />
-            <Route path="/visitor-log-today" element={<VisitorLogToday />} />
-            <Route path="/training-dashboard" element={<TrainingDashboard />} />
-            <Route path="/no-show-dashboard" element={<NoShowDashboard />} />
-            <Route path="/daily-summary" element={<DailySummary />} />
-            <Route path="/email-formatter" element={<EmailFormatter />} />
-            <Route path="/reports-list" element={<ReportsList />} />
-            <Route path="/licence-dashboard" element={<LicenceDashboard />} />
-            <Route path="/payroll-variance" element={<PayrollVariance />} />
-            <Route path="/tender-writer" element={<TenderWriter />} />
-            <Route path="/admin-tools" element={<AdminTools />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/incident-reporting" element={<ProtectedRoute><IncidentReport /></ProtectedRoute>} />
+              <Route path="/assignment-instructions" element={<ProtectedRoute><AssignmentInstructions /></ProtectedRoute>} />
+              <Route path="/instruction-generator" element={<ProtectedRoute><InstructionGenerator /></ProtectedRoute>} />
+              <Route path="/edob" element={<ProtectedRoute><EDOB /></ProtectedRoute>} />
+              <Route path="/uniform-check" element={<ProtectedRoute><UniformCheck /></ProtectedRoute>} />
+              <Route path="/break-checker" element={<ProtectedRoute><BreakChecker /></ProtectedRoute>} />
+              <Route path="/radio-handover" element={<ProtectedRoute><RadioHandover /></ProtectedRoute>} />
+              <Route path="/radio-handover-log" element={<ProtectedRoute><RadioHandoverLog /></ProtectedRoute>} />
+              <Route path="/rota-builder" element={<ProtectedRoute><RotaBuilder /></ProtectedRoute>} />
+              <Route path="/shift-confirm" element={<ProtectedRoute><ShiftConfirm /></ProtectedRoute>} />
+              <Route path="/rota-dashboard" element={<ProtectedRoute><RotaDashboard /></ProtectedRoute>} />
+              <Route path="/visitor-form" element={<ProtectedRoute><VisitorForm /></ProtectedRoute>} />
+              <Route path="/visitor-log-today" element={<ProtectedRoute><VisitorLogToday /></ProtectedRoute>} />
+              <Route path="/training-dashboard" element={<ProtectedRoute><TrainingDashboard /></ProtectedRoute>} />
+              <Route path="/no-show-dashboard" element={<ProtectedRoute><NoShowDashboard /></ProtectedRoute>} />
+              <Route path="/daily-summary" element={<ProtectedRoute><DailySummary /></ProtectedRoute>} />
+              <Route path="/email-formatter" element={<ProtectedRoute><EmailFormatter /></ProtectedRoute>} />
+              <Route path="/reports-list" element={<ProtectedRoute><ReportsList /></ProtectedRoute>} />
+              <Route path="/licence-dashboard" element={<ProtectedRoute><LicenceDashboard /></ProtectedRoute>} />
+              <Route path="/payroll-variance" element={<ProtectedRoute><PayrollVariance /></ProtectedRoute>} />
+              <Route path="/tender-writer" element={<ProtectedRoute><TenderWriter /></ProtectedRoute>} />
+              <Route path="/admin-tools" element={<ProtectedRoute><AdminTools /></ProtectedRoute>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
