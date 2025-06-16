@@ -17,6 +17,8 @@ import RadioHandoverLog from "./pages/RadioHandoverLog";
 import RotaBuilder from "./pages/RotaBuilder";
 import ShiftConfirm from "./pages/ShiftConfirm";
 import RotaDashboard from "./pages/RotaDashboard";
+import VisitorForm from "./pages/VisitorForm";
+import VisitorLogToday from "./pages/VisitorLogToday";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,8 @@ const App = () => (
             <Route path="/rota-builder" element={<RotaBuilder />} />
             <Route path="/shift-confirm" element={<ShiftConfirm />} />
             <Route path="/rota-dashboard" element={<RotaDashboard />} />
+            <Route path="/visitor-form" element={<VisitorForm />} />
+            <Route path="/visitor-log-today" element={<VisitorLogToday />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
