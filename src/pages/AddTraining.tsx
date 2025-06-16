@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
 import dayjs from 'dayjs';
 
@@ -17,8 +18,8 @@ interface AddTrainingProps {
 interface TrainingFormData {
   guardName: string;
   courseName: string;
-  completedDate: string;
-  expiresDate: string;
+  completedDate?: Date;
+  expiresDate?: Date;
 }
 
 // Predefined list of guards - in a real app this would come from a database
@@ -41,11 +42,11 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
   const [formData, setFormData] = useState<TrainingFormData>({
     guardName: '',
     courseName: '',
-    completedDate: '',
-    expiresDate: ''
+    completedDate: undefined,
+    expiresDate: undefined
   });
 
-  const handleInputChange = (field: keyof TrainingFormData, value: string) => {
+  const handleInputChange = (field: keyof TrainingFormData, value: string | Date | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -77,7 +78,7 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
       return records.some((record: any) => 
         record.guardName.toLowerCase() === formData.guardName.toLowerCase() &&
         record.courseName.toLowerCase() === formData.courseName.toLowerCase() &&
-        record.expiresDate === formData.expiresDate
+        dayjs(record.expiresDate).isSame(dayjs(formData.expiresDate), 'day')
       );
     } catch {
       return false;
@@ -109,12 +110,19 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
     setLoading(true);
 
     try {
+      const submitData = {
+        guardName: formData.guardName,
+        courseName: formData.courseName,
+        completedDate: dayjs(formData.completedDate).format('YYYY-MM-DD'),
+        expiresDate: dayjs(formData.expiresDate).format('YYYY-MM-DD')
+      };
+
       const response = await fetch('/api/training-add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
 
       if (response.ok) {
@@ -128,8 +136,8 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
           setFormData({
             guardName: '',
             courseName: '',
-            completedDate: '',
-            expiresDate: ''
+            completedDate: undefined,
+            expiresDate: undefined
           });
           
           onRecordAdded();
@@ -156,8 +164,8 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
       setFormData({
         guardName: '',
         courseName: '',
-        completedDate: '',
-        expiresDate: ''
+        completedDate: undefined,
+        expiresDate: undefined
       });
       onClose();
     }
@@ -201,22 +209,20 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
 
           <div className="space-y-2">
             <Label htmlFor="completedDate">Completed Date</Label>
-            <Input
-              id="completedDate"
-              type="date"
+            <DatePicker
               value={formData.completedDate}
-              onChange={(e) => handleInputChange('completedDate', e.target.value)}
+              onChange={(date) => handleInputChange('completedDate', date)}
+              placeholder="Select completed date"
               disabled={loading}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="expiresDate">Expires Date</Label>
-            <Input
-              id="expiresDate"
-              type="date"
+            <DatePicker
               value={formData.expiresDate}
-              onChange={(e) => handleInputChange('expiresDate', e.target.value)}
+              onChange={(date) => handleInputChange('expiresDate', date)}
+              placeholder="Select expires date"
               disabled={loading}
             />
           </div>
