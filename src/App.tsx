@@ -11,7 +11,6 @@ import IncidentReport from "./pages/IncidentReport";
 import AssignmentInstructions from "./pages/AssignmentInstructions";
 import EDOB from "./pages/EDOB";
 import UniformCheck from "./pages/UniformCheck";
-import EquipmentCheck from "./pages/EquipmentCheck";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +27,6 @@ const App = () => (
             <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
             <Route path="/edob" element={<EDOB />} />
             <Route path="/uniform-check" element={<UniformCheck />} />
-            <Route path="/equipment-check" element={<EquipmentCheck />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

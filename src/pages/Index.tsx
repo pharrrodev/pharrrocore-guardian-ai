@@ -1,8 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck, ListChecks } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck } from "lucide-react";
 
 const Index = () => {
   return (
@@ -74,36 +73,17 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <ClipboardCheck className="w-10 h-10 text-primary" />
               <div>
-                <CardTitle className="text-2xl">Uniform & Kit Check</CardTitle>
-                <CardDescription>Perform daily uniform and kit inspection.</CardDescription>
+                <CardTitle className="text-2xl">Uniform & Equipment Check</CardTitle>
+                <CardDescription>Perform daily uniform and equipment inspection.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-muted-foreground">
-              A quick checklist to ensure all security personnel are properly equipped and compliant with uniform standards before their shift.
+              A comprehensive checklist to ensure all security personnel are properly equipped with uniform and safety equipment before their shift.
             </p>
             <Button asChild className="w-full">
               <Link to="/uniform-check">Start Check</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <ListChecks className="w-10 h-10 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Equipment Check</CardTitle>
-                <CardDescription>Perform routine equipment inspections.</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              A checklist to ensure all key safety and security equipment is operational and report any issues found during inspection.
-            </p>
-            <Button asChild className="w-full">
-              <Link to="/equipment-check">Start Check</Link>
             </Button>
           </CardContent>
         </Card>
