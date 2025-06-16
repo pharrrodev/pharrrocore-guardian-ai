@@ -26,6 +26,7 @@ import EmailFormatter from "./pages/EmailFormatter";
 import ReportsList from "./pages/ReportsList";
 import LicenceDashboard from "./pages/LicenceDashboard";
 import PayrollVariance from "./pages/PayrollVariance";
+import TenderWriter from "./pages/TenderWriter";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/reports-list" element={<ReportsList />} />
             <Route path="/licence-dashboard" element={<LicenceDashboard />} />
             <Route path="/payroll-variance" element={<PayrollVariance />} />
+            <Route path="/tender-writer" element={<TenderWriter />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
