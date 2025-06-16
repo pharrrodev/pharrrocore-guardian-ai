@@ -29,6 +29,8 @@ const App = () => (
             <Route path="/edob" element={<EDOB />} />
             <Route path="/uniform-check" element={<UniformCheck />} />
             <Route path="/break-checker" element={<BreakChecker />} />
+            <Route path="/radio-handover" element={<RadioHandover />} />
+            <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
