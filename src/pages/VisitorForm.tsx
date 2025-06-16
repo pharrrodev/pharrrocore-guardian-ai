@@ -11,14 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { submitVisitorLog } from "@/api/visitor-log";
 
 const visitorFormSchema = z.object({
   visitorName: z.string().min(1, { message: "Visitor name is required." }),
   company: z.string().min(1, { message: "Company is required." }),
   escort: z.string().min(1, { message: "Escort name is required." }),
-  mode: z.enum(["in", "out"], { message: "Please select check-in or check-out." }),
 });
 
 type VisitorFormValues = z.infer<typeof visitorFormSchema>;
@@ -33,7 +31,6 @@ const VisitorForm = () => {
       visitorName: "",
       company: "",
       escort: "",
-      mode: "in",
     },
   });
 
@@ -55,7 +52,7 @@ const VisitorForm = () => {
         visitorName: values.visitorName,
         company: values.company,
         escort: values.escort,
-        mode: values.mode,
+        mode: 'in', // Always check-in for new entries
         photo: photo || undefined,
       });
 
@@ -83,8 +80,8 @@ const VisitorForm = () => {
         <CardHeader className="flex flex-row items-center gap-4 pb-4">
           <Users className="w-10 h-10 text-primary" />
           <div>
-            <CardTitle className="text-2xl">Visitor Access Log</CardTitle>
-            <CardDescription>Record visitor check-in and check-out times.</CardDescription>
+            <CardTitle className="text-2xl">Visitor Check-In</CardTitle>
+            <CardDescription>Register a new visitor entering the premises.</CardDescription>
           </div>
           <Button asChild variant="ghost" size="icon" className="ml-auto">
             <Link to="/" aria-label="Go to dashboard">
@@ -125,43 +122,19 @@ const VisitorForm = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="escort"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Escort/Contact Person</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter escort name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="mode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Action</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select action" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="in">Check In</SelectItem>
-                          <SelectItem value="out">Check Out</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="escort"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Escort/Contact Person</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter escort name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Photo Upload */}
               <div className="space-y-2">
@@ -192,7 +165,7 @@ const VisitorForm = () => {
 
               <div className="flex gap-4">
                 <Button type="submit" disabled={isSubmitting} className="flex-1">
-                  {isSubmitting ? "Processing..." : "Submit Entry"}
+                  {isSubmitting ? "Processing..." : "Check In Visitor"}
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/visitor-log-today">

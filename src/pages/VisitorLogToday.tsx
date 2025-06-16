@@ -1,24 +1,27 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Home, Users, Clock, Building, UserCheck } from "lucide-react";
+import { Home, Users, Clock, Building, UserCheck, LogOut } from "lucide-react";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getTodaysVisitorLogs, VisitorLogEntry } from "@/utils/csvHelpers";
+import { submitVisitorLog } from "@/api/visitor-log";
 
 const VisitorLogToday = () => {
   const [visitorLogs, setVisitorLogs] = useState<VisitorLogEntry[]>([]);
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
+
+  const loadLogs = () => {
+    const logs = getTodaysVisitorLogs();
+    setVisitorLogs(logs);
+  };
 
   useEffect(() => {
-    const loadLogs = () => {
-      const logs = getTodaysVisitorLogs();
-      setVisitorLogs(logs);
-    };
-
     loadLogs();
     
     // Refresh data every 30 seconds
@@ -26,6 +29,30 @@ const VisitorLogToday = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  const handleCheckOut = async (visitor: VisitorLogEntry) => {
+    setCheckingOut(visitor.id);
+    try {
+      const response = await submitVisitorLog({
+        visitorName: visitor.visitorName,
+        company: visitor.company,
+        escort: visitor.escort,
+        mode: 'out',
+      });
+
+      if (response.status === 'ok') {
+        toast.success(response.message);
+        loadLogs(); // Refresh the logs
+      } else {
+        toast.error(response.message || 'Failed to check out visitor');
+      }
+    } catch (error) {
+      toast.error('An error occurred while checking out the visitor');
+      console.error('Check-out error:', error);
+    } finally {
+      setCheckingOut(null);
+    }
+  };
 
   const formatTime = (timeString: string) => {
     if (!timeString) return "-";
@@ -67,7 +94,7 @@ const VisitorLogToday = () => {
             <Button asChild variant="outline">
               <Link to="/visitor-form">
                 <UserCheck className="w-4 h-4 mr-2" />
-                New Entry
+                New Check-In
               </Link>
             </Button>
             <Button asChild variant="outline">
@@ -123,7 +150,7 @@ const VisitorLogToday = () => {
           <CardHeader>
             <CardTitle>Visitor Entries</CardTitle>
             <CardDescription>
-              Complete log of all visitor activity for today. Active visitors are highlighted.
+              Complete log of all visitor activity for today. Click "Check Out" for active visitors.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -147,6 +174,7 @@ const VisitorLogToday = () => {
                       <TableHead>Check In</TableHead>
                       <TableHead>Check Out</TableHead>
                       <TableHead>Duration</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -169,6 +197,28 @@ const VisitorLogToday = () => {
                         <TableCell>{formatTime(log.arrivalTime)}</TableCell>
                         <TableCell>{formatTime(log.departureTime)}</TableCell>
                         <TableCell>{formatDuration(log.arrivalTime, log.departureTime)}</TableCell>
+                        <TableCell>
+                          {!log.departureTime ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCheckOut(log)}
+                              disabled={checkingOut === log.id}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              {checkingOut === log.id ? (
+                                "Checking Out..."
+                              ) : (
+                                <>
+                                  <LogOut className="w-4 h-4 mr-1" />
+                                  Check Out
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Completed</span>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
