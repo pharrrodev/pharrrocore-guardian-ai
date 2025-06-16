@@ -11,6 +11,7 @@ import IncidentReport from "./pages/IncidentReport";
 import AssignmentInstructions from "./pages/AssignmentInstructions";
 import EDOB from "./pages/EDOB";
 import UniformCheck from "./pages/UniformCheck";
+import BreakChecker from "./pages/BreakChecker";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
             <Route path="/edob" element={<EDOB />} />
             <Route path="/uniform-check" element={<UniformCheck />} />
+            <Route path="/break-checker" element={<BreakChecker />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,7 +1,8 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Bot, ClipboardList, ClipboardCheck } from "lucide-react";
+import { FileText, Bot, ClipboardList, ClipboardCheck, Clock } from "lucide-react";
 
 const Index = () => {
   return (
@@ -84,6 +85,25 @@ const Index = () => {
             </p>
             <Button asChild className="w-full">
               <Link to="/uniform-check">Start Check</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Clock className="w-10 h-10 text-primary" />
+              <div>
+                <CardTitle className="text-2xl">Break Time Checker</CardTitle>
+                <CardDescription>Check when your next break is scheduled.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-muted-foreground">
+              Instantly check if you're currently on break or find out when your next break starts using the shift rota data.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/break-checker">Check Break Times</Link>
             </Button>
           </CardContent>
         </Card>
