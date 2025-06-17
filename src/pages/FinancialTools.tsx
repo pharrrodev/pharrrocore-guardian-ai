@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, DollarSign, TrendingUp, FileText, Clock, AlertTriangle, CheckCircle } from "lucide-react";
@@ -313,7 +311,7 @@ const FinancialTools = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleInvoiceFinancing(invoice.id, invoice.amount)}
+                            onClick={() => handleInvoiceFinancing(invoice.id, Number(invoice.amount))}
                           >
                             Get Paid Now
                           </Button>
@@ -412,4 +410,3 @@ const FinancialTools = () => {
 };
 
 export default FinancialTools;
-
