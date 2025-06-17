@@ -6,55 +6,97 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useToast } from '@/hooks/use-toast';
+// useToast from shadcn/ui is different from sonner. Assuming sonner is used project-wide.
+// If using shadcn useToast, import { useToast } from '@/components/ui/use-toast';
+import { toast as sonnerToast } from 'sonner'; // Using sonner for consistency
 import dayjs from 'dayjs';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+import { Users } from 'lucide-react'; // For guard select icon
 
 interface AddTrainingProps {
   isOpen: boolean;
   onClose: () => void;
-  onRecordAdded: () => void;
+  onRecordAdded: () => void; // Callback after successful record addition
 }
 
 interface TrainingFormData {
-  guardName: string;
+  guardNameDisplay: string; // For display in Select and for guard_name_recorded
   courseName: string;
   completedDate?: Date;
   expiresDate?: Date;
+  // certificateUrl?: string; // Optional: if implementing file upload
 }
 
-// Predefined list of guards - in a real app this would come from a database
-const GUARD_NAMES = [
-  'John Smith',
-  'Sarah Johnson',
-  'Michael Brown',
-  'Emma Wilson',
-  'David Davis',
-  'Lisa Anderson',
-  'Robert Taylor',
-  'Jennifer Martinez',
-  'William Garcia',
-  'Ashley Rodriguez'
-];
+interface GuardUser {
+  id: string;
+  name: string;
+}
 
 const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdded }) => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingGuards, setIsLoadingGuards] = useState(true);
+  const [availableGuards, setAvailableGuards] = useState<GuardUser[]>([]);
+  const [selectedGuardUserId, setSelectedGuardUserId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<TrainingFormData>({
-    guardName: '',
+    guardNameDisplay: '',
     courseName: '',
     completedDate: undefined,
-    expiresDate: undefined
+    expiresDate: undefined,
   });
 
+  useEffect(() => {
+    if (!isOpen) return; // Don't fetch if modal is not open
+
+    const fetchGuards = async () => {
+      setIsLoadingGuards(true);
+      try {
+        const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
+        if (error) throw error;
+        if (guardsData) {
+          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        } else {
+          setAvailableGuards([]);
+        }
+      } catch (err) {
+        console.error("Error fetching guards for training form:", err);
+        sonnerToast.error("Failed to load guard list.");
+        setAvailableGuards([]);
+      } finally {
+        setIsLoadingGuards(false);
+      }
+    };
+    fetchGuards();
+  }, [isOpen]); // Re-fetch if modal is reopened
+
   const handleInputChange = (field: keyof TrainingFormData, value: string | Date | undefined) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleGuardSelection = (guardId: string) => {
+    const selectedGuard = availableGuards.find(g => g.id === guardId);
+    if (selectedGuard) {
+      setSelectedGuardUserId(selectedGuard.id);
+      handleInputChange('guardNameDisplay', selectedGuard.name);
+    } else {
+      setSelectedGuardUserId(null);
+      handleInputChange('guardNameDisplay', ''); // Clear if selection is invalid/cleared
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      guardNameDisplay: '',
+      courseName: '',
+      completedDate: undefined,
+      expiresDate: undefined,
+    });
+    setSelectedGuardUserId(null);
   };
 
   const validateForm = (): string | null => {
-    if (!formData.guardName.trim()) return 'Please select a guard name';
+    if (!selectedGuardUserId && !formData.guardNameDisplay.trim()) return 'Please select or enter a guard name';
+    if (!formData.guardNameDisplay.trim()) return 'Guard name cannot be empty if no user is selected';
     if (!formData.courseName.trim()) return 'Please enter a course name';
     if (!formData.completedDate) return 'Please select when the training was completed';
     if (!formData.expiresDate) return 'Please select when the training expires';
@@ -69,130 +111,128 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
     return null;
   };
 
-  const checkDuplicate = (): boolean => {
-    try {
-      const stored = localStorage.getItem('trainingRecords');
-      if (!stored) return false;
-      
-      const records = JSON.parse(stored);
-      return records.some((record: any) => 
-        record.guardName.toLowerCase() === formData.guardName.toLowerCase() &&
-        record.courseName.toLowerCase() === formData.courseName.toLowerCase() &&
-        dayjs(record.expiresDate).isSame(dayjs(formData.expiresDate), 'day')
-      );
-    } catch {
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validationError = validateForm();
     if (validationError) {
-      toast({
-        title: 'Validation Error',
-        description: validationError,
-        variant: 'destructive'
-      });
+      sonnerToast.error(validationError, { title: 'Validation Error' });
       return;
     }
 
-    if (checkDuplicate()) {
-      toast({
-        title: 'Duplicate Record',
-        description: 'A record with this guard name, course name, and expiry date already exists.',
-        variant: 'destructive'
-      });
-      return;
-    }
+    setIsLoading(true);
 
-    setLoading(true);
+    const submitData = {
+      guard_user_id: selectedGuardUserId, // This can be null if no Supabase user selected
+      guard_name_recorded: formData.guardNameDisplay,
+      course_name: formData.courseName,
+      completed_date: dayjs(formData.completedDate).format('YYYY-MM-DD'),
+      expiry_date: dayjs(formData.expiresDate).format('YYYY-MM-DD'),
+      // certificate_url: formData.certificateUrl || null, // If implemented
+    };
 
     try {
-      const submitData = {
-        guardName: formData.guardName,
-        courseName: formData.courseName,
-        completedDate: dayjs(formData.completedDate).format('YYYY-MM-DD'),
-        expiresDate: dayjs(formData.expiresDate).format('YYYY-MM-DD')
-      };
+      const { data: responseData, error: functionsError } = await supabase.functions.invoke(
+        'add-training-record',
+        { body: submitData }
+      );
 
-      const response = await fetch('/api/training-add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(submitData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.status === 'ok') {
-          toast({
-            title: 'Success',
-            description: 'Training record added successfully'
-          });
-          
-          setFormData({
-            guardName: '',
-            courseName: '',
-            completedDate: undefined,
-            expiresDate: undefined
-          });
-          
-          onRecordAdded();
+      if (functionsError) {
+         // Check for specific error messages from the function, e.g., duplicate
+        const errorMessage = functionsError.context?.message || functionsError.message || 'An unknown error occurred.';
+        if (functionsError.context?.status === 409) { // Assuming 409 for duplicate from edge function
+             sonnerToast.error('Duplicate Record', { description: errorMessage });
         } else {
-          throw new Error('Failed to add record');
+            sonnerToast.error('Operation Failed', { description: `Failed to add record: ${errorMessage}` });
         }
-      } else {
-        throw new Error('Failed to add record');
+        throw functionsError; // Throw to be caught by outer catch
       }
+
+      if (responseData) { // Edge function should return success message in data
+        sonnerToast.success('Success', { description: responseData.message || 'Training record added successfully' });
+        resetForm();
+        onRecordAdded(); // Call callback to refresh parent component's list
+        // onClose(); // Close modal on success, can be part of onRecordAdded if preferred
+      } else {
+         // Should not happen if no error, but good to handle
+         throw new Error('No response data from function.');
+      }
+
     } catch (error) {
       console.error('Error adding training record:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add training record. Please try again.',
-        variant: 'destructive'
-      });
+      // Toast for specific errors already shown, this is a fallback
+      if (!functionsError) { // Avoid double-toasting if already handled
+         sonnerToast.error('Error', { description: 'An unexpected error occurred. Please try again.' });
+      }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) {
-      setFormData({
-        guardName: '',
-        courseName: '',
-        completedDate: undefined,
-        expiresDate: undefined
-      });
+  const handleCloseDialog = () => {
+    if (!isLoading) {
+      resetForm();
       onClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
+      <DialogContent className="sm:max-w-[480px]"> {/* Slightly wider */}
         <DialogHeader>
-          <DialogTitle>Add Training Record</DialogTitle>
+          <DialogTitle>Add New Training Record</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="guardName">Guard Name</Label>
-            <Select value={formData.guardName} onValueChange={(value) => handleInputChange('guardName', value)} disabled={loading}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a guard" />
+            <Label htmlFor="guardNameSelect">Guard Name</Label>
+            <Select
+              value={selectedGuardUserId || formData.guardNameDisplay} // Use guard_id if available, else the name string for non-user case
+              onValueChange={handleGuardSelection}
+              disabled={isLoading || isLoadingGuards}
+            >
+              <SelectTrigger id="guardNameSelect">
+                <SelectValue placeholder="Select a guard or type name" />
               </SelectTrigger>
               <SelectContent>
-                {GUARD_NAMES.map((guardName) => (
-                  <SelectItem key={guardName} value={guardName}>
-                    {guardName}
-                  </SelectItem>
-                ))}
+                {isLoadingGuards ? (
+                  <div className="p-2 text-sm text-muted-foreground">Loading guards...</div>
+                ) : availableGuards.length > 0 ? (
+                  availableGuards.map((guard) => (
+                    <SelectItem key={guard.id} value={guard.id}>
+                      <div className="flex items-center">
+                        <Users className="w-4 h-4 mr-2 text-muted-foreground" />
+                        {guard.name}
+                      </div>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-muted-foreground">No system users found. Type name manually.</div>
+                )}
               </SelectContent>
             </Select>
+            {/* Fallback or manual entry for guardNameDisplay if no system user is selected,
+                or if the list is empty and you still want to allow manual name entry.
+                For this version, the Select's value is tied to guardNameDisplay if selectedGuardUserId is null.
+                If no user is selected from dropdown, guardNameDisplay can be typed if input is changed to text.
+                For simplicity with Select, if a guard isn't in the list, they can't be "selected" as a user ID.
+                The current setup requires selection if list is populated.
+                If manual entry is needed alongside selection, UI needs adjustment.
+                For now, guardNameDisplay is set via handleGuardSelection.
+            */}
+             <Input
+                id="guardNameDisplay"
+                type="text"
+                value={formData.guardNameDisplay}
+                onChange={(e) => {
+                    handleInputChange('guardNameDisplay', e.target.value);
+                    // If user types, assume it's not a selection from list unless list is re-selected
+                    setSelectedGuardUserId(null);
+                }}
+                placeholder="Enter guard name if not in list"
+                disabled={isLoading}
+                className="mt-2"
+            />
           </div>
 
           <div className="space-y-2">

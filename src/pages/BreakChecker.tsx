@@ -13,41 +13,71 @@ import { checkBreakStatus } from '@/api/break-check';
 import { supabase } from '@/lib/supabaseClient'; // Import Supabase
 import { toast } from 'sonner'; // Import sonner toast
 import dayjs from 'dayjs'; // Import dayjs for current time
-import { loadRotaData, Shift } from '@/utils/rotaStore'; // For guard names
+// Removed: import { loadRotaData, Shift } from '@/utils/rotaStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select
 
+// Interface for guards fetched from Edge Function
+interface GuardUser {
+  id: string; // Supabase auth user ID
+  name: string; // Display name
+}
+
 const BreakChecker = () => {
-  const [guardName, setGuardName] = useState(''); // This will store the selected guard's name
+  // State for selected guard's details
+  const [selectedGuardForQuery, setSelectedGuardForQuery] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Default to today
   const [currentTime, setCurrentTime] = useState<string>(dayjs().format('HH:mm')); // Default to current time
-  const [breakStatus, setBreakStatus] = useState<any>(null);
+  const [breakStatus, setBreakStatus] = useState<any>(null); // Type any for now, should match BreakCheckResponse
   const [isLoading, setIsLoading] = useState(false);
-  const [availableGuards, setAvailableGuards] = useState<string[]>([]);
+  const [availableGuards, setAvailableGuards] = useState<GuardUser[]>([]);
+  const [isLoadingGuards, setIsLoadingGuards] = useState(true);
+
 
   useEffect(() => {
-    const rota = loadRotaData();
-    const uniqueGuardNames = Array.from(new Set(rota.map((shift: Shift) => shift.guardName))).sort();
-    setAvailableGuards(uniqueGuardNames);
-    if (uniqueGuardNames.length > 0 && !guardName) {
-      // Optionally pre-select first guard or leave empty
-      // setGuardName(uniqueGuardNames[0]);
+    const fetchGuards = async () => {
+      setIsLoadingGuards(true);
+      try {
+        const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
+        if (error) throw error;
+        if (guardsData) {
+          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        } else {
+          setAvailableGuards([]);
+        }
+      } catch (err) {
+        console.error("Error fetching guards:", err);
+        toast.error("Failed to load guard list.");
+        setAvailableGuards([]);
+      } finally {
+        setIsLoadingGuards(false);
+      }
+    };
+    fetchGuards();
+  }, []);
+
+  const handleGuardSelection = (guardId: string) => {
+    const selected = availableGuards.find(g => g.id === guardId);
+    if (selected) {
+      setSelectedGuardForQuery({ id: selected.id, name: selected.name });
     }
-  }, [guardName]); // Re-run if guardName changes to allow clearing if needed
+  };
 
   const checkBreak = async () => {
-    if (!guardName || !selectedDate || !currentTime) {
+    if (!selectedGuardForQuery.name || !selectedDate || !currentTime) {
       toast.error("Please select guard, date, and time.");
       return;
     }
 
     setIsLoading(true);
     setBreakStatus(null); // Clear previous status
-    let result; // To store result from checkBreakStatus
+    let result: any; // To store result from checkBreakStatus, should be BreakCheckResponse
 
     try {
-      const dateStr = dayjs(selectedDate).format('YYYY-MM-DD'); // Format date correctly
+      const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
       result = await checkBreakStatus({
-        guardName: guardName.trim(),
+        guardId: selectedGuardForQuery.id, // Pass the UUID
+        guardName: selectedGuardForQuery.name, // Pass the name
         date: dateStr,
         currentTime
       });
@@ -55,22 +85,24 @@ const BreakChecker = () => {
 
       // Log the check to Supabase (best-effort)
       const { data: { user: checkerUser } } = await supabase.auth.getUser();
-      if (checkerUser && result) { // Ensure result is available
+      if (checkerUser && result) {
         const logData = {
-          queried_guard_name: guardName.trim(),
+          queried_guard_user_id: selectedGuardForQuery.id,
+          queried_guard_name: selectedGuardForQuery.name,
           queried_date: dateStr,
           queried_time: currentTime,
           status_on_break: result.onBreak,
           status_message: result.message,
+          shift_id_checked: result.shift_id_checked || null, // Get from API response
           user_id_performing_check: checkerUser.id,
-          // site_id: null, // Add if site context becomes available
+          // site_id: null,
         };
         const { error: logError } = await supabase.from('break_check_queries').insert(logData);
         if (logError) {
           console.error("Error logging break check query:", logError);
           toast.warning("Break status checked, but failed to log the query action.");
         } else {
-          toast.info("Break check query logged.");
+          // toast.info("Break check query logged."); // Optional toast
         }
       } else if (!checkerUser) {
         toast.warning("Break status checked, but could not log query (user not authenticated).");

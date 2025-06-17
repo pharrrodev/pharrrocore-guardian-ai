@@ -4,30 +4,140 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Check, X, Clock, Users, Calendar, AlertTriangle } from 'lucide-react';
-import { Shift } from '@/data/rota-data';
-import { loadRotaData, loadConfirmations, RotaConfirmation } from '@/utils/rotaStore';
+import { ArrowLeft, Check, X, Clock, Users, Calendar, AlertTriangle, RefreshCw } from 'lucide-react'; // Added RefreshCw
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { toast } from 'sonner'; // Import toast for error notifications
 import dayjs from 'dayjs';
 
+// Interface for shifts fetched from Supabase (matches 'shifts' table structure)
+// This should be the same as defined in RotaBuilder.tsx after its refactor
+export interface SupabaseShift {
+  id: string;
+  guard_id: string;
+  guard_name: string;
+  shift_date: string; // YYYY-MM-DD
+  start_time: string; // HH:MM
+  end_time: string; // HH:MM
+  position: string;
+  shift_type: 'Day' | 'Night' | 'Evening';
+  break_times?: Array<{ breakStart: string; breakEnd: string; breakType: string }>;
+  site_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Interface for shift activities (confirmations)
+export interface ShiftActivity {
+  id: string;
+  shift_id: string;
+  activity_type: 'Shift Confirmed' | 'Shift Declined'; // Focus on these two for status
+  "timestamp": string; // ISO string
+  notes?: string | null;
+  guard_id: string; // User who confirmed/declined (can be different from shift.guard_id)
+}
+
 const RotaDashboard = () => {
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [confirmations, setConfirmations] = useState<RotaConfirmation[]>([]);
+  const [shifts, setShifts] = useState<SupabaseShift[]>([]);
+  const [activities, setActivities] = useState<ShiftActivity[]>([]); // Renamed from confirmations
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const rotaData = loadRotaData();
-    const confirmData = loadConfirmations();
-    setShifts(rotaData);
-    setConfirmations(confirmData);
-  }, []);
+  const fetchRotaData = async () => {
+    setIsLoading(true);
+    try {
+      const today = dayjs();
+      const twoWeeksFromNow = today.add(14, 'day');
 
-  const getShiftConfirmation = (shiftId: string): RotaConfirmation | undefined => {
-    return confirmations.find(c => c.shiftId === shiftId);
+      // Fetch shifts
+      const { data: shiftsData, error: shiftsError } = await supabase
+        .from('shifts')
+        .select('*')
+        .gte('shift_date', today.format('YYYY-MM-DD')) // From today
+        .lte('shift_date', twoWeeksFromNow.format('YYYY-MM-DD')) // For next 14 days
+        .order('shift_date', { ascending: true })
+        .order('start_time', { ascending: true });
+
+      if (shiftsError) throw shiftsError;
+      setShifts(shiftsData || []);
+
+      // Fetch confirmations for the fetched shifts
+      if (shiftsData && shiftsData.length > 0) {
+        const shiftIds = shiftsData.map(s => s.id);
+        const { data: activitiesData, error: activitiesError } = await supabase
+          .from('shift_activities')
+          .select('*')
+          .in('shift_id', shiftIds)
+          .in('activity_type', ['Shift Confirmed', 'Shift Declined'])
+          .order('timestamp', { ascending: false }); // Get latest activity first for each shift
+
+        if (activitiesError) throw activitiesError;
+        setActivities(activitiesData || []);
+      } else {
+        setActivities([]); // No shifts, so no activities to fetch
+      }
+
+    } catch (error: any) {
+      console.error('Error fetching rota data:', error);
+      toast.error(`Failed to load rota: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getShiftStatus = (shift: Shift) => {
-    const confirmation = getShiftConfirmation(shift.id);
-    if (!confirmation) return 'pending';
-    return confirmation.confirmed ? 'confirmed' : 'declined';
+  useEffect(() => {
+    fetchRotaData(); // Initial fetch
+
+    // Set up real-time subscriptions
+    const shiftsChannel = supabase
+      .channel('rota-dashboard-shifts-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shifts' },
+        (payload) => {
+          console.log('Shifts change received!', payload);
+          toast.info('Rota has been updated. Refreshing...');
+          fetchRotaData(); // Re-fetch all data on any change for simplicity
+        }
+      )
+      .subscribe();
+
+    const activitiesChannel = supabase
+      .channel('rota-dashboard-activities-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shift_activities' },
+        (payload) => {
+          console.log('Shift activities change received!', payload);
+          // Check if the change is relevant to current view (e.g. a confirmation)
+          if (payload.new && ['Shift Confirmed', 'Shift Declined'].includes((payload.new as ShiftActivity).activity_type) ) {
+            toast.info('Shift confirmation status updated. Refreshing...');
+            fetchRotaData(); // Re-fetch all data
+          } else if (payload.eventType === 'DELETE' || payload.eventType === 'UPDATE') {
+            // Handle potential updates or deletes if they affect status
+            fetchRotaData();
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions on component unmount
+    return () => {
+      supabase.removeChannel(shiftsChannel);
+      supabase.removeChannel(activitiesChannel);
+    };
+  }, []); // Run once on mount
+
+  const getShiftConfirmationActivity = (shiftId: string): ShiftActivity | undefined => {
+    // Find the most recent 'Shift Confirmed' or 'Shift Declined' activity for this shift
+    return activities
+      .filter(act => act.shift_id === shiftId && (act.activity_type === 'Shift Confirmed' || act.activity_type === 'Shift Declined'))
+      .sort((a, b) => dayjs(b.timestamp).diff(dayjs(a.timestamp))) // Sort descending by time
+      [0]; // Get the latest one
+  };
+
+  const getShiftStatus = (shift: SupabaseShift): 'confirmed' | 'declined' | 'pending' => {
+    const activity = getShiftConfirmationActivity(shift.id);
+    if (!activity) return 'pending';
+    return activity.activity_type === 'Shift Confirmed' ? 'confirmed' : 'declined';
   };
 
   const getStatusColor = (status: string) => {
