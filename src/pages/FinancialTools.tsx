@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, DollarSign, TrendingUp, FileText, Clock, AlertTriangle, CheckCircle } from "lucide-react";
@@ -285,37 +284,40 @@ const FinancialTools = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {invoices.map((invoice) => (
-                    <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <p className="font-medium">{invoice.id}</p>
-                            <p className="text-sm text-muted-foreground">{invoice.client}</p>
-                          </div>
-                          <div>
-                            <p className="font-medium">£{invoice.amount.toLocaleString()}</p>
-                            <p className="text-sm text-muted-foreground">Due: {invoice.dueDate}</p>
-                          </div>
-                          <div>
-                            {getStatusBadge(invoice.status, invoice.daysOverdue)}
+                  {invoices.map((invoice) => {
+                    const invoiceAmount = Number(invoice.amount);
+                    return (
+                      <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <p className="font-medium">{invoice.id}</p>
+                              <p className="text-sm text-muted-foreground">{invoice.client}</p>
+                            </div>
+                            <div>
+                              <p className="font-medium">£{invoiceAmount.toLocaleString()}</p>
+                              <p className="text-sm text-muted-foreground">Due: {invoice.dueDate}</p>
+                            </div>
+                            <div>
+                              {getStatusBadge(invoice.status, invoice.daysOverdue)}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex gap-2">
+                          {invoice.status === "Sent" || invoice.status === "Overdue" ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleInvoiceFinancing(invoice.id, invoiceAmount)}
+                            >
+                              Get Paid Now
+                            </Button>
+                          ) : null}
+                          <Button variant="ghost" size="sm">View</Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        {invoice.status === "Sent" || invoice.status === "Overdue" ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleInvoiceFinancing(invoice.id, Number(invoice.amount))}
-                          >
-                            Get Paid Now
-                          </Button>
-                        ) : null}
-                        <Button variant="ghost" size="sm">View</Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
