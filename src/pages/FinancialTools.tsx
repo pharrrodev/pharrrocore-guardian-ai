@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, DollarSign, TrendingUp, FileText, Clock, AlertTriangle, CheckCircle } from "lucide-react";
@@ -23,8 +22,17 @@ interface MockInvoice {
   daysOverdue: number;
 }
 
+// Mock invoice data with proper typing
+const mockInvoices: MockInvoice[] = [
+  { id: "INV-001", client: "SecureTech Ltd", amount: 15000, dueDate: "2024-01-20", status: "Sent", daysOverdue: 0 },
+  { id: "INV-002", client: "Metro Shopping Centre", amount: 8500, dueDate: "2024-01-15", status: "Overdue", daysOverdue: 8 },
+  { id: "INV-003", client: "City Hospital", amount: 22000, dueDate: "2024-01-25", status: "Draft", daysOverdue: 0 },
+  { id: "INV-004", client: "Corporate Plaza", amount: 12000, dueDate: "2024-01-10", status: "Paid", daysOverdue: 0 },
+  { id: "INV-005", client: "Industrial Estate", amount: 18500, dueDate: "2024-01-30", status: "Sent", daysOverdue: 0 },
+];
+
 const FinancialTools = () => {
-  const [invoices, setInvoices] = useState<MockInvoice[]>([]);
+  const [invoices, setInvoices] = useState<MockInvoice[]>(mockInvoices);
   const [cashFlowData, setCashFlowData] = useState([]);
   const [newInvoice, setNewInvoice] = useState({ client: "", amount: "", dueDate: "", description: "" });
 
@@ -37,20 +45,6 @@ const FinancialTools = () => {
     { date: "Week 5", balance: 53000, inflow: 25000, outflow: -28000 },
     { date: "Week 6", balance: 60000, inflow: 40000, outflow: -33000 },
   ];
-
-  // Mock invoice data with proper typing
-  const mockInvoices: MockInvoice[] = [
-    { id: "INV-001", client: "SecureTech Ltd", amount: 15000, dueDate: "2024-01-20", status: "Sent", daysOverdue: 0 },
-    { id: "INV-002", client: "Metro Shopping Centre", amount: 8500, dueDate: "2024-01-15", status: "Overdue", daysOverdue: 8 },
-    { id: "INV-003", client: "City Hospital", amount: 22000, dueDate: "2024-01-25", status: "Draft", daysOverdue: 0 },
-    { id: "INV-004", client: "Corporate Plaza", amount: 12000, dueDate: "2024-01-10", status: "Paid", daysOverdue: 0 },
-    { id: "INV-005", client: "Industrial Estate", amount: 18500, dueDate: "2024-01-30", status: "Sent", daysOverdue: 0 },
-  ];
-
-  // Initialize invoices with mock data on component mount
-  useEffect(() => {
-    setInvoices(mockInvoices);
-  }, []);
 
   const getStatusBadge = (status: string, daysOverdue: number) => {
     switch (status) {
