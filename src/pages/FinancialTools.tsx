@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, DollarSign, TrendingUp, FileText, Clock, AlertTriangle, CheckCircle } from "lucide-react";
@@ -24,7 +25,7 @@ interface MockInvoice {
 }
 
 const FinancialTools = () => {
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<MockInvoice[]>([]);
   const [cashFlowData, setCashFlowData] = useState([]);
   const [newInvoice, setNewInvoice] = useState({ client: "", amount: "", dueDate: "", description: "" });
 
@@ -307,7 +308,7 @@ const FinancialTools = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleInvoiceFinancing(invoice.id, Number(invoice.amount))}
+                            onClick={() => handleInvoiceFinancing(invoice.id, invoice.amount)}
                           >
                             Get Paid Now
                           </Button>
@@ -406,3 +407,4 @@ const FinancialTools = () => {
 };
 
 export default FinancialTools;
+
