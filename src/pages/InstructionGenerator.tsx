@@ -7,36 +7,111 @@ import { Home, FileText, Plus, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { generateInstructions } from "@/api/instruction-generate";
-import { saveInstructions } from "@/api/instruction-save";
-import { Topic } from "@/data/centralData";
+import { generateInstructions } from "@/api/instruction-generate"; // This AI call is kept
+// Removed: import { saveInstructions } from "@/api/instruction-save";
+import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+// Assuming Topic interface from centralData is compatible or will be adjusted.
+// For now, the Edge Function expects { id, label, response, parent_id?, sort_order?, subTopics? }
+// Let's define a local Topic type that matches this expectation for clarity.
+interface Topic {
+  id: string;
+  label: string;
+  response: string;
+  parent_id?: string | null;
+  sort_order?: number;
+  subTopics?: Topic[];
+}
+interface FetchedTopic { // From TopicSelector
+  id: string;
+  label: string;
+}
+
 import TopicSelector from "@/components/TopicSelector";
+import { kebabCase } from 'lodash'; // For generating kebab-case IDs
 
 const InstructionGenerator = () => {
   const [rawText, setRawText] = useState("");
-  const [parentLabel, setParentLabel] = useState("");
+  // Store parent topic info: id (if existing) and label (for display and for new parent)
+  const [selectedParentTopicInfo, setSelectedParentTopicInfo] = useState<{ id: string | null; label: string }>({ id: null, label: "" });
+
   const [generatedTopics, setGeneratedTopics] = useState<Topic[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  const handleParentTopicChange = (value: string, isCustom: boolean, selectedTopic?: FetchedTopic) => {
+    if (isCustom) {
+      setSelectedParentTopicInfo({ id: null, label: value }); // Custom topic, ID will be generated if it becomes a parent
+    } else if (selectedTopic) {
+      setSelectedParentTopicInfo({ id: selectedTopic.id, label: selectedTopic.label });
+    } else { // Clearing selection
+      setSelectedParentTopicInfo({id: null, label: ""});
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!rawText.trim() || !parentLabel.trim()) {
-      toast.error("Please provide both raw text and parent topic label");
+    if (!rawText.trim() || !selectedParentTopicInfo.label.trim()) {
+      toast.error("Please provide both raw text and a parent topic label/selection.");
       return;
     }
 
     setIsGenerating(true);
+    let currentParentId = selectedParentTopicInfo.id;
+    let parentTopicLabel = selectedParentTopicInfo.label.trim();
+
+    // If it's a new parent topic (no ID yet), generate one.
+    // This new parent itself won't have a response from this UI,
+    // it acts as a container for AI generated sub-topics.
+    // The AI might generate a response for it, or it's just a structural node.
+    if (!currentParentId && parentTopicLabel) {
+      currentParentId = kebabCase(parentTopicLabel);
+      // Potentially add this new parent to generatedTopics if it needs to be saved itself
+      // For now, generateInstructions API is expected to handle the parent context.
+    }
+
     try {
+      // generateInstructions might need parentId as well as parentLabel for context
       const response = await generateInstructions({
         rawText: rawText.trim(),
-        parentLabel: parentLabel.trim(),
+        parentLabel: parentTopicLabel, // Pass the label
+        // parentId: currentParentId, // Pass ID if API supports it for context
       });
 
       if (response.status === 'ok' && response.topics) {
-        setGeneratedTopics(response.topics);
+        // Ensure generated topics have parent_id set if currentParentId exists
+        // and they are meant to be children of the selected/created parent.
+        // This logic depends on how generateInstructions API structures its output.
+        // For now, assume it returns topics potentially needing parent_id linkage.
+        const processedTopics = response.topics.map(topic => ({
+          ...topic,
+          // If the AI doesn't set parent_id for sub-topics relative to parentLabel, set it here.
+          // This assumes topics from AI are direct children of parentLabel.
+          // If AI creates deeper hierarchies, its own parent_id should be respected.
+          parent_id: topic.parent_id || currentParentId || null,
+        }));
+
+        // If a new parent topic was created by typing, and AI didn't return it, add it.
+        if (!selectedParentTopicInfo.id && parentTopicLabel && currentParentId) {
+            const newParentTopicExists = processedTopics.some(t => t.id === currentParentId);
+            if (!newParentTopicExists) {
+                const newParentTopic: Topic = {
+                    id: currentParentId,
+                    label: parentTopicLabel,
+                    response: "Parent topic for AI generated content.", // Default response
+                    parent_id: null, // Top-level
+                    subTopics: processedTopics, // Nest generated topics under it
+                };
+                setGeneratedTopics([newParentTopic]);
+            } else {
+                 // If AI returned the parent, ensure subtopics are nested correctly if not already
+                 setGeneratedTopics(processedTopics.map(t => t.id === currentParentId ? {...t, subTopics: t.subTopics || processedTopics.filter(st => st.parent_id === currentParentId)} : t ));
+            }
+        } else {
+            setGeneratedTopics(processedTopics);
+        }
+
         setShowPreview(true);
-        toast.success(`Generated ${response.topics.length} topics successfully`);
+        toast.success(`Generated ${response.topics.length} topics successfully for ${parentTopicLabel}`);
       } else {
         toast.error(response.message || 'Failed to generate instructions');
       }
@@ -53,13 +128,18 @@ const InstructionGenerator = () => {
       toast.error("No topics to save");
       return;
     }
-
     setIsSaving(true);
     try {
-      const response = await saveInstructions({ topics: generatedTopics });
+      // Call the Edge Function
+      const { data: saveData, error: saveError } = await supabase.functions.invoke(
+        'save-knowledge-base-topics',
+        { body: { topics: generatedTopics } }
+      );
 
-      if (response.status === 'ok') {
-        toast.success(response.message || 'Instructions saved successfully');
+      if (saveError) throw saveError;
+
+      if (saveData && !saveData.error) { // Check for application-level error from function
+        toast.success(saveData.message || 'Instructions saved successfully');
         setRawText("");
         setParentLabel("");
         setGeneratedTopics([]);

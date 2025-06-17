@@ -6,79 +6,118 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Calendar, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { getWeeklyReports } from '@/scripts/weeklyClientReport';
+// Removed: import { getWeeklyReports } from '@/scripts/weeklyClientReport';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
 import dayjs from 'dayjs';
 
-interface WeeklyReport {
-  filename: string;
-  path: string;
-  date: string;
+// Interface matches generated_reports_metadata table
+interface ReportMetadata {
+  id: string;
+  report_name: string;
+  report_type: string; // e.g., "WeeklyClientMarkdown", "WeeklyClientPDF"
+  generation_date: string; // TIMESTAMPTZ
+  period_start_date: string; // DATE
+  period_end_date: string; // DATE
+  file_storage_path: string;
+  file_size_bytes?: number | null;
+  generated_by_user_id?: string | null;
+  site_id?: string | null;
 }
 
 const ReportsList = () => {
-  const [reports, setReports] = useState<WeeklyReport[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [reports, setReports] = useState<ReportMetadata[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // isLoading instead of loading
+  const [isDownloading, setIsDownloading] = useState<string | null>(null); // To track which report is downloading
 
-  const loadReports = () => {
-    setLoading(true);
+  const fetchReports = async () => {
+    setIsLoading(true);
     try {
-      const availableReports = getWeeklyReports();
-      setReports(availableReports);
-      toast.success(`Found ${availableReports.length} weekly reports`);
-    } catch (error) {
+      const { data, error } = await supabase
+        .from('generated_reports_metadata')
+        .select('*')
+        .order('generation_date', { ascending: false });
+
+      if (error) throw error;
+      setReports(data || []);
+      if (data && data.length > 0) {
+        toast.success(`Found ${data.length} reports.`);
+      } else {
+        toast.info("No reports found.");
+      }
+    } catch (error: any) {
       console.error('Error loading reports:', error);
-      toast.error('Failed to load reports');
+      toast.error(`Failed to load reports: ${error.message}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadReports();
+    fetchReports();
+
+    const reportsChannel = supabase
+      .channel('generated-reports-metadata-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'generated_reports_metadata' },
+        (payload) => {
+          console.log('New report metadata received!', payload);
+          toast.info('A new report has been generated. Refreshing list...');
+          fetchReports(); // Re-fetch reports when a new one is inserted
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(reportsChannel);
+    };
   }, []);
 
-  const handleDownload = (report: WeeklyReport) => {
+  const handleDownload = async (report: ReportMetadata) => {
+    if (!report.file_storage_path) {
+      toast.error("File path is missing for this report.");
+      return;
+    }
+    setIsDownloading(report.id);
     try {
-      const content = localStorage.getItem(report.path);
-      if (!content) {
-        toast.error('Report content not found');
-        return;
-      }
+      // Generate a signed URL for secure download (recommended for private buckets)
+      // Expires in 1 hour (3600 seconds)
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('client-reports') // Ensure this is your bucket name
+        .createSignedUrl(report.file_storage_path, 3600);
 
-      const blob = new Blob([content], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = report.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (signedUrlError) throw signedUrlError;
+
+      const link = document.createElement('a');
+      link.href = signedUrlData.signedUrl;
+      // Extract filename from path or use report_name
+      link.download = report.report_name || report.file_storage_path.split('/').pop() || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
-      toast.success(`Downloaded ${report.filename}`);
-    } catch (error) {
+      toast.success(`Downloading ${report.report_name}...`);
+
+    } catch (error: any) {
       console.error('Download error:', error);
-      toast.error('Failed to download report');
+      toast.error(`Failed to download report: ${error.message}`);
+    } finally {
+      setIsDownloading(null);
     }
   };
 
-  const getReportType = (filename: string): string => {
-    if (filename.includes('.pdf')) return 'PDF';
-    if (filename.includes('.md')) return 'Markdown';
-    return 'Unknown';
+  const getReportTypeDisplay = (reportType: string): string => {
+    if (reportType.toLowerCase().includes('pdf')) return 'PDF Document';
+    if (reportType.toLowerCase().includes('markdown')) return 'Markdown Document';
+    return reportType || 'Unknown';
   };
 
-  const getFileSize = (path: string): string => {
-    try {
-      const content = localStorage.getItem(path);
-      if (!content) return 'Unknown';
-      const sizeInBytes = new Blob([content]).size;
-      if (sizeInBytes < 1024) return `${sizeInBytes} B`;
-      if (sizeInBytes < 1024 * 1024) return `${Math.round(sizeInBytes / 1024)} KB`;
-      return `${Math.round(sizeInBytes / (1024 * 1024))} MB`;
-    } catch {
-      return 'Unknown';
-    }
+  const getFileSizeDisplay = (sizeInBytes?: number | null): string => {
+    if (sizeInBytes == null) return 'N/A';
+    if (sizeInBytes < 1024) return `${sizeInBytes} B`;
+    if (sizeInBytes < 1024 * 1024) return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
@@ -90,8 +129,8 @@ const ReportsList = () => {
               <h1 className="text-4xl font-bold text-white mb-2">Client Reports</h1>
               <p className="text-slate-300">Weekly security reports and compliance documentation</p>
             </div>
-            <Button onClick={loadReports} disabled={loading} className="gap-2">
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <Button onClick={fetchReports} disabled={isLoading} className="gap-2">
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
@@ -110,57 +149,67 @@ const ReportsList = () => {
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="bg-blue-500/20 text-blue-200">
-                {reports.length} Reports Available
+                {reports.length} Report{reports.length === 1 ? '' : 's'} Available
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
-            {reports.length > 0 ? (
+            {isLoading && (
+              <div className="text-center py-12 text-slate-300">
+                <RefreshCw className="w-8 h-8 mx-auto animate-spin mb-3" />
+                Loading reports...
+              </div>
+            )}
+            {!isLoading && reports.length > 0 ? (
               <div className="rounded-lg border border-white/20 bg-white/5">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/20 hover:bg-white/5">
-                      <TableHead className="text-slate-300">Report Period</TableHead>
-                      <TableHead className="text-slate-300">Filename</TableHead>
+                      <TableHead className="text-slate-300">Report Name</TableHead>
+                      <TableHead className="text-slate-300">Period</TableHead>
                       <TableHead className="text-slate-300">Type</TableHead>
                       <TableHead className="text-slate-300">Size</TableHead>
-                      <TableHead className="text-slate-300">Generated</TableHead>
+                      <TableHead className="text-slate-300">Generated At</TableHead>
                       <TableHead className="text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reports.map((report, index) => (
-                      <TableRow key={index} className="border-white/20 hover:bg-white/5">
+                    {reports.map((report) => (
+                      <TableRow key={report.id} className="border-white/20 hover:bg-white/5">
                         <TableCell className="text-white font-medium">
+                           {report.report_name}
+                        </TableCell>
+                        <TableCell className="text-slate-300">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-blue-400" />
-                            {report.date}
+                            {dayjs(report.period_start_date).format('DD MMM')} - {dayjs(report.period_end_date).format('DD MMM YYYY')}
                           </div>
-                        </TableCell>
-                        <TableCell className="text-slate-300 font-mono text-sm">
-                          {report.filename}
                         </TableCell>
                         <TableCell>
                           <Badge 
-                            variant={getReportType(report.filename) === 'PDF' ? 'default' : 'secondary'}
-                            className="bg-green-500/20 text-green-200"
+                            variant={report.report_type.toLowerCase().includes('pdf') ? 'default' : 'secondary'}
+                            className={report.report_type.toLowerCase().includes('pdf') ? "bg-green-500/20 text-green-200" : "bg-sky-500/20 text-sky-200"}
                           >
-                            {getReportType(report.filename)}
+                            {getReportTypeDisplay(report.report_type)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-slate-300">
-                          {getFileSize(report.path)}
+                          {getFileSizeDisplay(report.file_size_bytes)}
                         </TableCell>
                         <TableCell className="text-slate-300">
-                          {dayjs().format('MMM DD, YYYY')}
+                          {dayjs(report.generation_date).format('DD MMM YYYY HH:mm')}
                         </TableCell>
                         <TableCell>
                           <Button
                             onClick={() => handleDownload(report)}
                             size="sm"
                             className="gap-2 bg-blue-600 hover:bg-blue-700"
+                            disabled={isDownloading === report.id}
                           >
-                            <Download className="w-4 h-4" />
+                            {isDownloading === report.id ?
+                              <RefreshCw className="w-4 h-4 animate-spin" /> :
+                              <Download className="w-4 h-4" />
+                            }
                             Download
                           </Button>
                         </TableCell>
@@ -169,7 +218,7 @@ const ReportsList = () => {
                   </TableBody>
                 </Table>
               </div>
-            ) : (
+            ) : !isLoading && (
               <div className="text-center py-12">
                 <FileText className="w-16 h-16 mx-auto text-slate-400 mb-4" />
                 <h3 className="text-xl font-medium text-white mb-2">No Reports Available</h3>

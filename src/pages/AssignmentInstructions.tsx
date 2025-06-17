@@ -2,15 +2,39 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Home, ArrowLeft, RotateCcw, FileText } from "lucide-react";
+import { Bot, Home, ArrowLeft, RotateCcw, FileText, RefreshCw } from "lucide-react"; // Added RefreshCw
 import { cn } from "@/lib/utils";
-import { centralData, type Topic } from "@/data/centralData";
+// Removed: import { centralData, type Topic } from "@/data/centralData";
+import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { toast } from "sonner"; // Import toast
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Define Topic structure based on Supabase table and nesting requirement
+export interface Topic {
+  id: string;
+  label: string;
+  response: string;
+  parent_id: string | null;
+  sort_order?: number;
+  subTopics?: Topic[]; // Client-side constructed hierarchy
+}
 
 type Message = {
   sender: 'user' | 'ai';
   text: string;
 };
+
+// Helper function to build the topic tree
+const buildTopicTree = (topics: Topic[], parentId: string | null = null): Topic[] => {
+  return topics
+    .filter(topic => topic.parent_id === parentId)
+    .map(topic => ({
+      ...topic,
+      subTopics: buildTopicTree(topics, topic.id),
+    }))
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || a.label.localeCompare(b.label));
+};
+
 
 const AssignmentInstructions = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -18,8 +42,45 @@ const AssignmentInstructions = () => {
   ]);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [currentTopics, setCurrentTopics] = useState<Topic[]>(centralData.assignmentTopics);
-  const [history, setHistory] = useState<Topic[][]>([centralData.assignmentTopics]);
+
+  const [allTopicsFlat, setAllTopicsFlat] = useState<Topic[]>([]); // Store flat list from DB
+  const [currentTopics, setCurrentTopics] = useState<Topic[]>([]); // Hierarchical, for display
+  const [history, setHistory] = useState<Topic[][]>([]);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(true);
+  const [initialTopics, setInitialTopics] = useState<Topic[]>([]); // To store root of the tree
+
+  const fetchTopics = async () => {
+    setIsLoadingTopics(true);
+    try {
+      const { data, error } = await supabase
+        .from('knowledge_base_topics')
+        .select('id, label, response, parent_id, sort_order')
+        .order('parent_id', { nullsFirst: true }) // Important for tree building logic
+        .order('sort_order')
+        .order('label');
+
+      if (error) throw error;
+
+      setAllTopicsFlat(data || []);
+      const topicTree = buildTopicTree(data || []);
+      setInitialTopics(topicTree); // Store the root for reset
+      setCurrentTopics(topicTree);
+      setHistory([topicTree]);
+
+    } catch (err: any) {
+      console.error("Error fetching knowledge base topics:", err);
+      toast.error("Failed to load instructions topics.");
+      setCurrentTopics([]);
+      setHistory([]);
+    } finally {
+      setIsLoadingTopics(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopics();
+  }, []);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
