@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input'; // Keep for fallback if needed, but Select is primary
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,30 +10,75 @@ import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { checkBreakStatus } from '@/api/break-check';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { toast } from 'sonner'; // Import sonner toast
+import dayjs from 'dayjs'; // Import dayjs for current time
+import { loadRotaData, Shift } from '@/utils/rotaStore'; // For guard names
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Import Select
 
 const BreakChecker = () => {
-  const [guardName, setGuardName] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [currentTime, setCurrentTime] = useState('');
+  const [guardName, setGuardName] = useState(''); // This will store the selected guard's name
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Default to today
+  const [currentTime, setCurrentTime] = useState<string>(dayjs().format('HH:mm')); // Default to current time
   const [breakStatus, setBreakStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableGuards, setAvailableGuards] = useState<string[]>([]);
+
+  useEffect(() => {
+    const rota = loadRotaData();
+    const uniqueGuardNames = Array.from(new Set(rota.map((shift: Shift) => shift.guardName))).sort();
+    setAvailableGuards(uniqueGuardNames);
+    if (uniqueGuardNames.length > 0 && !guardName) {
+      // Optionally pre-select first guard or leave empty
+      // setGuardName(uniqueGuardNames[0]);
+    }
+  }, [guardName]); // Re-run if guardName changes to allow clearing if needed
 
   const checkBreak = async () => {
     if (!guardName || !selectedDate || !currentTime) {
+      toast.error("Please select guard, date, and time.");
       return;
     }
 
     setIsLoading(true);
+    setBreakStatus(null); // Clear previous status
+    let result; // To store result from checkBreakStatus
+
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      const result = await checkBreakStatus({
+      const dateStr = dayjs(selectedDate).format('YYYY-MM-DD'); // Format date correctly
+      result = await checkBreakStatus({
         guardName: guardName.trim(),
         date: dateStr,
         currentTime
       });
       setBreakStatus(result);
+
+      // Log the check to Supabase (best-effort)
+      const { data: { user: checkerUser } } = await supabase.auth.getUser();
+      if (checkerUser && result) { // Ensure result is available
+        const logData = {
+          queried_guard_name: guardName.trim(),
+          queried_date: dateStr,
+          queried_time: currentTime,
+          status_on_break: result.onBreak,
+          status_message: result.message,
+          user_id_performing_check: checkerUser.id,
+          // site_id: null, // Add if site context becomes available
+        };
+        const { error: logError } = await supabase.from('break_check_queries').insert(logData);
+        if (logError) {
+          console.error("Error logging break check query:", logError);
+          toast.warning("Break status checked, but failed to log the query action.");
+        } else {
+          toast.info("Break check query logged.");
+        }
+      } else if (!checkerUser) {
+        toast.warning("Break status checked, but could not log query (user not authenticated).");
+      }
+
     } catch (error) {
       console.error('Error checking break status:', error);
+      toast.error("Failed to check break status.");
     } finally {
       setIsLoading(false);
     }
@@ -61,13 +106,21 @@ const BreakChecker = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="guardName">Guard Name</Label>
-              <Input
-                id="guardName"
-                value={guardName}
-                onChange={(e) => setGuardName(e.target.value)}
-                placeholder="Enter your name"
-              />
+              <Label htmlFor="guardNameSelect">Guard Name</Label>
+              <Select value={guardName} onValueChange={setGuardName}>
+                <SelectTrigger id="guardNameSelect">
+                  <SelectValue placeholder="Select guard name" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableGuards.length > 0 ? (
+                    availableGuards.map(name => (
+                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-4 text-sm text-muted-foreground">No guards found in rota.</div>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
