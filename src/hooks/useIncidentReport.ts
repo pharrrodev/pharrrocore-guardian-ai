@@ -15,6 +15,7 @@ export interface FormData {
     contact: string;
   }>;
   actionsTaken: string;
+  otherActionDetails?: string; // New field for "Other" action details
   witnesses: Array<{
     name: string;
     contact: string;
@@ -25,6 +26,7 @@ export interface FormData {
   policeDetails: string;
   followUpRequired: boolean;
   followUpDetails: string;
+  // Removed: otherActionDetails: ''; (it was incorrectly placed in the interface)
 }
 
 export const useIncidentReport = () => {
@@ -52,7 +54,8 @@ export const useIncidentReport = () => {
     policeInvolved: false,
     policeDetails: '',
     followUpRequired: false,
-    followUpDetails: ''
+    followUpDetails: '',
+    otherActionDetails: '' // Correctly initialize new field in the state object
   });
 
   const updateFormData = (data: Partial<FormData>) => {
@@ -113,6 +116,12 @@ export const useIncidentReport = () => {
     if (formData.followUpRequired && !formData.followUpDetails.trim()) {
       warnings.push('Follow-up required but no details provided');
     }
+    // Add warning for "Other" action details if "Other" is selected and details are empty
+    // Assuming actionsTaken could be a string like "Other" or "Action1, Other, Action2"
+    if (typeof formData.actionsTaken === 'string' && formData.actionsTaken.toLowerCase().includes('other') && !formData.otherActionDetails?.trim()) {
+      warnings.push('Action "Other" selected but no details provided for it in the dedicated field');
+    }
+
 
     if (warnings.length > 0) {
       setValidationMessage(`Warning: ${warnings.join(', ')}. Do you want to proceed?`);

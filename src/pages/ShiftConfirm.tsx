@@ -9,6 +9,7 @@ import { Check, X, Home, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shift, guards } from '@/data/rota-data';
 import { loadRotaData, loadConfirmations } from '@/utils/rotaStore';
@@ -54,15 +55,29 @@ const ShiftConfirm = () => {
   };
 
   const handleConfirmation = async (shift: Shift, confirmed: boolean) => {
-    if (!guardId.trim()) {
-      toast.error('Please select a guard');
+    // guardId from state is the one selected in dropdown.
+    // For shift_activities, we need auth.uid() due to RLS.
+    // The existing confirmShift API might handle its own auth or use the passed guardId.
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("You must be logged in to confirm shifts.");
+      return;
+    }
+    const authenticatedUserId = user.id;
+
+    // Note: The existing guardId from dropdown is used for the confirmShift API
+    // This might need reconciliation if confirmShift also expects auth.uid() implicitly
+    if (!guardId.trim() && !authenticatedUserId) { // Check both if one could be empty
+      toast.error('Guard information is missing.');
       return;
     }
 
     try {
+      // Existing call to update rota (presumably)
       const response = await confirmShift({
-        guardId: guardId.trim(),
-        guardName: guardName,
+        guardId: guardId.trim(), // guardId from dropdown selection
+        guardName: guardName,    // guardName from dropdown selection
         date: shift.date,
         shiftId: shift.id,
         confirmed
@@ -70,7 +85,30 @@ const ShiftConfirm = () => {
 
       if (response.status === 'ok') {
         toast.success(confirmed ? 'Shift confirmed!' : 'Shift declined');
-        // Reload confirmations
+
+        // Now, log to shift_activities using authenticated user's ID
+        const activityType = confirmed ? 'Shift Confirmed' : 'Shift Declined';
+        const notes = `${activityType} for position ${shift.position} from ${shift.startTime} to ${shift.endTime}. Original Guard in Rota: ${guardName} (ID: ${guardId})`;
+
+        const { error: activityError } = await supabase
+          .from('shift_activities')
+          .insert({
+            guard_id: authenticatedUserId, // This MUST be auth.uid() due to RLS
+            activity_type: activityType,
+            "timestamp": new Date().toISOString(),
+            shift_id: shift.id, // Assuming shift.id is the UUID for the shift
+            site_id: shift.siteId || null, // Assuming shift.siteId exists
+            notes: notes,
+          });
+
+        if (activityError) {
+          console.error('Error logging shift activity:', activityError);
+          toast.error(`Confirmation saved, but failed to log activity: ${activityError.message}`);
+        } else {
+          toast.info("Shift activity logged.");
+        }
+
+        // Reload confirmations from localStorage (or wherever loadConfirmations reads from)
         const updatedConfirmations = loadConfirmations();
         setConfirmations(updatedConfirmations);
       } else {

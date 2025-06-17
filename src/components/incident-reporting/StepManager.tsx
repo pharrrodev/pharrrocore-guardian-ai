@@ -24,11 +24,11 @@ const StepManager: React.FC<StepManagerProps> = ({ currentStep, formData, update
         case 4:
             return <Step4IncidentType formData={formData} updateFormData={updateFormData} />;
         case 5:
-            return <Step6PeopleInvolved formData={formData} updateFormData={updateFormData} />;
-        case 6:
-            return <Step7ActionsTaken formData={formData} updateFormData={updateFormData} />;
-        case 7:
             return <Step5Description formData={formData} updateFormData={updateFormData} />;
+        case 6:
+            return <Step6PeopleInvolved formData={formData} updateFormData={updateFormData} />;
+        case 7:
+            return <Step7ActionsTaken formData={formData} updateFormData={updateFormData} />;
         default:
             return null;
     }

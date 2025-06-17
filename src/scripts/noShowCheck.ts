@@ -1,201 +1,195 @@
 
 import dayjs from 'dayjs';
-import { loadRotaData } from '@/utils/rotaStore';
-import { guards } from '@/data/rota-data';
+import { supabase } from '@/lib/supabaseClient'; // Assuming supabase client is configured
 
-export interface NoShowAlert {
-  id: string;
-  guardId: string;
-  guardName: string;
-  date: string;
-  shiftStartTime: string;
-  alertTime: string;
+// Define types based on expected Supabase table structures
+interface RotaEntry {
+  id: string; // This is shift_id
+  guard_id: string;
+  date: string; // 'YYYY-MM-DD'
+  start_time: string; // 'HH:MM'
+  site_id: string | null;
+  // Add other relevant fields from your 'rota' table, e.g., status
+  // status?: string; // e.g., 'Confirmed', 'Pending Confirmation'
 }
 
-export interface ShiftStartLog {
-  id: string;
-  guardId: string;
-  timestamp: string;
-  action: string;
+interface ShiftActivity {
+  guard_id: string;
+  activity_type: string;
+  "timestamp": string; // ISO string
+  shift_id: string;
+}
+
+interface ExistingNoShowAlert {
+  guard_id: string;
+  expected_shift_start_time: string; // ISO string for the specific shift instance
+  shift_id: string; // To uniquely identify the shift instance
 }
 
 // Get grace period from environment or default to 10 minutes
-const GRACE_PERIOD_MINUTES = parseInt(import.meta.env.VITE_GRACE_PERIOD_MINUTES || '10');
+// For a backend script, use process.env.GRACE_PERIOD_MINUTES
+const GRACE_PERIOD_MINUTES = parseInt(process.env.GRACE_PERIOD_MINUTES || '10');
 
-// Helper function to parse CSV data to ShiftStartLog objects
-const parseShiftStartLogs = (csvData: string): ShiftStartLog[] => {
-  console.log('Raw CSV data:', csvData);
-  
-  if (!csvData || csvData.trim() === '') {
-    console.log('No CSV data found');
-    return [];
-  }
-  
-  try {
-    const lines = csvData.trim().split('\n');
-    console.log('CSV lines:', lines);
-    
-    if (lines.length <= 1) {
-      console.log('No data rows in CSV');
-      return [];
-    }
-    
-    // Skip header row and parse each line
-    const logs = lines.slice(1).map((line, index) => {
-      console.log(`Processing line ${index + 1}:`, line);
-      
-      const parts = line.split(',');
-      if (parts.length < 4) {
-        console.warn('Malformed CSV line (too few parts):', line, 'Parts:', parts);
-        return null;
-      }
-      
-      const [id, guardId, guardName, action, timestamp] = parts.map(p => p?.trim() || '');
-      
-      const log = {
-        id,
-        guardId,
-        timestamp,
-        action
-      };
-      
-      console.log('Parsed log:', log);
-      return log;
-    }).filter(log => log !== null && log.action === 'Shift Start') as ShiftStartLog[];
-    
-    console.log('Filtered shift start logs:', logs);
-    return logs;
-  } catch (error) {
-    console.error('Error parsing shift start logs:', error);
-    return [];
-  }
-};
-
-export const checkNoShows = (): NoShowAlert[] => {
+export const checkNoShows = async (): Promise<void> => {
   console.log('=== Starting No-Show Check ===');
   const now = dayjs();
-  const alerts: NoShowAlert[] = [];
-  
-  // Load rota data
-  console.log('Loading rota data...');
-  const rotaShifts = loadRotaData();
-  console.log('Rota shifts loaded:', rotaShifts);
-  
-  // Load existing shift start logs from localStorage (CSV format)
-  let shiftStartLogs: ShiftStartLog[] = [];
-  try {
-    console.log('Loading shift start logs...');
-    const csvData = localStorage.getItem('logs/shiftStart.csv');
-    console.log('Raw shift start data from localStorage:', csvData);
-    
-    if (csvData) {
-      shiftStartLogs = parseShiftStartLogs(csvData);
-    }
-    console.log('Parsed shift start logs:', shiftStartLogs);
-  } catch (error) {
-    console.error('Error loading shift start logs:', error);
-    shiftStartLogs = [];
+  const newAlertsToInsert: any[] = [];
+
+  // 1. Fetch upcoming/recent shifts from Supabase 'rota' table
+  //    Adjust filters as needed (e.g., shifts starting in the last X hours and next Y hours)
+  //    For this example, we'll look for shifts that should have started recently.
+  const relevantPeriodStart = now.subtract(2, 'hour').toISOString();
+  const relevantPeriodEnd = now.add(GRACE_PERIOD_MINUTES + 5, 'minute').toISOString(); // Shifts that should be starting or just started
+
+  console.log(`Fetching rota shifts between ${relevantPeriodStart} and ${relevantPeriodEnd}`);
+  const { data: rotaShifts, error: rotaError } = await supabase
+    .from('rota') // Assuming your rota table is named 'rota'
+    .select('id, guard_id, date, start_time, site_id, status') // Adjust columns as needed
+    // .eq('status', 'Confirmed') // Optionally, only check confirmed shifts
+    .gte('date', now.subtract(1, 'day').format('YYYY-MM-DD')) // Optimization: limit date range
+    .lte('date', now.format('YYYY-MM-DD'));
+    // Further filtering by combining date and start_time to form a full timestamp
+    // might be needed if 'start_time' doesn't make 'date' redundant for this comparison window.
+
+  if (rotaError) {
+    console.error('Error fetching rota data:', rotaError);
+    return;
   }
+  if (!rotaShifts || rotaShifts.length === 0) {
+    console.log('No relevant rota shifts found.');
+    return;
+  }
+  console.log(`Found ${rotaShifts.length} potentially relevant rota shifts.`);
+
+  // Filter shifts more precisely based on their actual start datetime
+  const shiftsToCheck = rotaShifts.filter(shift => {
+    const shiftDateTime = dayjs(`${shift.date}T${shift.start_time}`); // Ensure this parsing is correct for your time format
+    return shiftDateTime.isAfter(now.subtract(2, 'hour')) && shiftDateTime.isBefore(now.add(GRACE_PERIOD_MINUTES + 5, 'minute'));
+  });
+
+  if (shiftsToCheck.length === 0) {
+    console.log('No shifts fall into the precise check window.');
+    return;
+  }
+  console.log(`Processing ${shiftsToCheck.length} shifts in the precise check window.`);
+
+
+  // 2. Fetch recent shift start activities from `shift_activities`
+  const activityCheckStartTime = now.subtract(3, 'hour').toISOString(); // Check activities in a wider window
+  const { data: shiftActivities, error: activityError } = await supabase
+    .from('shift_activities')
+    .select('guard_id, activity_type, timestamp, shift_id')
+    .in('activity_type', ['Shift Confirmed', 'Shift Start', 'Check Call']) // Relevant activities
+    .gte('timestamp', activityCheckStartTime);
+
+  if (activityError) {
+    console.error('Error fetching shift activities:', activityError);
+    return;
+  }
+  const activitiesMap = new Map<string, ShiftActivity[]>();
+  (shiftActivities || []).forEach(act => {
+    const key = `${act.guard_id}-${act.shift_id}`; // Or just guard_id if shift_id is not always present/reliable
+    if (!activitiesMap.has(key)) activitiesMap.set(key, []);
+    activitiesMap.get(key)!.push(act);
+  });
+
+
+  // 3. Fetch existing no-show alerts for relevant shifts to avoid duplicates
+  const alertCheckStartTime = now.subtract(3, 'hour').toISOString(); // Check alerts in a wider window
+  const { data: existingAlertsData, error: existingAlertsError } = await supabase
+    .from('no_show_alerts')
+    .select('guard_id, shift_id, expected_shift_start_time')
+    .gte('expected_shift_start_time', alertCheckStartTime);
   
-  // Load existing no-show alerts to avoid duplicates
-  console.log('Loading existing no-show alerts...');
-  const existingAlerts: NoShowAlert[] = getNoShowAlerts();
-  console.log('Existing alerts:', existingAlerts);
-  
-  // Check each shift that should have started in the last 10 minutes
-  console.log('Checking shifts for no-shows...');
-  rotaShifts.forEach((shift, index) => {
-    console.log(`Checking shift ${index + 1}:`, shift);
-    
-    const shiftDateTime = dayjs(`${shift.date} ${shift.startTime}`);
+  if (existingAlertsError) {
+    console.error('Error fetching existing no-show alerts:', existingAlertsError);
+    return;
+  }
+  const existingAlertsSet = new Set(
+    (existingAlertsData || []).map(a => `${a.guard_id}-${a.shift_id}`) // Use shift_id for uniqueness
+  );
+
+
+  // 4. Logic to determine no-shows
+  for (const shift of shiftsToCheck) {
+    const shiftDateTime = dayjs(`${shift.date}T${shift.start_time}`); // Ensure TZ consistency if applicable
     const gracePeriodEnd = shiftDateTime.add(GRACE_PERIOD_MINUTES, 'minute');
-    
-    console.log(`Shift time: ${shiftDateTime.format()}, Grace period ends: ${gracePeriodEnd.format()}, Current time: ${now.format()}`);
-    
-    // Only check shifts where grace period has ended but not too old (within last hour)
-    if (now.isAfter(gracePeriodEnd) && now.isBefore(shiftDateTime.add(1, 'hour'))) {
-      console.log('Shift is within check window');
+
+    console.log(`Checking shift: Guard ${shift.guard_id}, Shift ID ${shift.id}, Expected Start: ${shiftDateTime.format()}`);
+    console.log(`Grace period ends: ${gracePeriodEnd.format()}, Current time: ${now.format()}`);
+
+    if (now.isAfter(gracePeriodEnd)) { // Check only if grace period has passed
+      const alertKey = `${shift.guard_id}-${shift.id}`;
+      if (existingAlertsSet.has(alertKey)) {
+        console.log(`Alert already exists for Guard ${shift.guard_id}, Shift ID ${shift.id}. Skipping.`);
+        continue;
+      }
+
+      const guardActivitiesKey = `${shift.guard_id}-${shift.id}`; // Key to look up activities
+      const guardRecentActivities = activitiesMap.get(guardActivitiesKey) || [];
       
-      // Check if guard has logged shift start
-      const hasCheckedIn = shiftStartLogs.some(log => {
-        const logTime = dayjs(log.timestamp);
-        const isMatch = log.guardId === shift.guardId && 
-               logTime.isAfter(shiftDateTime.subtract(5, 'minute')) && // Allow 5 min early
-               logTime.isBefore(gracePeriodEnd);
-        
-        if (log.guardId === shift.guardId) {
-          console.log(`Checking log for ${log.guardId}: ${logTime.format()} vs shift ${shiftDateTime.format()} - Match: ${isMatch}`);
-        }
-        
-        return isMatch;
+      const hasCheckedIn = guardRecentActivities.some(activity => {
+        const activityTime = dayjs(activity.timestamp);
+        // Check if activity is within a window around shift start (e.g. 30 mins before to grace period end)
+        return activityTime.isAfter(shiftDateTime.subtract(30, 'minute')) &&
+               activityTime.isBefore(gracePeriodEnd);
       });
-      
-      console.log(`Guard ${shift.guardId} has checked in: ${hasCheckedIn}`);
-      
-      // Check if alert already exists for this shift
-      const alertExists = existingAlerts.some(alert => 
-        alert.guardId === shift.guardId && 
-        alert.date === shift.date && 
-        alert.shiftStartTime === shift.startTime
-      );
-      
-      console.log(`Alert already exists: ${alertExists}`);
-      
-      if (!hasCheckedIn && !alertExists) {
-        const guard = guards.find(g => g.id === shift.guardId);
-        const alert: NoShowAlert = {
-          id: crypto.randomUUID(),
-          guardId: shift.guardId,
-          guardName: guard?.name || 'Unknown Guard',
-          date: shift.date,
-          shiftStartTime: shift.startTime,
-          alertTime: now.toISOString()
-        };
-        
-        alerts.push(alert);
-        console.log(`🚨 NO-SHOW ALERT CREATED:`, alert);
+
+      if (!hasCheckedIn) {
+        console.log(`🚨 NO-SHOW DETECTED: Guard ${shift.guard_id} for Shift ID ${shift.id} (Expected: ${shiftDateTime.format()})`);
+        newAlertsToInsert.push({
+          guard_id: shift.guard_id,
+          expected_shift_start_time: shiftDateTime.toISOString(),
+          alert_time: now.toISOString(),
+          shift_id: shift.id, // This is rota.id
+          site_id: shift.site_id,
+          status: 'Pending',
+        });
+        existingAlertsSet.add(alertKey); // Add to set to prevent duplicate alerts in this run
+      } else {
+        console.log(`Guard ${shift.guard_id} for Shift ID ${shift.id} seems to have checked in.`);
       }
     } else {
-      console.log('Shift outside check window');
+      console.log(`Shift for Guard ${shift.guard_id}, Shift ID ${shift.id} is not yet past grace period.`);
     }
-  });
-  
-  // Save new alerts
-  if (alerts.length > 0) {
-    console.log('Saving new alerts:', alerts);
-    saveNoShowAlerts(alerts);
+  }
+
+  // 5. Insert new alerts into Supabase `no_show_alerts` table
+  if (newAlertsToInsert.length > 0) {
+    console.log(`Inserting ${newAlertsToInsert.length} new no-show alerts into Supabase...`);
+    const { error: insertError } = await supabase
+      .from('no_show_alerts')
+      .insert(newAlertsToInsert);
+
+    if (insertError) {
+      console.error('Error inserting no-show alerts:', insertError);
+    } else {
+      console.log(`${newAlertsToInsert.length} new no-show alerts inserted successfully.`);
+    }
   } else {
-    console.log('No new alerts to save');
+    console.log('No new no-show alerts to insert.');
   }
-  
+
   console.log('=== No-Show Check Complete ===');
-  return alerts;
 };
 
-export const getNoShowAlerts = (): NoShowAlert[] => {
-  try {
-    const stored = localStorage.getItem('logs/noShowAlerts.json');
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Error loading no-show alerts:', error);
-    return [];
-  }
-};
+// Example of how this might be run (e.g. in a cron job)
+// (async () => {
+//   // Ensure Supabase client is initialized, potentially with service key
+//   // if (!supabase.auth.session()) {
+//   //   // Initialize with service key if needed, or ensure environment variables are set for client
+//   //   console.log("Supabase client needs to be initialized, possibly with a service role for backend scripts.");
+//   //   // Example: global.supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+//   // }
+//   if (supabase) { // Check if supabase client is available
+//      await checkNoShows();
+//   } else {
+//      console.error("Supabase client not initialized. Cannot run noShowCheck.");
+//   }
+// })();
 
-export const saveNoShowAlerts = (newAlerts: NoShowAlert[]): void => {
-  try {
-    const existing = getNoShowAlerts();
-    const combined = [...existing, ...newAlerts];
-    localStorage.setItem('logs/noShowAlerts.json', JSON.stringify(combined));
-    console.log(`Saved ${newAlerts.length} new no-show alerts`);
-  } catch (error) {
-    console.error('Error saving no-show alerts:', error);
-  }
-};
 
-export const getAlertsLast24Hours = (): NoShowAlert[] => {
-  const alerts = getNoShowAlerts();
-  const yesterday = dayjs().subtract(24, 'hour');
-  
-  return alerts.filter(alert => dayjs(alert.alertTime).isAfter(yesterday));
-};
+// Old localStorage functions - to be removed or adapted if some client-side display remains for a bit
+// export const getNoShowAlerts = (): NoShowAlert[] => { ... };
+// export const saveNoShowAlerts = (newAlerts: NoShowAlert[]): void => { ... };
+// export const getAlertsLast24Hours = (): NoShowAlert[] => { ... };

@@ -55,13 +55,15 @@ export const emailFormat = async (request: EmailFormatRequest): Promise<EmailFor
             role: 'system',
             content: `You are a professional email formatter for security guards. Convert shorthand security messages into professional emails. Follow these guidelines:
             
-            1. Add a proper greeting using the recipient's name
-            2. Rewrite the message in professional language while keeping all important details
-            3. Maintain the factual content but improve grammar and clarity
-            4. Add a professional closing
-            5. Sign with the guard's name and "Security Team"
-            6. Keep it concise and to the point
-            7. Use appropriate security/facility management terminology`
+            1. Add a proper greeting using the recipient's name.
+            2. Rewrite the message in professional language while keeping all important details.
+            3. Maintain the factual content but improve grammar and clarity.
+            4. Add a professional closing.
+            5. Sign with the guard's name and "Security Team".
+            6. While being concise, ensure all critical details from the raw message are preserved. If the raw message is lengthy, summarize where appropriate without losing key facts. Avoid jargon where possible, opting for clear language.
+            7. Use appropriate security/facility management terminology.
+            8. Maintain a formal, respectful, and clear tone throughout the email.
+            9. If the raw message is too brief to draft a full professional email (e.g., lacks essential context or detail like specific times, locations, or actions if implied but not stated), politely state that more information is needed from the sender to accurately format the email, rather than inventing details. For example: 'The provided message is too brief to formulate a complete professional email. Please provide more details regarding [mention missing aspect if obvious, otherwise general request].'`
           },
           {
             role: 'user',

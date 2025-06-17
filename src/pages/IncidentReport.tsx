@@ -78,6 +78,7 @@ const IncidentReport = () => {
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
                 currentStep > 1 ? 'opacity-100' : 'invisible'
               }`}
+              aria-label="Previous step"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -98,6 +99,7 @@ const IncidentReport = () => {
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
                 currentStep < TOTAL_STEPS ? 'opacity-100' : 'invisible'
               }`}
+              aria-label="Next step"
             >
               <ArrowRight className="h-5 w-5" />
             </Button>

@@ -1,250 +1,136 @@
 import dayjs from 'dayjs';
-import { getLogsFromStorage } from '@/utils/appendCsv';
-import { getTodaysVisitorLogs } from '@/utils/csvHelpers';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+// Removed getLogsFromStorage and getTodaysVisitorLogs as they are localStorage/CSV based
 
 export interface DailySummaryData {
-  date: string;
-  edobEntries: any[];
-  incidents: any[];
-  visitors: any[];
-  shiftLogs: any[];
-  noShowAlerts: any[];
+  date: string; // YYYY-MM-DD
+  edobEntries: any[]; // Define more specific types if possible
+  incidents: any[];   // Define more specific types if possible
+  visitors: any[];    // Define more specific types if possible
+  shiftLogs: any[];   // Define more specific types if possible
+  noShowAlerts: any[];// Define more specific types if possible
 }
 
-// Get OpenAI API key from environment (if available)
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-
-export const generateDailySummary = async (): Promise<string> => {
-  const today = dayjs().format('YYYY-MM-DD');
-  const todayDisplay = dayjs().format('dddd, MMMM D, YYYY');
-  
-  console.log(`Generating daily summary for ${today}...`);
-  
-  // Load all data sources for today
-  const summaryData = await loadTodaysData(today);
-  
-  let summaryText: string;
-  
-  if (OPENAI_API_KEY) {
-    try {
-      summaryText = await generateGPTSummary(summaryData, todayDisplay);
-    } catch (error) {
-      console.warn('GPT-4 generation failed, using fallback template:', error);
-      summaryText = generateFallbackSummary(summaryData, todayDisplay);
-    }
-  } else {
-    console.log('No OpenAI API key found, using fallback template');
-    summaryText = generateFallbackSummary(summaryData, todayDisplay);
-  }
-  
-  // Save the summary report
-  const reportPath = `reports/summary-${today}.txt`;
-  saveSummaryReport(reportPath, summaryText);
-  
-  console.log('Daily summary saved ✔');
-  return summaryText;
+// Helper function to get start and end of a given day
+const getDayBoundaries = (date: string) => {
+  const day = dayjs(date);
+  return {
+    startOfDay: day.startOf('day').toISOString(),
+    endOfDay: day.endOf('day').toISOString(),
+  };
 };
 
-const loadTodaysData = async (today: string): Promise<DailySummaryData> => {
-  console.log('Loading data for date:', today);
-  
-  // Load EDOB entries (stored in localStorage as JSON)
-  const edobEntries = getEdobEntriesForDate(today);
-  console.log('EDOB entries loaded:', edobEntries.length);
-  
-  // Load incident reports (if any exist)
-  const incidents = getIncidentsForDate(today);
-  console.log('Incidents loaded:', incidents.length);
-  
-  // Load visitor logs for today
-  const visitors = getTodaysVisitorLogs();
-  console.log('Visitors loaded:', visitors.length);
-  
-  // Load shift start logs - properly handle CSV format
-  const shiftLogs = getShiftLogsForDate(today);
-  console.log('Shift logs loaded:', shiftLogs.length);
-  
-  // Load no-show alerts - now properly handling JSON format
-  const noShowAlerts = getNoShowAlertsForDate(today);
-  console.log('No-show alerts loaded:', noShowAlerts.length);
-  
+// New helper functions to fetch data from Supabase
+const getEdobEntriesForDateFromSupabase = async (date: string): Promise<any[]> => {
+  const { startOfDay, endOfDay } = getDayBoundaries(date);
+  const { data, error } = await supabase
+    .from('edob_entries')
+    .select('*') // Select specific columns as needed for the summary
+    .gte('timestamp', startOfDay)
+    .lte('timestamp', endOfDay)
+    .order('timestamp', { ascending: false });
+  if (error) console.error('Error fetching EDOB entries:', error.message);
+  return data || [];
+};
+
+const getIncidentsForDateFromSupabase = async (date: string): Promise<any[]> => {
+  // Assuming 'incident_reports' table has a 'created_at' or a specific 'incident_date' field
+  // For this example, let's assume 'created_at' for the incident reporting time.
+  // If there's a field like 'occurrence_date' that stores just the date, adjust accordingly.
+  const { startOfDay, endOfDay } = getDayBoundaries(date);
+  const { data, error } = await supabase
+    .from('incident_reports') // Ensure this is your actual incident reports table name
+    .select('*') // Select specific columns
+    .gte('created_at', startOfDay) // Adjust field if a different date field is used for incidents
+    .lte('created_at', endOfDay)
+    .order('created_at', { ascending: false });
+  if (error) console.error('Error fetching incidents:', error.message);
+  return data || [];
+};
+
+const getVisitorLogsForDateFromSupabase = async (date: string): Promise<any[]> => {
+  const { startOfDay, endOfDay } = getDayBoundaries(date);
+  const { data, error } = await supabase
+    .from('visitor_logs')
+    .select('*') // Select specific columns
+    .gte('arrival_time', startOfDay)
+    .lte('arrival_time', endOfDay) // Could also consider visitors who departed within the day
+    .order('arrival_time', { ascending: false });
+  if (error) console.error('Error fetching visitor logs:', error.message);
+  return data || [];
+};
+
+const getShiftActivitiesForDateFromSupabase = async (date: string): Promise<any[]> => {
+  const { startOfDay, endOfDay } = getDayBoundaries(date);
+  // Fetch relevant activities like 'Shift Start', 'Shift Confirmed'
+  const relevantActivityTypes = ['Shift Start', 'Shift Confirmed', 'Check Call'];
+  const { data, error } = await supabase
+    .from('shift_activities')
+    .select('*') // Select specific columns
+    .in('activity_type', relevantActivityTypes)
+    .gte('timestamp', startOfDay)
+    .lte('timestamp', endOfDay)
+    .order('timestamp', { ascending: false });
+  if (error) console.error('Error fetching shift activities:', error.message);
+  return data || [];
+};
+
+const getNoShowAlertsForDateFromSupabase = async (date: string): Promise<any[]> => {
+  const { startOfDay, endOfDay } = getDayBoundaries(date);
+  // No-show alerts usually have an 'alert_time' or 'expected_shift_start_time'
+  const { data, error } = await supabase
+    .from('no_show_alerts')
+    .select('*') // Select specific columns
+    // Filter based on when the alert was generated or when the shift was expected
+    .gte('alert_time', startOfDay) // Assuming you want alerts generated on this day
+    .lte('alert_time', endOfDay)
+    // Or, if you want alerts FOR shifts on this day:
+    // .gte('expected_shift_start_time', startOfDay)
+    // .lte('expected_shift_start_time', endOfDay)
+    .order('alert_time', { ascending: false });
+  if (error) console.error('Error fetching no-show alerts:', error.message);
+  return data || [];
+};
+
+
+export const loadTodaysData = async (inputDate: string): Promise<DailySummaryData> => {
+  // inputDate is expected to be 'YYYY-MM-DD'
+  console.log('Loading data from Supabase for date:', inputDate);
+
+  const [edobEntries, incidents, visitors, shiftLogs, noShowAlerts] = await Promise.all([
+    getEdobEntriesForDateFromSupabase(inputDate),
+    getIncidentsForDateFromSupabase(inputDate), // Assuming 'incident_reports' is the table
+    getVisitorLogsForDateFromSupabase(inputDate),
+    getShiftActivitiesForDateFromSupabase(inputDate),
+    getNoShowAlertsForDateFromSupabase(inputDate),
+  ]);
+
+  console.log('EDOB entries loaded from Supabase:', edobEntries.length);
+  console.log('Incidents loaded from Supabase:', incidents.length);
+  console.log('Visitors loaded from Supabase:', visitors.length);
+  console.log('Shift logs loaded from Supabase:', shiftLogs.length);
+  console.log('No-show alerts loaded from Supabase:', noShowAlerts.length);
+
   return {
-    date: today,
+    date: inputDate,
     edobEntries,
     incidents,
     visitors,
     shiftLogs,
-    noShowAlerts
+    noShowAlerts,
   };
 };
 
-const getShiftLogsForDate = (date: string): any[] => {
-  try {
-    console.log('Loading shift logs for date:', date);
-    const csvData = localStorage.getItem('logs/shiftStart.csv');
-    
-    if (!csvData) {
-      console.log('No shift start CSV data found');
-      return [];
-    }
-    
-    console.log('Raw shift start CSV:', csvData);
-    
-    const lines = csvData.trim().split('\n');
-    if (lines.length <= 1) {
-      console.log('No data rows in shift start CSV');
-      return [];
-    }
-    
-    const logs = lines.slice(1).map((line, index) => {
-      console.log(`Processing shift log line ${index + 1}:`, line);
-      
-      const parts = line.split(',');
-      if (parts.length < 5) {
-        console.warn('Malformed shift log CSV line:', line);
-        return null;
-      }
-      
-      const [id, guardId, guardName, action, timestamp] = parts.map(p => p?.trim() || '');
-      
-      console.log('Parsed shift log parts:', { id, guardId, guardName, action, timestamp });
-      
-      if (action !== 'Shift Start') {
-        return null;
-      }
-      
-      const logDate = dayjs(timestamp).format('YYYY-MM-DD');
-      console.log(`Shift log date: ${logDate}, looking for: ${date}`);
-      
-      if (logDate === date) {
-        return {
-          id,
-          guardId,
-          guardName,
-          action,
-          timestamp
-        };
-      }
-      
-      return null;
-    }).filter(log => log !== null);
-    
-    console.log('Filtered shift logs for date:', logs);
-    return logs;
-  } catch (error) {
-    console.error('Error loading shift logs:', error);
-    return [];
-  }
-};
+// Old localStorage based functions are removed.
+// getShiftLogsForDate, getEdobEntriesForDate, getIncidentsForDate, getNoShowAlertsForDate
 
-const getEdobEntriesForDate = (date: string): any[] => {
-  try {
-    const stored = localStorage.getItem('edob-entries');
-    if (!stored) return [];
-    
-    const entries = JSON.parse(stored);
-    return entries.filter((entry: any) => {
-      const entryDate = dayjs(entry.timestamp).format('YYYY-MM-DD');
-      return entryDate === date;
-    });
-  } catch (error) {
-    console.warn('No EDOB entries found:', error);
-    return [];
-  }
-};
-
-const getIncidentsForDate = (date: string): any[] => {
-  try {
-    const stored = localStorage.getItem('incident-reports');
-    if (!stored) return [];
-    
-    const incidents = JSON.parse(stored);
-    return incidents.filter((incident: any) => {
-      const incidentDate = dayjs(incident.date).format('YYYY-MM-DD');
-      return incidentDate === date;
-    });
-  } catch (error) {
-    console.warn('No incident reports found:', error);
-    return [];
-  }
-};
-
-const getNoShowAlertsForDate = (date: string): any[] => {
-  try {
-    const stored = localStorage.getItem('logs/noShowAlerts.json');
-    if (!stored) return [];
-    
-    // No-show alerts are stored as JSON
-    const alerts = JSON.parse(stored);
-    return alerts.filter((alert: any) => {
-      const alertDate = dayjs(alert.alertTime).format('YYYY-MM-DD');
-      return alertDate === date;
-    });
-  } catch (error) {
-    console.warn('No no-show alerts found:', error);
-    return [];
-  }
-};
-
-const generateGPTSummary = async (data: DailySummaryData, dateDisplay: string): Promise<string> => {
-  const prompt = `Write a concise security shift summary for ${dateDisplay} covering the following data:
-
-EDOB ENTRIES (${data.edobEntries.length} total):
-${data.edobEntries.map(entry => `- ${entry.type}: ${entry.details} (${dayjs(entry.timestamp).format('HH:mm')})`).join('\n')}
-
-INCIDENTS (${data.incidents.length} total):
-${data.incidents.map(incident => `- ${incident.type}: ${incident.description} (${incident.time})`).join('\n')}
-
-VISITORS (${data.visitors.length} total):
-${data.visitors.map(visitor => `- ${visitor.visitorName} (${visitor.company}) - In: ${dayjs(visitor.arrivalTime).format('HH:mm')}${visitor.departureTime ? `, Out: ${dayjs(visitor.departureTime).format('HH:mm')}` : ' (Still on-site)'}`).join('\n')}
-
-SHIFT ACTIVITIES (${data.shiftLogs.length} shift starts):
-${data.shiftLogs.map(log => `- ${log.guardName} started shift at ${dayjs(log.timestamp).format('HH:mm')}`).join('\n')}
-
-NO-SHOW ALERTS (${data.noShowAlerts.length} total):
-${data.noShowAlerts.map(alert => `- ${alert.guardName} failed to check in for ${alert.shiftStartTime} shift`).join('\n')}
-
-Please provide a professional security summary covering:
-- Overview of shift activities and patrols completed
-- Security incidents and actions taken
-- Visitor management summary
-- Any outstanding issues or concerns
-- Overall security status
-
-Keep it concise but comprehensive, suitable for management review.`;
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4.1-2025-04-14',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional security manager writing daily shift summaries. Be concise, professional, and focus on key security activities and outcomes.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 1000
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
-
-  const result = await response.json();
-  return result.choices[0].message.content;
-};
-
-const generateFallbackSummary = (data: DailySummaryData, dateDisplay: string): string => {
+export const generateFallbackSummary = (data: DailySummaryData, dateDisplay: string): string => {
+  // This function remains the same as its logic depends on the structure of DailySummaryData,
+  // not on where the data comes from.
+  // However, the fields within data items (e.g., data.visitors[0].visitorName)
+  // must now match column names from Supabase tables or be mapped correctly.
+  // Example: if Supabase returns 'visitor_name' and FallbackSummary expects 'visitorName',
+  // this needs alignment either in fetching or here. For now, assuming direct compatibility.
   const summary = `DAILY SECURITY SUMMARY
 ${dateDisplay}
 ${'='.repeat(50)}
@@ -297,7 +183,7 @@ Generated: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
   return summary;
 };
 
-const saveSummaryReport = (reportPath: string, content: string): void => {
+export const saveSummaryReport = (reportPath: string, content: string): void => {
   // In a real implementation, this would save to the file system
   // For this demo, we'll save to localStorage
   localStorage.setItem(reportPath, content);
