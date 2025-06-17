@@ -81,23 +81,16 @@ const FinancialTools = () => {
   const projectedShortfall = nextWeekPayroll - (mockCashFlowData[0]?.balance || 0);
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold flex items-center gap-3 mb-2">
-              <DollarSign className="w-10 h-10 text-green-500" />
-              Financial Tools & Cash Flow Management
-            </h1>
-            <p className="text-muted-foreground">
-              Advanced financial management, cash flow forecasting, and invoice processing
-            </p>
-          </div>
-          <Button asChild variant="ghost" size="icon">
-            <Link to="/" aria-label="Go to dashboard">
-              <Home className="h-5 w-5" />
-            </Link>
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold flex items-center gap-3 mb-2">
+            <DollarSign className="w-10 h-10 text-green-500" />
+            Financial Tools & Cash Flow Management
+          </h1>
+          <p className="text-muted-foreground">
+            Advanced financial management, cash flow forecasting, and invoice processing
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-4 mb-8">
