@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, DollarSign, TrendingUp, FileText, Clock, AlertTriangle, CheckCircle } from "lucide-react";
@@ -12,6 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+
+// Define proper types for our data
+interface MockInvoice {
+  id: string;
+  client: string;
+  amount: number;
+  dueDate: string;
+  status: string;
+  daysOverdue: number;
+}
 
 const FinancialTools = () => {
   const [invoices, setInvoices] = useState([]);
@@ -28,8 +37,8 @@ const FinancialTools = () => {
     { date: "Week 6", balance: 60000, inflow: 40000, outflow: -33000 },
   ];
 
-  // Mock invoice data
-  const mockInvoices = [
+  // Mock invoice data with proper typing
+  const mockInvoices: MockInvoice[] = [
     { id: "INV-001", client: "SecureTech Ltd", amount: 15000, dueDate: "2024-01-20", status: "Sent", daysOverdue: 0 },
     { id: "INV-002", client: "Metro Shopping Centre", amount: 8500, dueDate: "2024-01-15", status: "Overdue", daysOverdue: 8 },
     { id: "INV-003", client: "City Hospital", amount: 22000, dueDate: "2024-01-25", status: "Draft", daysOverdue: 0 },
@@ -304,7 +313,7 @@ const FinancialTools = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleInvoiceFinancing(invoice.id, Number(invoice.amount))}
+                            onClick={() => handleInvoiceFinancing(invoice.id, invoice.amount)}
                           >
                             Get Paid Now
                           </Button>
