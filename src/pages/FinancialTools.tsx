@@ -304,7 +304,7 @@ const FinancialTools = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleInvoiceFinancing(invoice.id, invoice.amount)}
+                            onClick={() => handleInvoiceFinancing(invoice.id, Number(invoice.amount))}
                           >
                             Get Paid Now
                           </Button>
