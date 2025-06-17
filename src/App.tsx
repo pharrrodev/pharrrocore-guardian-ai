@@ -4,8 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 import { ThemeProvider } from "@/components/theme-provider";
 import IncidentReport from "./pages/IncidentReport";
 import AssignmentInstructions from "./pages/AssignmentInstructions";
@@ -43,51 +46,59 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <SidebarProvider>
-            <div className="flex min-h-screen w-full">
-              <AppSidebar />
-              <SidebarInset className="flex-1">
-                <header className="flex h-14 items-center gap-4 border-b px-4 lg:px-6">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex-1" />
-                </header>
-                <main className="flex-1 overflow-auto">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/incident-reporting" element={<IncidentReport />} />
-                    <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
-                    <Route path="/instruction-generator" element={<InstructionGenerator />} />
-                    <Route path="/edob" element={<EDOB />} />
-                    <Route path="/uniform-check" element={<UniformCheck />} />
-                    <Route path="/break-checker" element={<BreakChecker />} />
-                    <Route path="/radio-handover" element={<RadioHandover />} />
-                    <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
-                    <Route path="/rota-builder" element={<RotaBuilder />} />
-                    <Route path="/shift-confirm" element={<ShiftConfirm />} />
-                    <Route path="/rota-dashboard" element={<RotaDashboard />} />
-                    <Route path="/visitor-form" element={<VisitorForm />} />
-                    <Route path="/visitor-log-today" element={<VisitorLogToday />} />
-                    <Route path="/training-dashboard" element={<TrainingDashboard />} />
-                    <Route path="/no-show-dashboard" element={<NoShowDashboard />} />
-                    <Route path="/daily-summary" element={<DailySummary />} />
-                    <Route path="/email-formatter" element={<EmailFormatter />} />
-                    <Route path="/reports-list" element={<ReportsList />} />
-                    <Route path="/licence-dashboard" element={<LicenceDashboard />} />
-                    <Route path="/payroll-variance" element={<PayrollVariance />} />
-                    <Route path="/tender-writer" element={<TenderWriter />} />
-                    <Route path="/admin-tools" element={<AdminTools />} />
-                    <Route path="/guard-welfare" element={<GuardWelfare />} />
-                    <Route path="/financial-tools" element={<FinancialTools />} />
-                    <Route path="/compliance-audit" element={<ComplianceAudit />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-              </SidebarInset>
-            </div>
-          </SidebarProvider>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/*" element={
+                <ProtectedRoute>
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AppSidebar />
+                      <SidebarInset className="flex-1">
+                        <header className="flex h-14 items-center gap-4 border-b px-4 lg:px-6">
+                          <SidebarTrigger className="-ml-1" />
+                          <div className="flex-1" />
+                        </header>
+                        <main className="flex-1 overflow-auto">
+                          <Routes>
+                            <Route path="/" element={<Index />} />
+                            <Route path="/incident-reporting" element={<IncidentReport />} />
+                            <Route path="/assignment-instructions" element={<AssignmentInstructions />} />
+                            <Route path="/instruction-generator" element={<InstructionGenerator />} />
+                            <Route path="/edob" element={<EDOB />} />
+                            <Route path="/uniform-check" element={<UniformCheck />} />
+                            <Route path="/break-checker" element={<BreakChecker />} />
+                            <Route path="/radio-handover" element={<RadioHandover />} />
+                            <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
+                            <Route path="/rota-builder" element={<RotaBuilder />} />
+                            <Route path="/shift-confirm" element={<ShiftConfirm />} />
+                            <Route path="/rota-dashboard" element={<RotaDashboard />} />
+                            <Route path="/visitor-form" element={<VisitorForm />} />
+                            <Route path="/visitor-log-today" element={<VisitorLogToday />} />
+                            <Route path="/training-dashboard" element={<TrainingDashboard />} />
+                            <Route path="/no-show-dashboard" element={<NoShowDashboard />} />
+                            <Route path="/daily-summary" element={<DailySummary />} />
+                            <Route path="/email-formatter" element={<EmailFormatter />} />
+                            <Route path="/reports-list" element={<ReportsList />} />
+                            <Route path="/licence-dashboard" element={<LicenceDashboard />} />
+                            <Route path="/payroll-variance" element={<PayrollVariance />} />
+                            <Route path="/tender-writer" element={<TenderWriter />} />
+                            <Route path="/admin-tools" element={<AdminTools />} />
+                            <Route path="/guard-welfare" element={<GuardWelfare />} />
+                            <Route path="/financial-tools" element={<FinancialTools />} />
+                            <Route path="/compliance-audit" element={<ComplianceAudit />} />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </main>
+                      </SidebarInset>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
