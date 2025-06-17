@@ -48,6 +48,11 @@ const FinancialTools = () => {
     { id: "INV-005", client: "Industrial Estate", amount: 18500, dueDate: "2024-01-30", status: "Sent", daysOverdue: 0 },
   ];
 
+  // Initialize invoices with mock data on component mount
+  useEffect(() => {
+    setInvoices(mockInvoices);
+  }, []);
+
   const getStatusBadge = (status: string, daysOverdue: number) => {
     switch (status) {
       case "Paid":
@@ -77,8 +82,8 @@ const FinancialTools = () => {
     toast.info(`Invoice financing integration coming soon. You could receive up to £${(amount * 0.9).toLocaleString()} within 24 hours.`);
   };
 
-  const totalReceivables = mockInvoices.reduce((sum, inv) => inv.status !== "Paid" ? sum + inv.amount : sum, 0);
-  const overdueAmount = mockInvoices.reduce((sum, inv) => inv.status === "Overdue" ? sum + inv.amount : sum, 0);
+  const totalReceivables = invoices.reduce((sum, inv) => inv.status !== "Paid" ? sum + inv.amount : sum, 0);
+  const overdueAmount = invoices.reduce((sum, inv) => inv.status === "Overdue" ? sum + inv.amount : sum, 0);
   const nextWeekPayroll = 28000; // Mock payroll calculation
   const projectedShortfall = nextWeekPayroll - (mockCashFlowData[0]?.balance || 0);
 
@@ -286,7 +291,7 @@ const FinancialTools = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockInvoices.map((invoice) => (
+                  {invoices.map((invoice) => (
                     <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-4">
