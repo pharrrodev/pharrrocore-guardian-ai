@@ -35,6 +35,7 @@ import AdminTools from "./pages/AdminTools";
 import GuardWelfare from "./pages/GuardWelfare";
 import FinancialTools from "./pages/FinancialTools";
 import ComplianceAudit from "./pages/ComplianceAudit";
+import EquipmentCheck from "./pages/EquipmentCheck";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 
@@ -69,6 +70,7 @@ const App = () => (
                             <Route path="/edob" element={<EDOB />} />
                             <Route path="/uniform-check" element={<UniformCheck />} />
                             <Route path="/break-checker" element={<BreakChecker />} />
+                            <Route path="/equipment-check" element={<EquipmentCheck />} />
                             <Route path="/radio-handover" element={<RadioHandover />} />
                             <Route path="/radio-handover-log" element={<RadioHandoverLog />} />
                             <Route path="/rota-builder" element={<RotaBuilder />} />
