@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { centralData } from "@/data/centralData";
 
@@ -89,4 +90,5 @@ export type EDOBEntry = {
     company?: string;
     alarmZone?: string;
     alarmType?: string;
+    guardName?: string;
 }
