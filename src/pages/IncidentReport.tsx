@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react'; // Import useState, useEffect
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // For error notifications
 
 import { useIncidentReport } from '@/hooks/useIncidentReport';

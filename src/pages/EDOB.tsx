@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FormValues } from "@/data/edob-types"; // EDOBEntry might be removed if not used locally
 import EDOBForm from "@/components/edob/EDOBForm";
 import EDOBLog from "@/components/edob/EDOBLog";
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase client
 import { toast } from "sonner"; // For notifications
 
 const EDOB = () => {

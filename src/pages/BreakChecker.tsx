@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { checkBreakStatus } from '@/api/break-check';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // Import sonner toast
 import dayjs from 'dayjs'; // Import dayjs for current time
 // Removed: import { loadRotaData, Shift } from '@/utils/rotaStore';

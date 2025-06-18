@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { generateInstructions } from "@/api/instruction-generate"; // This AI call is kept
 // Removed: import { saveInstructions } from "@/api/instruction-save";
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase
 // Assuming Topic interface from centralData is compatible or will be adjusted.
 // For now, the Edge Function expects { id, label, response, parent_id?, sort_order?, subTopics? }
 // Let's define a local Topic type that matches this expectation for clarity.

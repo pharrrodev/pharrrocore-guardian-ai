@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Bot, Home, ArrowLeft, RotateCcw, FileText, RefreshCw } from "lucide-react"; // Added RefreshCw
 import { cn } from "@/lib/utils";
 // Removed: import { centralData, type Topic } from "@/data/centralData";
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase
 import { toast } from "sonner"; // Import toast
 import { ScrollArea } from "@/components/ui/scroll-area";
 
