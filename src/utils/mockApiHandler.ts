@@ -3,7 +3,7 @@
 
 import { addTrainingRecord } from '@/api/training-add';
 import { generateKPIReport } from '@/scripts/kpiTracker';
-import { generateDailySummary } from '@/scripts/dailySummary';
+// import { generateDailySummary } from '@/scripts/dailySummary'; // Removed
 import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
 import { runLicenceChecker } from '@/scripts/licenceChecker';
 import { runPayrollValidator } from '@/scripts/payrollValidator';
@@ -74,9 +74,10 @@ window.fetch = async (url: string | URL | Request, options?: RequestInit): Promi
 
         case 'run-daily-summary':
           console.log('🔄 Running Daily Summary...');
-          result = await generateDailySummary();
-          console.log('✅ Daily Summary completed');
-          return new Response(JSON.stringify({ message: 'Daily summary generated successfully' }), {
+          // result = await generateDailySummary(); // Removed
+          result = { message: "Mock daily summary generated" }; // Placeholder
+          console.log('✅ Daily Summary completed (mocked)');
+          return new Response(JSON.stringify({ message: 'Daily summary generated successfully (mocked)' }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
           });

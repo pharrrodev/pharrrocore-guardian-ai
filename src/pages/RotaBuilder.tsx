@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import dayjs from 'dayjs'; // For date formatting
 
 // Define Shift interface matching Supabase table structure

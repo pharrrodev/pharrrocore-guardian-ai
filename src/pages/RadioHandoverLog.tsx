@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Radio, Handshake, RefreshCw, UserCircle, Users } from 'lucide-react';
 // Removed: import { getLogsFromStorage, RadioHandoverLogEntry } from '../utils/appendCsv';
 // Removed: import { rotaData } from '../data/rota-data';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
 

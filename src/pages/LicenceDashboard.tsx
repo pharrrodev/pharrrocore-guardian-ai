@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Calendar, Shield, RefreshCw, CheckCircle, UserCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { toast as sonnerToast } from 'sonner';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
