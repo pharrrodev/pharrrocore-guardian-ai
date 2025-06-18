@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { RadioGroupItem, RadioGroup } from '@/components/ui/radio-group';
-import { toast } from 'sonner'; // Correct import for sonner
-import { Radio, Handshake, ArrowLeft, Check, Users } from 'lucide-react'; // Added Users
+import { toast } from 'sonner';
+import { Radio, Handshake, ArrowLeft, Check, Users } from 'lucide-react';
 import { logRadioHandover } from '../api/radio-handover';
-// Removed: import { getTodaysLogs } from '../utils/appendCsv';
-// Removed: import { guards } from '../data/rota-data';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/lib/supabaseClient';
 import dayjs from 'dayjs';
 
 interface GuardUser {
-  id: string; // Supabase auth user ID
-  name: string; // Display name (e.g., email or full_name from metadata)
+  id: string;
+  name: string;
 }
 
 interface LogEntry {
@@ -38,8 +35,7 @@ const RadioHandover = () => {
   useEffect(() => {
     const fetchGuards = async () => {
       setIsFetchingGuards(true);
-      try { // Added try block here to catch errors properly
-        // Invoke the Edge Function to get the list of guards/users
+      try {
         const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
 
         if (functionsError) {
@@ -47,21 +43,16 @@ const RadioHandover = () => {
           toast.error("Failed to load guards list. Please try again later.");
           setGuardUsers([]);
         } else if (guardsData) {
-          // Edge function is expected to return [{id, name, email}]
-          // Map to GuardUser interface {id, name}
           const formattedGuards = guardsData.map((g: any) => ({
             id: g.id,
-            name: g.name || g.email, // Use name, fallback to email
+            name: g.name || g.email,
           }));
           setGuardUsers(formattedGuards);
         } else {
-          // No data and no error, unlikely but handle it
           setGuardUsers([]);
-          // THIS IS THE FIXED LINE:
           console.warn("No guards data returned from Edge Function, and no error reported.");
         }
       } catch (err) {
-        // Catch any other client-side errors during the fetch process
         console.error("Client-side error in fetchGuards:", err);
         toast.error("An unexpected error occurred while loading guards.");
         setGuardUsers([]);
@@ -121,17 +112,15 @@ const RadioHandover = () => {
 
     setIsLoading(true);
     try {
-      const response = await logRadioHandover({ // Now async
+      const response = await logRadioHandover({
         guard_id: selectedGuardSupabaseId,
         guard_name_logged: selectedGuardName,
         action,
         user_id_performed_log: currentUser.id,
-        // site_id: null, // TODO: Add site context if available
       });
 
       if (response.status === 'ok') {
         toast.success(`${action === 'radio' ? 'Radio test' : 'Handover'} logged successfully for ${selectedGuardName}`);
-        // Refresh today's logs by re-fetching
         const todayStart = dayjs().startOf('day').toISOString();
         const todayEnd = dayjs().endOf('day').toISOString();
         const { data: updatedLogsData, error: refetchError } = await supabase
@@ -154,10 +143,9 @@ const RadioHandover = () => {
 
   const hasLoggedRadio = todaysLogs.some(log => log.action === 'radio');
   const hasLoggedHandover = todaysLogs.some(log => log.action === 'handover');
-  
-  const lastRadioLog = todaysLogs.filter(log => log.action === 'radio').sort((a,b) => dayjs(b.log_timestamp).diff(dayjs(a.log_timestamp))).shift();
-  const lastHandoverLog = todaysLogs.filter(log => log.action === 'handover').sort((a,b) => dayjs(b.log_timestamp).diff(dayjs(a.log_timestamp))).shift();
 
+  const lastRadioLog = todaysLogs.filter(log => log.action === 'radio').sort((a, b) => dayjs(b.log_timestamp).diff(dayjs(a.log_timestamp))).shift();
+  const lastHandoverLog = todaysLogs.filter(log => log.action === 'handover').sort((a, b) => dayjs(b.log_timestamp).diff(dayjs(a.log_timestamp))).shift();
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -175,7 +163,6 @@ const RadioHandover = () => {
         </header>
 
         <div className="grid gap-6">
-          {/* Guard Selection */}
           <Card>
             <CardHeader>
               <CardTitle>Select Guard</CardTitle>
@@ -185,7 +172,7 @@ const RadioHandover = () => {
               {isFetchingGuards ? (
                 <p>Loading guards...</p>
               ) : guardUsers.length === 0 ? (
-                <p className="text-muted-foreground">No guards found or could not load guard list. Ensure admin rights for user listing or check 'profiles' table access.</p>
+                <p className="text-muted-foreground">No guards found or could not load guard list.</p>
               ) : (
                 <RadioGroup value={selectedGuardSupabaseId} onValueChange={handleGuardSelection}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -193,7 +180,7 @@ const RadioHandover = () => {
                       <div key={guard.id} className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded-md">
                         <RadioGroupItem value={guard.id} id={guard.id} />
                         <label htmlFor={guard.id} className="text-sm font-medium cursor-pointer flex items-center gap-2">
-                          <Users className="w-4 h-4 text-muted-foreground"/>
+                          <Users className="w-4 h-4 text-muted-foreground" />
                           {guard.name}
                         </label>
                       </div>
@@ -206,7 +193,6 @@ const RadioHandover = () => {
 
           {selectedGuardSupabaseId && (
             <>
-              {/* Action Buttons */}
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className={hasLoggedRadio ? 'border-green-500 bg-green-50 dark:bg-green-950/70' : ''}>
                   <CardHeader>
@@ -218,7 +204,7 @@ const RadioHandover = () => {
                           {hasLoggedRadio && <Check className="h-5 w-5 text-green-600" />}
                         </CardTitle>
                         <CardDescription>
-                          {hasLoggedRadio 
+                          {hasLoggedRadio
                             ? `Completed at ${dayjs(lastRadioLog?.log_timestamp).format('HH:mm')}`
                             : 'Press to confirm radio is working'
                           }
@@ -227,8 +213,8 @@ const RadioHandover = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button 
-                      onClick={() => handleAction('radio')} 
+                    <Button
+                      onClick={() => handleAction('radio')}
                       disabled={isLoading || isFetchingLogs}
                       className="w-full"
                       variant={hasLoggedRadio ? "secondary" : "default"}
@@ -248,7 +234,7 @@ const RadioHandover = () => {
                           {hasLoggedHandover && <Check className="h-5 w-5 text-green-600" />}
                         </CardTitle>
                         <CardDescription>
-                          {hasLoggedHandover 
+                          {hasLoggedHandover
                             ? `Completed at ${dayjs(lastHandoverLog?.log_timestamp).format('HH:mm')}`
                             : 'Press to confirm handover complete'
                           }
@@ -257,8 +243,8 @@ const RadioHandover = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button 
-                      onClick={() => handleAction('handover')} 
+                    <Button
+                      onClick={() => handleAction('handover')}
                       disabled={isLoading || isFetchingLogs}
                       className="w-full"
                       variant={hasLoggedHandover ? "secondary" : "default"}
@@ -269,7 +255,6 @@ const RadioHandover = () => {
                 </Card>
               </div>
 
-              {/* Today's Summary */}
               <Card>
                 <CardHeader>
                   <CardTitle>Today's Status for {selectedGuardName || "Selected Guard"}</CardTitle>
@@ -294,7 +279,6 @@ const RadioHandover = () => {
                 </CardContent>
               </Card>
 
-              {/* View Logs Link */}
               <div className="text-center">
                 <Button variant="outline" asChild>
                   <Link to="/radio-handover-log">View All Logs</Link>
