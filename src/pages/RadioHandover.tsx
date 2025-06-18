@@ -35,6 +35,7 @@ const RadioHandover = () => {
   useEffect(() => {
     const fetchGuards = async () => {
       setIsFetchingGuards(true);
+
       try {
         // Invoke the Edge Function to get the list of guards/users
         const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
@@ -298,3 +299,4 @@ const RadioHandover = () => {
 };
 
 export default RadioHandover;
+
