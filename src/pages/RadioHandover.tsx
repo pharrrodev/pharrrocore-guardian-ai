@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -39,36 +38,38 @@ const RadioHandover = () => {
   useEffect(() => {
     const fetchGuards = async () => {
       setIsFetchingGuards(true);
-      // Invoke the Edge Function to get the list of guards/users
-      const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
+      try { // Added try block here to catch errors properly
+        // Invoke the Edge Function to get the list of guards/users
+        const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
 
-      if (functionsError) {
-        console.error("Error fetching guards via Edge Function:", functionsError);
-        toast.error("Failed to load guards list. Please try again later.");
+        if (functionsError) {
+          console.error("Error fetching guards via Edge Function:", functionsError);
+          toast.error("Failed to load guards list. Please try again later.");
+          setGuardUsers([]);
+        } else if (guardsData) {
+          // Edge function is expected to return [{id, name, email}]
+          // Map to GuardUser interface {id, name}
+          const formattedGuards = guardsData.map((g: any) => ({
+            id: g.id,
+            name: g.name || g.email, // Use name, fallback to email
+          }));
+          setGuardUsers(formattedGuards);
+        } else {
+          // No data and no error, unlikely but handle it
+          setGuardUsers([]);
+          // THIS IS THE FIXED LINE:
+          console.warn("No guards data returned from Edge Function, and no error reported.");
+        }
+      } catch (err) {
+        // Catch any other client-side errors during the fetch process
+        console.error("Client-side error in fetchGuards:", err);
+        toast.error("An unexpected error occurred while loading guards.");
         setGuardUsers([]);
-      } else if (guardsData) {
-        // Edge function is expected to return [{id, name, email}]
-        // Map to GuardUser interface {id, name}
-        const formattedGuards = guardsData.map((g: any) => ({
-          id: g.id,
-          name: g.name || g.email, // Use name, fallback to email
-        }));
-        setGuardUsers(formattedGuards);
-      } else {
-        // No data and no error, unlikely but handle it
-        setGuardUsers([]);
-        console.warn("No guards data returned from Edge Function, and no error reported.");
+      } finally {
+        setIsFetchingGuards(false);
       }
-    } catch (err) {
-      // Catch any other client-side errors during the fetch process
-      console.error("Client-side error in fetchGuards:", err);
-      toast.error("An unexpected error occurred while loading guards.");
-      setGuardUsers([]);
-    } finally {
-      setIsFetchingGuards(false);
-    }
-  };
-  fetchGuards();
+    };
+    fetchGuards();
   }, []);
 
   // Fetch today's logs for the selected guard
