@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
 // Removed: import { appendCsvLine, RadioHandoverLogEntry } from '../utils/appendCsv';
 // Removed: import { guards } from '../data/rota-data';
 

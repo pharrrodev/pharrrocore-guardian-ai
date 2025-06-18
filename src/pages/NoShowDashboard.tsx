@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ArrowLeft, RefreshCw, Clock, Filter, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // For notifications
 
 // Define the structure for NoShowAlerts from Supabase

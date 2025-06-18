@@ -6,7 +6,7 @@ import { RadioGroupItem, RadioGroup } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Radio, Handshake, ArrowLeft, Check, Users } from 'lucide-react';
 import { logRadioHandover } from '../api/radio-handover';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import dayjs from 'dayjs';
 
 interface GuardUser {

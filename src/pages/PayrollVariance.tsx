@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, FileText, RefreshCw, UserCircle, Edit3, CheckSquare } from 'lucide-react'; // Added icons
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // Import sonner
 import dayjs from 'dayjs'; // For date formatting
 import { cn } from '@/lib/utils'; // For conditional class names

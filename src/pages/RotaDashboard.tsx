@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Check, X, Clock, Users, Calendar, AlertTriangle, RefreshCw } from 'lucide-react'; // Added RefreshCw
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // Import toast for error notifications
 import dayjs from 'dayjs';
 

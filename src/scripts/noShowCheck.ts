@@ -1,6 +1,6 @@
 
 import dayjs from 'dayjs';
-import { supabase } from '@/lib/supabaseClient'; // Assuming supabase client is configured
+import { supabase } from '@/integrations/supabase/client'; // Assuming supabase client is configured
 
 // Define types based on expected Supabase table structures
 interface RotaEntry {

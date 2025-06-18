@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Calendar, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 // Removed: import { getWeeklyReports } from '@/scripts/weeklyClientReport';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import dayjs from 'dayjs';
 
 // Interface matches generated_reports_metadata table

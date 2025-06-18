@@ -7,7 +7,7 @@ import { Settings, Play, CheckCircle, XCircle, Clock, Home, Loader2, Eye } from 
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { generateKPIReport } from '@/scripts/kpiTracker';
-import { generateDailySummary } from '@/scripts/dailySummary';
+// import { generateDailySummary } from '@/scripts/dailySummary'; // Removed
 import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
 import { runLicenceChecker, getLicenceAlerts } from '@/scripts/licenceChecker';
 import { runPayrollValidator, getLatestPayrollVarianceReport } from '@/scripts/payrollValidator';
@@ -102,7 +102,8 @@ const AdminTools = () => {
           scriptData = result;
           break;
         case 'daily-summary':
-          result = { content: await generateDailySummary() };
+          // result = { content: await generateDailySummary() }; // Removed
+          result = { content: "Daily summary generation from admin panel is temporarily disabled." };
           scriptData = result;
           break;
         case 'weekly-report':

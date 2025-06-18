@@ -9,7 +9,7 @@ import { Check, X, Home, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shift, guards } from '@/data/rota-data';
 import { loadRotaData, loadConfirmations } from '@/utils/rotaStore';

@@ -10,7 +10,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 // If using shadcn useToast, import { useToast } from '@/components/ui/use-toast';
 import { toast as sonnerToast } from 'sonner'; // Using sonner for consistency
 import dayjs from 'dayjs';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
 import { Users } from 'lucide-react'; // For guard select icon
 
 interface AddTrainingProps {

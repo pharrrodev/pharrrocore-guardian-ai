@@ -1,6 +1,6 @@
 
 import { isTimeInRange, getTimeLeftInBreak, formatTimeRemaining, getTimeUntilBreak } from '../utils/timeHelpers'; // Assuming these are still relevant
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
 // Removed: import { loadRotaData } from '../utils/rotaStore';
 // Removed: import { getCurrentTime, getCurrentDate } // Not used directly
 

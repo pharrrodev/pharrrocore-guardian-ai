@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
 import AddTraining from './AddTraining'; // This is the modal component
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // For notifications
 import { RefreshCw } from 'lucide-react'; // For loading icon
 
