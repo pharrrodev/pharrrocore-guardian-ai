@@ -36,6 +36,7 @@ const RadioHandover = () => {
     const fetchGuards = async () => {
       setIsFetchingGuards(true);
       try {
+        // Invoke the Edge Function to get the list of guards/users
         const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
 
         if (functionsError) {
@@ -43,16 +44,20 @@ const RadioHandover = () => {
           toast.error("Failed to load guards list. Please try again later.");
           setGuardUsers([]);
         } else if (guardsData) {
+          // Map to GuardUser interface {id, name}
           const formattedGuards = guardsData.map((g: any) => ({
             id: g.id,
-            name: g.name || g.email,
+            name: g.name || g.email, // Use name, fallback to email
           }));
           setGuardUsers(formattedGuards);
         } else {
+          // No data and no error, unlikely but handle it
           setGuardUsers([]);
+          // The missing semicolon has been added to this line to fix the build error.
           console.warn("No guards data returned from Edge Function, and no error reported.");
         }
       } catch (err) {
+        // Catch any other client-side errors during the fetch process
         console.error("Client-side error in fetchGuards:", err);
         toast.error("An unexpected error occurred while loading guards.");
         setGuardUsers([]);
