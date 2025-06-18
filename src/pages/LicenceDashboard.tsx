@@ -1,30 +1,26 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Calendar, Shield, RefreshCw, CheckCircle, UserCircle } from 'lucide-react'; // Added CheckCircle, UserCircle
-// Removed: import { getLicenceAlerts, runLicenceChecker } from '../scripts/licenceChecker';
-// Removed: import { useToast } from '@/hooks/use-toast'; // Using sonner instead
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase
-import { toast as sonnerToast } from 'sonner'; // Using sonner
+import { AlertTriangle, Calendar, Shield, RefreshCw, CheckCircle, UserCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { toast as sonnerToast } from 'sonner';
 import dayjs from 'dayjs';
-import { cn } from '@/lib/utils'; // For conditional class names
+import { cn } from '@/lib/utils';
 
 interface SupabaseLicenceAlert {
   id: string;
   sia_licence_id: string;
   guard_user_id: string;
   licence_number: string;
-  expiry_date: string; // YYYY-MM-DD
+  expiry_date: string;
   days_until_expiry: number;
-  alert_type: string; // "Expired", "Critical", "Warning", "Info"
+  alert_type: string;
   alert_generated_at: string;
   is_acknowledged: boolean;
   acknowledged_by_user_id: string | null;
   acknowledged_at: string | null;
-  // Joined data
   guard_user: { email?: string; user_metadata?: { full_name?: string } } | null;
   acknowledged_by_user: { email?: string; user_metadata?: { full_name?: string } } | null;
 }
@@ -32,7 +28,7 @@ interface SupabaseLicenceAlert {
 const LicenceDashboard = () => {
   const [alerts, setAlerts] = useState<SupabaseLicenceAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isChecking, setIsChecking] = useState(false); // For "Run Checker" button
+  const [isChecking, setIsChecking] = useState(false);
 
   const fetchLicenceAlerts = async () => {
     setIsLoading(true);
@@ -44,7 +40,7 @@ const LicenceDashboard = () => {
           guard_user:guard_user_id ( email, user_metadata ),
           acknowledged_by_user:acknowledged_by_user_id ( email, user_metadata )
         `)
-        .eq('is_acknowledged', false) // Only show non-acknowledged alerts
+        .eq('is_acknowledged', false)
         .order('days_until_expiry', { ascending: true });
 
       if (error) {
@@ -71,8 +67,6 @@ const LicenceDashboard = () => {
         throw error;
       }
       sonnerToast.success("Licence expiry check completed. Refreshing alerts...");
-      // The real-time subscription should pick up changes, but a manual refresh is good too.
-      // Or, the Edge Function could return the new/updated alerts.
       await fetchLicenceAlerts();
     } catch (error: any) {
       console.error('Error invoking licence checker function:', error);
@@ -120,8 +114,6 @@ const LicenceDashboard = () => {
         .eq('id', alertId);
       if (error) throw error;
       sonnerToast.success("Alert acknowledged successfully.");
-      // The real-time subscription should handle the refresh.
-      // Or explicitly call fetchLicenceAlerts() if preferred.
     } catch (error: any) {
       sonnerToast.error(`Failed to acknowledge alert: ${error.message}`);
     }
@@ -138,7 +130,7 @@ const LicenceDashboard = () => {
     } else if (alertType === 'Info') {
       return <Badge variant="default" className="bg-blue-500 hover:bg-blue-600">Info ({daysLeft}d)</Badge>;
     }
-    return <Badge variant="outline">OK ({daysLeft}d)</Badge>; // Should not happen if only fetching alerts
+    return <Badge variant="outline">OK ({daysLeft}d)</Badge>;
   };
 
   const getRowClassName = (daysLeft: number, alertType: string) => {
@@ -151,7 +143,6 @@ const LicenceDashboard = () => {
 
   const criticalAlerts = alerts.filter(alert => alert.alert_type === 'Critical' || alert.alert_type === 'Expired');
   const warningAlerts = alerts.filter(alert => alert.alert_type === 'Warning');
-  // Total active alerts are those not acknowledged
   const totalActiveAlerts = alerts.filter(alert => !alert.is_acknowledged).length;
 
 
@@ -194,8 +185,9 @@ const LicenceDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{criticalAlerts.length}</div>
+              {/* THIS IS THE FIXED LINE: */}
               <p className="text-xs text-muted-foreground">
-                Expired or <30 days remaining
+                Expired or &lt;30 days remaining
               </p>
             </CardContent>
           </Card>

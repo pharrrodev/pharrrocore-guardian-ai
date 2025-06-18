@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { RadioGroupItem, RadioGroup } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Radio, Handshake, ArrowLeft, Check, Users } from 'lucide-react';
@@ -36,7 +35,7 @@ const RadioHandover = () => {
   useEffect(() => {
     const fetchGuards = async () => {
       setIsFetchingGuards(true);
-      // The 'try' keyword was missing here. It has been added back.
+
       try {
         // Invoke the Edge Function to get the list of guards/users
         const { data: guardsData, error: functionsError } = await supabase.functions.invoke('get-guard-list');
@@ -128,7 +127,6 @@ const RadioHandover = () => {
 
       if (response.status === 'ok') {
         toast.success(`${action === 'radio' ? 'Radio test' : 'Handover'} logged successfully for ${selectedGuardName}`);
-        // Refresh today's logs by re-fetching
         const todayStart = dayjs().startOf('day').toISOString();
         const todayEnd = dayjs().endOf('day').toISOString();
         const { data: updatedLogsData, error: refetchError } = await supabase
@@ -171,7 +169,6 @@ const RadioHandover = () => {
         </header>
 
         <div className="grid gap-6">
-          {/* Guard Selection */}
           <Card>
             <CardHeader>
               <CardTitle>Select Guard</CardTitle>
@@ -181,7 +178,7 @@ const RadioHandover = () => {
               {isFetchingGuards ? (
                 <p>Loading guards...</p>
               ) : guardUsers.length === 0 ? (
-                <p className="text-muted-foreground">No guards found or could not load guard list. Ensure admin rights for user listing or check 'profiles' table access.</p>
+                <p className="text-muted-foreground">No guards found or could not load guard list.</p>
               ) : (
                 <RadioGroup value={selectedGuardSupabaseId} onValueChange={handleGuardSelection}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -193,3 +190,113 @@ const RadioHandover = () => {
                           {guard.name}
                         </label>
                       </div>
+                    ))}
+                  </div>
+                </RadioGroup>
+              )}
+            </CardContent>
+          </Card>
+
+          {selectedGuardSupabaseId && (
+            <>
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className={hasLoggedRadio ? 'border-green-500 bg-green-50 dark:bg-green-950/70' : ''}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <Radio className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          Radio Test
+                          {hasLoggedRadio && <Check className="h-5 w-5 text-green-600" />}
+                        </CardTitle>
+                        <CardDescription>
+                          {hasLoggedRadio
+                            ? `Completed at ${dayjs(lastRadioLog?.log_timestamp).format('HH:mm')}`
+                            : 'Press to confirm radio is working'
+                          }
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => handleAction('radio')}
+                      disabled={isLoading || isFetchingLogs}
+                      className="w-full"
+                      variant={hasLoggedRadio ? "secondary" : "default"}
+                    >
+                      {hasLoggedRadio ? 'Radio Test Logged' : 'Log Radio Test Passed'}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className={hasLoggedHandover ? 'border-green-500 bg-green-50 dark:bg-green-950/70' : ''}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <Handshake className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          Handover
+                          {hasLoggedHandover && <Check className="h-5 w-5 text-green-600" />}
+                        </CardTitle>
+                        <CardDescription>
+                          {hasLoggedHandover
+                            ? `Completed at ${dayjs(lastHandoverLog?.log_timestamp).format('HH:mm')}`
+                            : 'Press to confirm handover complete'
+                          }
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => handleAction('handover')}
+                      disabled={isLoading || isFetchingLogs}
+                      className="w-full"
+                      variant={hasLoggedHandover ? "secondary" : "default"}
+                    >
+                      {hasLoggedHandover ? 'Handover Logged' : 'Log Handover Complete'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Today's Status for {selectedGuardName || "Selected Guard"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isFetchingLogs ? <p>Loading logs...</p> : (
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className={`p-4 rounded-lg ${hasLoggedRadio ? 'bg-green-100 dark:bg-green-900' : 'bg-muted'}`}>
+                        <div className="text-2xl font-bold">
+                          {hasLoggedRadio ? '✓' : '○'}
+                        </div>
+                        <div className="text-sm">Radio Test</div>
+                      </div>
+                      <div className={`p-4 rounded-lg ${hasLoggedHandover ? 'bg-green-100 dark:bg-green-900' : 'bg-muted'}`}>
+                        <div className="text-2xl font-bold">
+                          {hasLoggedHandover ? '✓' : '○'}
+                        </div>
+                        <div className="text-sm">Handover</div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="text-center">
+                <Button variant="outline" asChild>
+                  <Link to="/radio-handover-log">View All Logs</Link>
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RadioHandover;
+

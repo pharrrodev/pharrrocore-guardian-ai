@@ -1,0 +1,8 @@
+# This tells Netlify how to build your Next.js site correctly.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# This makes sure the Next.js plugin is used.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
