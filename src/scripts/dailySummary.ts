@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { supabase } from '@/lib/supabaseClient'; // Import Supabase client
+import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
 // Removed getLogsFromStorage and getTodaysVisitorLogs as they are localStorage/CSV based
 
 export interface DailySummaryData {
