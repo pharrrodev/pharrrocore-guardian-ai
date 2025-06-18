@@ -9,16 +9,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area'; // Added for scrollability
 
-// Define the Person structure as expected by useIncidentReport.ts
+// Define the Person structure, now including staff_user_id
 interface Person {
   name: string;
   role: string;
   contact: string;
+  staff_user_id?: string | null;
+}
+
+interface StaffMember { // For the prop from parent
+  id: string;
+  name: string;
 }
 
 interface Step6PeopleInvolvedProps {
-  formData: { peopleInvolved?: Person[] }; // Expects an array of Person objects
+  formData: { peopleInvolved?: Person[] };
   updateFormData: (data: { peopleInvolved: Person[] }) => void;
+  availableStaff: StaffMember[]; // New prop
+  isLoadingStaff: boolean;      // New prop
 }
 
 const personRoleOptions = [
@@ -31,18 +39,31 @@ const personRoleOptions = [
   "Security Personnel",
   "Client Contact",
   "Other",
+  // Consider adding more specific internal roles if needed e.g. "Security Manager", "Control Room Operator"
 ];
 
-const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, updateFormData }) => {
+// Define specific roles that should trigger the staff selection dropdown
+const STAFF_ROLES = ["Staff Member", "Security Personnel", "Responding Officer"]; // Add other relevant internal roles
+
+
+const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, updateFormData, availableStaff, isLoadingStaff }) => {
   const [currentPeople, setCurrentPeople] = useState<Person[]>(formData.peopleInvolved || []);
 
-  // Sync with parent form data if it changes (e.g., loading a draft)
+  // Sync with parent form data if it changes
   useEffect(() => {
-    setCurrentPeople(formData.peopleInvolved || []);
+    // Ensure staff_user_id is preserved or initialized
+    const initialPeople = (formData.peopleInvolved || []).map(p => ({
+      name: p.name || '',
+      role: p.role || '',
+      contact: p.contact || '',
+      staff_user_id: p.staff_user_id || null, // Ensure this field is part of the state
+    }));
+    setCurrentPeople(initialPeople);
   }, [formData.peopleInvolved]);
 
+
   const handleAddPerson = () => {
-    const newPeople = [...currentPeople, { name: '', role: '', contact: '' }];
+    const newPeople = [...currentPeople, { name: '', role: '', contact: '', staff_user_id: null }]; // Initialize staff_user_id
     setCurrentPeople(newPeople);
     updateFormData({ peopleInvolved: newPeople });
   };
@@ -53,13 +74,49 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
     updateFormData({ peopleInvolved: newPeople });
   };
 
-  const handlePersonChange = (index: number, field: keyof Person, value: string) => {
-    const newPeople = currentPeople.map((person, i) =>
-      i === index ? { ...person, [field]: value } : person
-    );
+  const handlePersonChange = (index: number, field: keyof Person, value: string | null) => {
+    const newPeople = currentPeople.map((person, i) => {
+      if (i === index) {
+        const updatedPerson = { ...person, [field]: value };
+        // If role changes away from a staff role, clear staff_user_id
+        // Also, if the name was auto-filled from staff selection, user might want to clear/edit it.
+        // For now, just clearing staff_user_id. Name remains as is unless changed by staff selection.
+        if (field === 'role' && !STAFF_ROLES.includes(value || '')) {
+          updatedPerson.staff_user_id = null;
+        }
+        return updatedPerson;
+      }
+      return person;
+    });
     setCurrentPeople(newPeople);
     updateFormData({ peopleInvolved: newPeople });
   };
+
+  const handleStaffSelection = (index: number, staffUserId: string) => {
+    const selectedStaff = availableStaff.find(s => s.id === staffUserId);
+    const newPeople = currentPeople.map((person, i) => {
+      if (i === index) {
+        if (selectedStaff) {
+          return {
+            ...person,
+            staff_user_id: selectedStaff.id,
+            name: selectedStaff.name, // Auto-fill name
+          };
+        } else { // "None" or empty selection from staff dropdown
+          return {
+            ...person,
+            staff_user_id: null,
+            // Optionally clear name if it was previously auto-filled, or leave as is for manual input
+            // name: '',
+          };
+        }
+      }
+      return person;
+    });
+    setCurrentPeople(newPeople);
+    updateFormData({ peopleInvolved: newPeople });
+  };
+
 
   return (
     <div className="w-full max-w-2xl text-center mx-auto"> {/* Increased max-width */}
@@ -111,12 +168,40 @@ const Step6PeopleInvolved: React.FC<Step6PeopleInvolvedProps> = ({ formData, upd
                       <SelectValue placeholder="Select role..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {personRoleOptions.map(role => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      {personRoleOptions.map(roleOption => (
+                        <SelectItem key={roleOption} value={roleOption}>{roleOption}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Conditional Staff Member Selection */}
+                {STAFF_ROLES.includes(person.role) && (
+                  <div>
+                    <Label htmlFor={`staffMemberSelect-${index}`}>Select Staff Member (Optional)</Label>
+                    <Select
+                      value={person.staff_user_id || ""} // Bind to staff_user_id
+                      onValueChange={(staffId) => handleStaffSelection(index, staffId)}
+                      disabled={isLoadingStaff}
+                    >
+                      <SelectTrigger id={`staffMemberSelect-${index}`}>
+                        <SelectValue placeholder={isLoadingStaff ? "Loading staff..." : "Select staff member..."} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isLoadingStaff ? (
+                          <SelectItem value="loading" disabled>Loading...</SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="">None (or manually enter name)</SelectItem>
+                            {availableStaff.map(staff => (
+                              <SelectItem key={staff.id} value={staff.id}>{staff.name}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor={`personContact-${index}`}>Contact Details (Optional)</Label>

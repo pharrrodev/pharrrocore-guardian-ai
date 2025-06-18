@@ -70,54 +70,78 @@ const InstructionGenerator = () => {
     }
 
     try {
-      // generateInstructions might need parentId as well as parentLabel for context
-      const response = await generateInstructions({
+      const requestBody = {
         rawText: rawText.trim(),
-        parentLabel: parentTopicLabel, // Pass the label
-        // parentId: currentParentId, // Pass ID if API supports it for context
-      });
+        parentTopicLabel: parentTopicLabel,
+        parentTopicId: selectedParentTopicInfo.id // Pass existing parent ID if available
+      };
 
-      if (response.status === 'ok' && response.topics) {
-        // Ensure generated topics have parent_id set if currentParentId exists
-        // and they are meant to be children of the selected/created parent.
-        // This logic depends on how generateInstructions API structures its output.
-        // For now, assume it returns topics potentially needing parent_id linkage.
-        const processedTopics = response.topics.map(topic => ({
-          ...topic,
-          // If the AI doesn't set parent_id for sub-topics relative to parentLabel, set it here.
-          // This assumes topics from AI are direct children of parentLabel.
-          // If AI creates deeper hierarchies, its own parent_id should be respected.
-          parent_id: topic.parent_id || currentParentId || null,
-        }));
+      // Call the new Edge Function
+      const { data: funcResponse, error: funcError } = await supabase.functions.invoke(
+        'structure-sop-text',
+        { body: requestBody }
+      );
 
-        // If a new parent topic was created by typing, and AI didn't return it, add it.
-        if (!selectedParentTopicInfo.id && parentTopicLabel && currentParentId) {
-            const newParentTopicExists = processedTopics.some(t => t.id === currentParentId);
-            if (!newParentTopicExists) {
-                const newParentTopic: Topic = {
+      if (funcError) throw funcError;
+
+      if (funcResponse.status === 'ok' && funcResponse.topics) {
+        let finalTopics = funcResponse.topics;
+
+        // If a new parent topic was created (no selectedParentTopicInfo.id)
+        // AND the AI didn't return this parent as the root of its structure,
+        // we might need to wrap the AI's topics under this new parent.
+        // However, the Edge Function is prompted to use parentTopicLabel as context
+        // or make generated topics children of parentTopicId.
+        // For this iteration, we'll trust the Edge Function's output structure.
+        // The `save-knowledge-base-topics` function will handle parent_id for top-level items if needed.
+        // If `parentTopicId` was supplied to structure-sop-text, topics should be structured under it.
+        // If not, they are new top-level topics (or one root topic with subTopics).
+
+        // If a new parent was created on the client (no selectedParentTopicInfo.id)
+        // and the AI returns a flat list intended to be children of this new parent
+        if (!selectedParentTopicInfo.id && currentParentId) { // currentParentId is the kebab-case of a new label
+            const isParentPresent = finalTopics.some((t: Topic) => t.id === currentParentId);
+            if (!isParentPresent && finalTopics.every((t: Topic) => t.id !== currentParentId)) {
+                // AI did not create the parent, so we create it and nest AI topics under it
+                const newParentNode: Topic = {
                     id: currentParentId,
                     label: parentTopicLabel,
-                    response: "Parent topic for AI generated content.", // Default response
-                    parent_id: null, // Top-level
-                    subTopics: processedTopics, // Nest generated topics under it
+                    response: `Main topic: ${parentTopicLabel}. Details are in sub-topics.`, // Placeholder response
+                    parent_id: null, // This new topic is a root for these generated items
+                    subTopics: finalTopics.map(t => ({...t, parent_id: currentParentId})) // Ensure children link to it
                 };
-                setGeneratedTopics([newParentTopic]);
+                setGeneratedTopics([newParentNode]);
             } else {
-                 // If AI returned the parent, ensure subtopics are nested correctly if not already
-                 setGeneratedTopics(processedTopics.map(t => t.id === currentParentId ? {...t, subTopics: t.subTopics || processedTopics.filter(st => st.parent_id === currentParentId)} : t ));
+                // AI might have created the parent, or it's already structured.
+                // Ensure parent_id is set for topics that are children of the new parent.
+                finalTopics = finalTopics.map((t: Topic) => {
+                    if (t.id !== currentParentId && !t.parent_id) { // If not the parent itself and has no parent_id
+                        return { ...t, parent_id: currentParentId };
+                    }
+                    return t;
+                });
+                setGeneratedTopics(finalTopics);
             }
+        } else if (selectedParentTopicInfo.id) {
+            // If generating for an existing parent, ensure returned topics have parent_id set
+            finalTopics = finalTopics.map((t: Topic) => ({
+                ...t,
+                parent_id: t.parent_id || selectedParentTopicInfo.id // Default to selected parent if AI doesn't assign one
+            }));
+            setGeneratedTopics(finalTopics);
         } else {
-            setGeneratedTopics(processedTopics);
+            // Topics are new top-level items
+            setGeneratedTopics(finalTopics.map(t => ({...t, parent_id: null})));
         }
 
         setShowPreview(true);
-        toast.success(`Generated ${response.topics.length} topics successfully for ${parentTopicLabel}`);
+        toast.success(`Generated ${funcResponse.topics.length} topic(s) successfully for "${parentTopicLabel}"`);
       } else {
-        toast.error(response.message || 'Failed to generate instructions');
+        toast.error(funcResponse.message || funcResponse.error || 'Failed to generate instructions via Edge Function');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation error:', error);
-      toast.error('An error occurred while generating instructions');
+      toast.error(error.message || 'An error occurred while generating instructions');
     } finally {
       setIsGenerating(false);
     }

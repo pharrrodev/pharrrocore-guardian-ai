@@ -13,6 +13,7 @@ export interface FormData {
     name: string;
     role: string;
     contact: string;
+    staff_user_id?: string | null; // New field for linking to auth.users
   }>;
   actionsTaken: string;
   otherActionDetails?: string; // New field for "Other" action details

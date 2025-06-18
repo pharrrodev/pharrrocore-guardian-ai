@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Download, Loader2, Home } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { FileText, Download, Loader2, Home, Copy, FileDown } from "lucide-react"; // Added Copy, FileDown
+import { useToast } from "@/hooks/use-toast"; // Assuming this should stay, not sonner for this file
 import { DatePicker } from "@/components/ui/date-picker";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { copyToClipboard } from "@/utils/clipboard"; // For copy functionality
 
 const TenderWriter = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +22,9 @@ const TenderWriter = () => {
     siteSpecifics: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
-  const [downloadLink, setDownloadLink] = useState('');
+  // Removed: const [downloadLink, setDownloadLink] = useState('');
+  const [generatedTenderText, setGeneratedTenderText] = useState<string | null>(null);
+  const [suggestedFileName, setSuggestedFileName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
@@ -49,36 +53,49 @@ const TenderWriter = () => {
     }
 
     setIsGenerating(true);
-    setDownloadLink('');
+    // Removed: setDownloadLink('');
+    setGeneratedTenderText(null); // Clear previous results
+    setSuggestedFileName(null);
 
     try {
-      const response = await fetch('/api/tender-generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          mobilisationDate: formData.mobilisationDate?.toISOString().split('T')[0] || ''
-        }),
-      });
+      const payload = {
+        ...formData,
+        mobilisationDate: formData.mobilisationDate
+          ? formData.mobilisationDate.toISOString().split('T')[0]
+          : '',
+      };
 
-      if (!response.ok) {
-        throw new Error('Failed to generate tender');
+      const { data: result, error: funcError } = await supabase.functions.invoke(
+        'generate-tender-document',
+        { body: payload }
+      );
+
+      if (funcError) {
+        console.error('Edge function invocation error:', funcError);
+        throw new Error(funcError.message || 'Failed to invoke tender generation service.');
+      }
+      
+      if (result.error) { // Check for application-level error returned from function
+        console.error('Error from Edge Function processing:', result.error);
+        throw new Error(result.error);
       }
 
-      const result = await response.json();
-      setDownloadLink(result.downloadLink);
-      
-      toast({
-        title: "Tender Generated Successfully",
-        description: "Your tender document is ready for download.",
-      });
-    } catch (error) {
+      if (result.generatedText && result.fileNameSuggestion) {
+        setGeneratedTenderText(result.generatedText);
+        setSuggestedFileName(result.fileNameSuggestion);
+        toast({
+          title: "Tender Draft Generated Successfully",
+          description: "Review the generated text below. You can copy or download it.",
+        });
+      } else {
+        throw new Error("Received incomplete data from tender generation service. Missing text or filename.");
+      }
+
+    } catch (error: any) { // Catch any error (string or Error object)
       console.error('Error generating tender:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate tender document. Please try again.",
+        description: error.message || "Failed to generate tender document. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -213,21 +230,57 @@ const TenderWriter = () => {
                   )}
                 </Button>
 
-                {downloadLink && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="flex-1 h-9"
-                  >
-                    <a href={downloadLink} download>
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Tender
-                    </a>
-                  </Button>
-                )}
+                {/* Old downloadLink button removed */}
               </div>
             </CardContent>
           </Card>
+
+          {/* Display Generated Tender Text */}
+          {generatedTenderText && (
+            <Card className="max-w-4xl mx-auto mt-6">
+              <CardHeader>
+                <CardTitle>Generated Tender Draft</CardTitle>
+                <CardDescription>Review the Markdown text below. You can copy it or download it as a .md file.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px] w-full border rounded-md p-3 bg-muted/30">
+                  <pre className="text-sm whitespace-pre-wrap break-words">{generatedTenderText}</pre>
+                </ScrollArea>
+                <div className="flex gap-3 mt-4">
+                  <Button
+                    onClick={() => {
+                      copyToClipboard(generatedTenderText);
+                      toast({ title: "Copied to clipboard!" });
+                    }}
+                    variant="outline"
+                    className="flex-1 h-9"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy to Clipboard
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const blob = new Blob([generatedTenderText], { type: 'text/markdown;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = suggestedFileName || 'tender_draft.md';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                      toast({ title: "Markdown file download initiated."});
+                    }}
+                    variant="secondary"
+                    className="flex-1 h-9"
+                  >
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Download as .md
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </ScrollArea>
       </div>
     </div>
