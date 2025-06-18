@@ -8,7 +8,7 @@ import { Clock, MapPin, User, Shield, AlertTriangle, UserCircle } from "lucide-r
 // For now, we assume the structure fetched from Supabase will be compatible or adapted.
 // import { EDOBEntry } from "@/data/edob-types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import dayjs from "dayjs"; // For formatting timestamp
 

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, FileText, RefreshCw, Home } from 'lucide-react';
 import { loadTodaysData, generateFallbackSummary, saveSummaryReport, getSavedReport, getAllSavedReports, DailySummaryData } from '@/scripts/dailySummary';
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase client for auth
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase client for auth
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import SummaryReportModal from '@/components/SummaryReportModal';

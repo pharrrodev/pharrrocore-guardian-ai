@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 // Removed: import { assignmentTopics, Topic } from "@/data/assignmentTopics";
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase
 import { toast } from "sonner"; // Import sonner
 import React, { useState, useEffect } from "react"; // Import useEffect
 

@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Added for visit_purpose
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase client
 import { v4 as uuidv4 } from 'uuid'; // For generating unique file names
 
 // Updated Zod schema to match new requirements

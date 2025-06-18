@@ -9,7 +9,7 @@ import { FileText, Download, Loader2, Home, Copy, FileDown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"; // Assuming this should stay, not sonner for this file
 import { DatePicker } from "@/components/ui/date-picker";
 import { Link } from "react-router-dom";
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase
 import { copyToClipboard } from "@/utils/clipboard"; // For copy functionality
 
 const TenderWriter = () => {

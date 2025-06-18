@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { uniformKitItems } from "@/data/edob-types";
 // import { guards } from "@/data/rota-data"; // Remove static import
-import { supabase } from "@/lib/supabaseClient"; // Import Supabase client
+import { supabase } from "@/integrations/supabase/client"; // Import Supabase client
 import React, { useState, useEffect } from "react"; // Import React hooks
 
 // Define a type for fetched users/guards
