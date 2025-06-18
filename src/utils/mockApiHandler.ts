@@ -136,54 +136,54 @@ window.fetch = async (url: string | URL | Request, options?: RequestInit): Promi
     }
   }
   
-  // Handle tender generation API endpoint
-  if (urlString === '/api/tender-generate' && options?.method === 'POST') {
-    try {
-      const data: TenderRequest = options.body ? JSON.parse(options.body as string) : {};
+  // // Handle tender generation API endpoint - Replaced by Supabase Edge Function
+  // if (urlString === '/api/tender-generate' && options?.method === 'POST') {
+  //   try {
+  //     const data: TenderRequest = options.body ? JSON.parse(options.body as string) : {};
       
-      console.log('Generating tender for:', data.clientName);
+  //     console.log('Generating tender for:', data.clientName);
       
-      // Simulate GPT-4 content generation
-      const gptPrompt = `Generate a professional security tender document using the following information:
+  //     // Simulate GPT-4 content generation
+  //     const gptPrompt = `Generate a professional security tender document using the following information:
       
-Client: ${data.clientName}
-Site Address: ${data.siteAddress}
-Guarding Hours Per Week: ${data.guardingHoursPerWeek}
-Key Risks: ${data.keyRisks}
-Mobilisation Date: ${data.mobilisationDate}
-Site Specifics: ${data.siteSpecifics}
+  // Client: ${data.clientName}
+  // Site Address: ${data.siteAddress}
+  // Guarding Hours Per Week: ${data.guardingHoursPerWeek}
+  // Key Risks: ${data.keyRisks}
+  // Mobilisation Date: ${data.mobilisationDate}
+  // Site Specifics: ${data.siteSpecifics}
 
-Please merge this with our company boilerplate and create a comprehensive tender document.
-Temperature: 0.2 for factual tone.`;
+  // Please merge this with our company boilerplate and create a comprehensive tender document.
+  // Temperature: 0.2 for factual tone.`;
 
-      console.log('GPT Prompt:', gptPrompt);
+  //     console.log('GPT Prompt:', gptPrompt);
       
-      // Simulate document generation process
-      const generatedContent = generateTenderContent(data);
+  //     // Simulate document generation process
+  //     const generatedContent = generateTenderContent(data);
       
-      // Create filename with current date
-      const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
-      const filename = `tender-${data.clientName.replace(/\s+/g, '-').toLowerCase()}-${currentDate}.docx`;
+  //     // Create filename with current date
+  //     const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  //     const filename = `tender-${data.clientName.replace(/\s+/g, '-').toLowerCase()}-${currentDate}.docx`;
       
-      // Simulate saving to /tenders/ directory
-      console.log(`Saving tender document: /tenders/${filename}`);
-      console.log('Generated content preview:', generatedContent.substring(0, 200) + '...');
+  //     // Simulate saving to /tenders/ directory
+  //     console.log(`Saving tender document: /tenders/${filename}`);
+  //     console.log('Generated content preview:', generatedContent.substring(0, 200) + '...');
       
-      const downloadLink = `/tenders/${filename}`;
+  //     const downloadLink = `/tenders/${filename}`;
       
-      console.log('Tender generation completed successfully');
+  //     console.log('Tender generation completed successfully');
       
-      return new Response(JSON.stringify({ downloadLink }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } catch (error) {
-      return new Response(JSON.stringify({ status: 'error', message: 'Failed to generate tender' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  }
+  //     return new Response(JSON.stringify({ downloadLink }), {
+  //       status: 200,
+  //       headers: { 'Content-Type': 'application/json' }
+  //     });
+  //   } catch (error) {
+  //     return new Response(JSON.stringify({ status: 'error', message: 'Failed to generate tender' }), {
+  //       status: 500,
+  //       headers: { 'Content-Type': 'application/json' }
+  //     });
+  //   }
+  // }
   
   // Fall back to original fetch for other requests
   return originalFetch(url, options);

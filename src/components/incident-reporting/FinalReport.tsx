@@ -24,10 +24,18 @@ const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
   };
 
   const generateActionsTaken = () => {
-    if (formData.actionsTaken && formData.actionsTaken.length > 0) {
-      return `The following actions were taken: ${formData.actionsTaken.join(', ')}.`;
+    let actionsText = 'No specific immediate actions were logged in the system.';
+    if (formData.actionsTaken && formData.actionsTaken.trim() !== '') {
+      actionsText = `The following actions were taken: ${formData.actionsTaken}.`;
     }
-    return 'No specific immediate actions were logged in the system.';
+
+    // Append otherActionDetails if "Other" was an action and details exist
+    // Assuming formData.actionsTaken is a string like "Action1, Other, Action2"
+    const OTHER_ACTION_KEYWORD = "Other"; // Or the exact string like "Other (specify in description)"
+    if (typeof formData.actionsTaken === 'string' && formData.actionsTaken.includes(OTHER_ACTION_KEYWORD) && formData.otherActionDetails && formData.otherActionDetails.trim() !== '') {
+      actionsText += ` Details for 'Other' action: ${formData.otherActionDetails}`;
+    }
+    return actionsText;
   };
 
   const handleSaveDraft = () => {

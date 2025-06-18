@@ -67,7 +67,8 @@ export const useSupabaseData = () => {
         incident_type: report.incidentType,
         description: report.description,
         people_involved: report.peopleInvolved,
-        actions_taken: report.actionsTaken
+        actions_taken: report.actionsTaken,
+        other_action_details: report.otherActionDetails // Add the new field
       });
 
     if (error) {

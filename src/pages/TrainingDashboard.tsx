@@ -8,72 +8,105 @@ import { Plus, Calendar, User, BookOpen, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { cn } from '@/lib/utils';
-import AddTraining from './AddTraining';
+import AddTraining from './AddTraining'; // This is the modal component
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { toast } from 'sonner'; // For notifications
+import { RefreshCw } from 'lucide-react'; // For loading icon
 
-interface TrainingRecord {
+// Interface for records fetched from Supabase (matches 'training_records' table)
+interface SupabaseTrainingRecord {
   id: string;
-  guardId: string;
-  guardName: string;
-  courseName: string;
-  completedDate: string;
-  expiresDate: string;
+  guard_user_id: string | null;
+  guard_name_recorded: string;
+  course_name: string;
+  completed_date: string; // YYYY-MM-DD
+  expiry_date: string;    // YYYY-MM-DD
+  certificate_url: string | null;
+  added_by_user_id: string;
+  created_at: string;
+  // Optional: joined data for added_by_user_id if needed
+  // added_by_user: { email?: string; user_metadata?: { full_name?: string } } | null;
 }
 
 const TrainingDashboard = () => {
-  const [records, setRecords] = useState<TrainingRecord[]>([]);
+  const [records, setRecords] = useState<SupabaseTrainingRecord[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Renamed from loading to isLoading
 
-  const loadTrainingRecords = () => {
-    // In a real app, this would fetch from the CSV file
-    // For now, we'll use localStorage to simulate the data
+  const fetchTrainingRecords = async () => {
+    setIsLoading(true);
     try {
-      const stored = localStorage.getItem('trainingRecords');
-      if (stored) {
-        setRecords(JSON.parse(stored));
+      const { data, error } = await supabase
+        .from('training_records')
+        .select(`
+          *,
+          added_by_user:added_by_user_id (email, user_metadata->>full_name)
+        `) // Example of joining to get adder's info
+        .order('expiry_date', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching training records:", error);
+        toast.error(`Failed to load records: ${error.message}`);
+        setRecords([]);
+      } else {
+        setRecords(data || []);
       }
-    } catch (error) {
-      console.log('No training records found');
+    } catch (e: any) {
+      console.error("Unexpected error fetching records:", e);
+      toast.error(`An unexpected error occurred: ${e.message}`);
+      setRecords([]);
+    } finally {
+      setIsLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    loadTrainingRecords();
-  }, []);
+    fetchTrainingRecords();
 
-  const getRowClass = (expiresDate: string) => {
-    const daysUntilExpiry = dayjs(expiresDate).diff(dayjs(), 'days');
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('training-records-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'training_records' },
+        (payload) => {
+          console.log('Training records change received!', payload);
+          toast.info('Training records have been updated. Refreshing list...');
+          fetchTrainingRecords(); // Re-fetch data on any change
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on component unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []); // Run once on mount
+
+  const getRowClass = (expiryDate: string) => { // Parameter changed to expiryDate
+    const daysUntilExpiry = dayjs(expiryDate).diff(dayjs(), 'days');
     
-    if (daysUntilExpiry < 0) {
-      return 'bg-red-50 border-red-200';
-    } else if (daysUntilExpiry < 7) {
-      return 'bg-red-50 border-red-200';
-    } else if (daysUntilExpiry < 30) {
-      return 'bg-yellow-50 border-yellow-200';
-    }
-    return '';
+    if (daysUntilExpiry < 0) return 'bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500';
+    if (daysUntilExpiry < 7) return 'bg-red-50 dark:bg-red-800/30 border-l-4 border-red-400';
+    if (daysUntilExpiry < 30) return 'bg-yellow-50 dark:bg-yellow-800/30 border-l-4 border-yellow-400';
+    return 'border-l-4 border-transparent'; // Default or for valid records
   };
 
-  const getExpiryBadge = (expiresDate: string) => {
-    const daysUntilExpiry = dayjs(expiresDate).diff(dayjs(), 'days');
+  const getExpiryBadge = (expiryDate: string) => { // Parameter changed to expiryDate
+    const daysUntilExpiry = dayjs(expiryDate).diff(dayjs(), 'days');
     
-    if (daysUntilExpiry < 0) {
-      return <Badge variant="destructive">Expired</Badge>;
-    } else if (daysUntilExpiry < 7) {
-      return <Badge variant="destructive">{daysUntilExpiry} days left</Badge>;
-    } else if (daysUntilExpiry < 30) {
-      return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">{daysUntilExpiry} days left</Badge>;
-    }
-    return <Badge variant="outline">{daysUntilExpiry} days left</Badge>;
+    if (daysUntilExpiry < 0) return <Badge variant="destructive">Expired {Math.abs(daysUntilExpiry)} days ago</Badge>;
+    if (daysUntilExpiry < 7) return <Badge variant="destructive" className="bg-red-500">Expires in {daysUntilExpiry}d</Badge>;
+    if (daysUntilExpiry < 30) return <Badge variant="secondary" className="bg-yellow-500 text-yellow-950">Expires in {daysUntilExpiry}d</Badge>;
+    return <Badge variant="outline">Expires in {daysUntilExpiry}d</Badge>;
   };
 
   const handleRecordAdded = () => {
-    loadTrainingRecords();
-    setIsAddModalOpen(false);
+    // fetchTrainingRecords(); // Data will be re-fetched by real-time subscription
+    setIsAddModalOpen(false); // Just close modal, RT will update list
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">Loading training records...</div>
@@ -123,7 +156,7 @@ const TrainingDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
               {records.filter(r => {
-                const days = dayjs(r.expiresDate).diff(dayjs(), 'days');
+                const days = dayjs(r.expiry_date).diff(dayjs(), 'days'); // Corrected: r.expiry_date
                 return days >= 0 && days < 30;
               }).length}
             </div>
@@ -137,7 +170,7 @@ const TrainingDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {records.filter(r => dayjs(r.expiresDate).diff(dayjs(), 'days') < 0).length}
+              {records.filter(r => dayjs(r.expiry_date).diff(dayjs(), 'days') < 0).length} {/* Corrected: r.expiry_date */}
             </div>
           </CardContent>
         </Card>
@@ -167,13 +200,13 @@ const TrainingDashboard = () => {
                 {records.map((record) => (
                   <TableRow
                     key={record.id}
-                    className={cn(getRowClass(record.expiresDate))}
+                    className={cn(getRowClass(record.expiry_date))} // Corrected: record.expiry_date
                   >
-                    <TableCell className="font-medium">{record.guardName}</TableCell>
-                    <TableCell>{record.courseName}</TableCell>
-                    <TableCell>{dayjs(record.completedDate).format('DD/MM/YYYY')}</TableCell>
-                    <TableCell>{dayjs(record.expiresDate).format('DD/MM/YYYY')}</TableCell>
-                    <TableCell>{getExpiryBadge(record.expiresDate)}</TableCell>
+                    <TableCell className="font-medium">{record.guard_name_recorded}</TableCell> {/* Corrected: record.guard_name_recorded */}
+                    <TableCell>{record.course_name}</TableCell> {/* Corrected: record.course_name */}
+                    <TableCell>{dayjs(record.completed_date).format('DD/MM/YYYY')}</TableCell> {/* Corrected: record.completed_date */}
+                    <TableCell>{dayjs(record.expiry_date).format('DD/MM/YYYY')}</TableCell> {/* Corrected: record.expiry_date */}
+                    <TableCell>{getExpiryBadge(record.expiry_date)}</TableCell> {/* Corrected: record.expiry_date */}
                   </TableRow>
                 ))}
               </TableBody>

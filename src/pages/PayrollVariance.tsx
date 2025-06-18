@@ -4,49 +4,110 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, FileText, RefreshCw } from 'lucide-react';
-import { runPayrollValidator, getLatestPayrollVarianceReport } from '@/scripts/payrollValidator';
+import { AlertTriangle, FileText, RefreshCw, UserCircle, Edit3, CheckSquare } from 'lucide-react'; // Added icons
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { toast } from 'sonner'; // Import sonner
+import dayjs from 'dayjs'; // For date formatting
+import { cn } from '@/lib/utils'; // For conditional class names
 
-interface VarianceRecord {
-  guardId: string;
-  date: string;
-  actualHours: number;
-  hoursPaid: number;
-  variance: number;
-  siteCode: string;
+// Interface for data fetched from 'payroll_variances' table
+interface SupabasePayrollVariance {
+  id: string;
+  guard_user_id: string;
+  shift_id: string | null;
+  variance_date: string; // YYYY-MM-DD
+  scheduled_hours: number;
+  actual_hours_calculated: number;
+  paid_hours: number;
+  variance_hours: number;
+  site_id: string | null;
+  notes: string | null;
+  report_generated_at: string;
+  status: 'Pending' | 'Investigating' | 'Resolved' | 'No Action Required';
+  // Joined data
+  guard_user: { email?: string; user_metadata?: { full_name?: string } } | null;
 }
 
 const PayrollVariance = () => {
-  const [variances, setVariances] = useState<VarianceRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [variances, setVariances] = useState<SupabasePayrollVariance[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // For initial load and manual refresh
+  const [isCalculating, setIsCalculating] = useState(false); // For "Run Validator" button
+  const [lastUpdated, setLastUpdated] = useState<string>(''); // Keep for display if useful
 
-  useEffect(() => {
-    loadVarianceData();
-  }, []);
-
-  const loadVarianceData = () => {
-    const data = getLatestPayrollVarianceReport();
-    setVariances(data);
-    setLastUpdated(new Date().toLocaleString());
-  };
-
-  const handleRunValidator = async () => {
+  const fetchVariances = async () => {
     setIsLoading(true);
     try {
-      runPayrollValidator();
-      // Reload data after running validator
-      setTimeout(() => {
-        loadVarianceData();
-        setIsLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Error running payroll validator:', error);
+      const { data, error } = await supabase
+        .from('payroll_variances')
+        .select(`
+          *,
+          guard_user:guard_user_id ( email, user_metadata )
+        `)
+        .order('variance_date', { ascending: false })
+        .order('report_generated_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching payroll variances:', error);
+        toast.error(`Failed to load variances: ${error.message}`);
+        setVariances([]);
+      } else {
+        setVariances(data || []);
+        if (data && data.length > 0) {
+          // Set lastUpdated based on the newest report_generated_at from the fetched variances
+          setLastUpdated(dayjs(data[0].report_generated_at).toLocaleString());
+        } else {
+          setLastUpdated('No data');
+        }
+      }
+    } catch (e: any) {
+      console.error('Unexpected error fetching variances:', e);
+      toast.error(`An unexpected error occurred: ${e.message}`);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const getVarianceBadge = (variance: number) => {
+  useEffect(() => {
+    fetchVariances();
+
+    const payrollVariancesChannel = supabase
+      .channel('payroll-variances-dashboard')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'payroll_variances' },
+        (payload) => {
+          console.log('Payroll variances change received!', payload);
+          toast.info('Payroll variance data has changed. Refreshing list...');
+          fetchVariances();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(payrollVariancesChannel);
+    };
+  }, []);
+
+
+  const invokeVarianceCalculator = async () => {
+    setIsCalculating(true);
+    toast.info("Requesting payroll variance calculation...");
+    try {
+      const { error } = await supabase.functions.invoke('calculate-payroll-variance');
+      if (error) throw error;
+      toast.success("Payroll variance calculation completed. Refreshing data...");
+      // Real-time should pick it up, or call fetchVariances() explicitly if needed after a delay
+      // For immediate feedback, we can call it:
+      await fetchVariances();
+    } catch (error: any) {
+      console.error('Error invoking payroll variance calculator:', error);
+      toast.error(`Variance calculation failed: ${error.message}`);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const getVarianceBadge = (varianceHours: number) => {
     const absVariance = Math.abs(variance);
     if (absVariance > 1) {
       return <Badge variant="destructive">High Variance</Badge>;

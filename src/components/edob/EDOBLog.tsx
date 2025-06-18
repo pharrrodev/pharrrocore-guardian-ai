@@ -1,17 +1,75 @@
 
+import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, User, Building, Shield, AlertTriangle } from "lucide-react";
-import { EDOBEntry } from "@/data/edob-types";
+import { Clock, MapPin, User, Shield, AlertTriangle, UserCircle } from "lucide-react"; // Removed Building, added UserCircle
+// EDOBEntry might need to be redefined or imported if its structure changes with Supabase
+// For now, we assume the structure fetched from Supabase will be compatible or adapted.
+// import { EDOBEntry } from "@/data/edob-types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
+import dayjs from "dayjs"; // For formatting timestamp
 
-interface EDOBLogProps {
-  entries: EDOBEntry[];
-  loading?: boolean;
+// Define a type for entries fetched from Supabase
+// This should match the structure of your 'edob_entries' table + any joins (e.g., user email)
+export interface SupabaseEDOBEntry {
+  id: string;
+  timestamp: string; // timestamptz comes as string
+  type: string;
+  details: string;
+  route?: string | null;
+  user_id?: string | null;
+  site_id?: string | null;
+  created_at: string;
+  // Optional: include user email if joining with auth.users
+  users?: { email?: string | null } | null;
 }
 
-const EDOBLog = ({ entries, loading = false }: EDOBLogProps) => {
+
+const EDOBLog = () => { // Removed props: entries, loading
+  const [entries, setEntries] = useState<SupabaseEDOBEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEntries = async () => {
+      setLoading(true);
+      try {
+        // Fetch entries and related user's email (optional join)
+        // Adjust the select query based on what user information you want.
+        // If you stored guardName directly and don't need email, simplify the query.
+        const { data, error } = await supabase
+          .from("edob_entries")
+          .select(`
+            id,
+            timestamp,
+            type,
+            details,
+            route,
+            user_id,
+            created_at,
+            users ( email )
+          `)
+          .order("timestamp", { ascending: false })
+          .limit(100); // Add a limit for performance
+
+        if (error) {
+          console.error("Error fetching EDOB entries:", error);
+          toast.error(`Failed to fetch entries: ${error.message}`);
+          throw error;
+        }
+        setEntries(data || []);
+      } catch (err) {
+        // Error already handled by toast
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEntries();
+  }, []); // Empty dependency array means this runs once on mount, and when `key` prop changes (remount)
+
   const getEntryIcon = (type: string) => {
     switch (type) {
       case "Patrol":
@@ -33,7 +91,7 @@ const EDOBLog = ({ entries, loading = false }: EDOBLogProps) => {
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
       case "Alarm Activation":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      default:
+      default: // Incident / Observation or other types
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
     }
   };
@@ -49,10 +107,13 @@ const EDOBLog = ({ entries, loading = false }: EDOBLogProps) => {
           <ScrollArea className="h-full">
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                  <Skeleton className="h-12 w-full" />
+                <div key={i} className="space-y-2 p-4 border rounded-md">
+                  <Skeleton className="h-5 w-1/4" /> {/* Badge type */}
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-1/4" /> {/* Timestamp */}
+                    <Skeleton className="h-4 w-1/4" /> {/* User */}
+                  </div>
+                  <Skeleton className="h-10 w-full mt-1" /> {/* Details */}
                 </div>
               ))}
             </div>
@@ -94,7 +155,8 @@ const EDOBLog = ({ entries, loading = false }: EDOBLogProps) => {
                       </div>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {entry.timestamp.toLocaleTimeString()}
+                        {/* Format timestamp using dayjs */}
+                        {dayjs(entry.timestamp).format('HH:mm:ss on DD MMM YYYY')}
                       </div>
                     </div>
                     
@@ -102,28 +164,20 @@ const EDOBLog = ({ entries, loading = false }: EDOBLogProps) => {
                       <p className="text-sm font-medium mb-1">Route: {entry.route}</p>
                     )}
                     
-                    {entry.accessType && (
-                      <div className="text-sm mb-1">
-                        <p><span className="font-medium">Access Type:</span> {entry.accessType}</p>
-                        {entry.personName && <p><span className="font-medium">Person:</span> {entry.personName}</p>}
-                        {entry.company && <p><span className="font-medium">Company:</span> {entry.company}</p>}
-                      </div>
-                    )}
-                    
-                    {entry.alarmZone && (
-                      <div className="text-sm mb-1">
-                        <p><span className="font-medium">Zone:</span> {entry.alarmZone}</p>
-                        {entry.alarmType && <p><span className="font-medium">Type:</span> {entry.alarmType}</p>}
-                      </div>
-                    )}
+                    {/* Details are now expected to contain the specifics for Access Control/Alarm
+                        If these were separate fields in Supabase, you would render them directly.
+                        Since they are merged into 'details' in EDOB.tsx, we just show 'details'.
+                    */}
                     
                     {entry.details && (
-                      <p className="text-sm text-muted-foreground mt-2">{entry.details}</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words mt-2">{entry.details}</p>
                     )}
 
-                    {(entry as any).guardName && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Logged by: {(entry as any).guardName}
+                    {/* Display user info if available (e.g., email from joined users table) */}
+                    {entry.users?.email && (
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center">
+                        <UserCircle className="w-3 h-3 mr-1" />
+                        Logged by: {entry.users.email}
                       </p>
                     )}
                   </CardContent>

@@ -9,7 +9,6 @@ import { Mail, Copy, RefreshCw, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { copyToClipboard } from '@/utils/clipboard';
-import { formatEmail } from '@/utils/emailFormat';
 
 const EmailFormatter = () => {
   const [rawText, setRawText] = useState('');
@@ -26,17 +25,31 @@ const EmailFormatter = () => {
 
     setIsFormatting(true);
     try {
-      const result = await formatEmail({
-        rawText: rawText.trim(),
-        recipientName: recipientName.trim() || 'Recipient',
-        guardName: guardName.trim() || 'Security Guard',
+      const response = await fetch('/api/email-format', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rawText: rawText.trim(),
+          recipientName: recipientName.trim() || 'Recipient',
+          guardName: guardName.trim() || 'Security Guard',
+        }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' })); // Try to parse error, fallback if not JSON
+        throw new Error(errorData.message || `API error: ${response.status}`);
+      }
+
+      const result = await response.json();
       setFormattedEmail(result.formatted);
       toast.success('Email formatted successfully!');
     } catch (error) {
       console.error('Error formatting email:', error);
-      toast.error('Failed to format email');
+      // Check if error is an instance of Error and has a message property
+      const errorMessage = error instanceof Error ? error.message : 'Failed to format email';
+      toast.error(errorMessage);
     } finally {
       setIsFormatting(false);
     }

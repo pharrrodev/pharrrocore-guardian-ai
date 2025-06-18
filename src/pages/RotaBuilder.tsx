@@ -11,87 +11,188 @@ import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shift, guards } from '@/data/rota-data';
-import { loadRotaData } from '@/utils/rotaStore';
-import { updateRotaData } from '@/api/rota-update';
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import dayjs from 'dayjs'; // For date formatting
+
+// Define Shift interface matching Supabase table structure
+// Note: `date` in UI might be Date object, but Supabase needs 'YYYY-MM-DD' string for DATE type.
+// `breakTimes` will be JSON.
+export interface Shift {
+  id: string; // client-generated UUID
+  guard_id: string; // UUID from auth.users
+  guard_name: string;
+  shift_date: string; // YYYY-MM-DD format
+  start_time: string; // HH:MM
+  end_time: string; // HH:MM
+  position: string;
+  shift_type: 'Day' | 'Night' | 'Evening';
+  break_times?: Array<{ breakStart: string; breakEnd: string; breakType: string }>;
+  site_id?: string | null;
+  // created_at and updated_at are handled by Supabase
+}
+
+interface GuardUser {
+  id: string;
+  name: string;
+}
 
 const RotaBuilder = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [newShift, setNewShift] = useState<{
-    guardName: string;
-    date: Date | undefined;
-    startTime: string;
-    endTime: string;
+  const [newShiftForm, setNewShiftForm] = useState<{
+    guard_id: string; // Stores selected guard's Supabase UUID
+    guard_name: string; // Stores selected guard's display name
+    shift_date_obj: Date | undefined; // For DatePicker component
+    start_time: string;
+    end_time: string;
     position: string;
+    shift_type: 'Day' | 'Night' | 'Evening';
   }>({
-    guardName: '',
-    date: undefined,
-    startTime: '',
-    endTime: '',
-    position: ''
+    guard_id: '',
+    guard_name: '',
+    shift_date_obj: undefined,
+    start_time: '',
+    end_time: '',
+    position: '',
+    shift_type: 'Day',
   });
-  const [isLoading, setIsLoading] = useState(false);
 
+  const [availableGuards, setAvailableGuards] = useState<GuardUser[]>([]);
+  const [isLoadingGuards, setIsLoadingGuards] = useState(true);
+  const [isLoadingShifts, setIsLoadingShifts] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch guards
   useEffect(() => {
-    // Load existing rota data
-    const existingShifts = loadRotaData();
-    setShifts(existingShifts);
+    const fetchGuards = async () => {
+      setIsLoadingGuards(true);
+      try {
+        const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
+        if (error) throw error;
+        if (guardsData) {
+          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        }
+      } catch (err) {
+        console.error("Error fetching guards:", err);
+        toast.error("Failed to load guard list.");
+        setAvailableGuards([]);
+      } finally {
+        setIsLoadingGuards(false);
+      }
+    };
+    fetchGuards();
   }, []);
 
+  // Fetch existing shifts
+  useEffect(() => {
+    const fetchShifts = async () => {
+      setIsLoadingShifts(true);
+      try {
+        const { data, error } = await supabase
+          .from('shifts')
+          .select('*')
+          .order('shift_date', { ascending: true })
+          .order('start_time', { ascending: true });
+        if (error) throw error;
+        // Ensure break_times is parsed if it's stored as a string, though JSONB handles objects.
+        // And ensure shift_date is in 'YYYY-MM-DD' if it's not already.
+        setShifts(data || []);
+      } catch (err) {
+        console.error("Error fetching shifts:", err);
+        toast.error("Failed to load existing shifts.");
+        setShifts([]);
+      } finally {
+        setIsLoadingShifts(false);
+      }
+    };
+    fetchShifts();
+  }, []);
+
+  const handleNewShiftFormChange = (field: string, value: any) => {
+    setNewShiftForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleGuardSelectionForNewShift = (guardId: string) => {
+    const selectedGuard = availableGuards.find(g => g.id === guardId);
+    setNewShiftForm(prev => ({
+      ...prev,
+      guard_id: guardId,
+      guard_name: selectedGuard ? selectedGuard.name : '',
+    }));
+  };
+
   const addShift = () => {
-    if (!newShift.guardName || !newShift.date || !newShift.startTime || !newShift.endTime || !newShift.position) {
-      toast.error('Please fill in all fields');
+    if (!newShiftForm.guard_id || !newShiftForm.shift_date_obj || !newShiftForm.start_time || !newShiftForm.end_time || !newShiftForm.position || !newShiftForm.shift_type) {
+      toast.error('Please fill in all required fields for the new shift.');
       return;
     }
 
-    // Find the guard ID based on the selected name
-    const selectedGuard = guards.find(guard => guard.name === newShift.guardName);
-    const guardId = selectedGuard ? selectedGuard.id : crypto.randomUUID();
-
-    const shift: Shift = {
+    const newShiftEntry: Shift = {
       id: crypto.randomUUID(),
-      guardId: guardId,
-      guardName: newShift.guardName,
-      date: newShift.date.toISOString().split('T')[0],
-      startTime: newShift.startTime,
-      endTime: newShift.endTime,
-      position: newShift.position,
-      shiftType: 'Day', // Default to Day shift
-      breakTimes: [
-        { breakStart: '12:00', breakEnd: '12:30', breakType: 'Lunch' }
-      ] // Default break time
+      guard_id: newShiftForm.guard_id,
+      guard_name: newShiftForm.guard_name,
+      shift_date: dayjs(newShiftForm.shift_date_obj).format('YYYY-MM-DD'),
+      start_time: newShiftForm.start_time,
+      end_time: newShiftForm.end_time,
+      position: newShiftForm.position,
+      shift_type: newShiftForm.shift_type,
+      break_times: [ // Default break times
+        { breakStart: '12:00', breakEnd: '12:30', breakType: 'Lunch' },
+        // Add more default breaks if needed based on shift_type
+      ],
+      // site_id: null, // Set if site context is available
     };
 
-    setShifts([...shifts, shift]);
-    setNewShift({
-      guardName: '',
-      date: undefined,
-      startTime: '',
-      endTime: '',
-      position: ''
+    setShifts([...shifts, newShiftEntry]);
+    // Reset form
+    setNewShiftForm({
+      guard_id: '',
+      guard_name: '',
+      shift_date_obj: undefined,
+      start_time: '',
+      end_time: '',
+      position: '',
+      shift_type: 'Day',
     });
-    toast.success('Shift added');
+    toast.success('Shift added to current rota. Save rota to persist changes.');
   };
 
   const removeShift = (id: string) => {
     setShifts(shifts.filter(shift => shift.id !== id));
-    toast.success('Shift removed');
+    toast.info('Shift removed from current rota. Save rota to persist changes.');
   };
 
   const saveRota = async () => {
-    setIsLoading(true);
+    if (shifts.length === 0) {
+      toast.info("No shifts to save.");
+      // Optionally, you might want to delete all shifts for the relevant date range/guards if this means clearing the rota.
+      // For now, we only upsert what's in the local state.
+      return;
+    }
+    setIsSaving(true);
     try {
-      const response = await updateRotaData({ rows: shifts });
-      if (response.status === 'ok') {
-        toast.success('Rota saved successfully');
-      } else {
-        toast.error(response.message || 'Failed to save rota');
+      // Map local state `shifts` to ensure structure matches DB table exactly
+      // (e.g. `shift_date` is string 'YYYY-MM-DD')
+      const shiftsToUpsert = shifts.map(s => ({
+        ...s,
+        // Ensure shift_date is correctly formatted if it was a Date object locally at some point
+        shift_date: dayjs(s.shift_date).format('YYYY-MM-DD'),
+      }));
+
+      const { error } = await supabase.from('shifts').upsert(shiftsToUpsert, {
+        onConflict: 'id', // Use the client-generated UUID as the conflict target
+      });
+
+      if (error) {
+        console.error('Error saving rota to Supabase:', error);
+        toast.error(`Failed to save rota: ${error.message}`);
+        throw error;
       }
+      toast.success('Rota saved successfully to Supabase!');
     } catch (error) {
-      toast.error('Error saving rota');
-      console.error('Save error:', error);
+      // Error already handled by toast in the upsert block or if it's a different error
+      console.error('Save rota error:', error);
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -116,16 +217,22 @@ const RotaBuilder = () => {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="guardName">Guard Name</Label>
-                <Select onValueChange={(value) => setNewShift({ ...newShift, guardName: value })} value={newShift.guardName}>
-                  <SelectTrigger>
+                <Select onValueChange={handleGuardSelectionForNewShift} value={newShiftForm.guard_id}>
+                  <SelectTrigger id="guardName">
                     <SelectValue placeholder="Select guard name" />
                   </SelectTrigger>
                   <SelectContent>
-                    {guards.map((guard) => (
-                      <SelectItem key={guard.id} value={guard.name}>
-                        {guard.name}
-                      </SelectItem>
-                    ))}
+                    {isLoadingGuards ? (
+                      <SelectItem value="loading" disabled>Loading guards...</SelectItem>
+                    ) : availableGuards.length > 0 ? (
+                      availableGuards.map((guard) => (
+                        <SelectItem key={guard.id} value={guard.id}>
+                          {guard.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-guards" disabled>No guards available</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -164,11 +271,30 @@ const RotaBuilder = () => {
                 <Label htmlFor="position">Position</Label>
                 <Input
                   id="position"
-                  value={newShift.position}
-                  onChange={(e) => setNewShift({ ...newShift, position: e.target.value })}
+                  value={newShiftForm.position} // Use newShiftForm
+                  onChange={(e) => handleNewShiftFormChange('position', e.target.value)}
                   placeholder="e.g., Main Gate, Reception, Patrol"
                 />
               </div>
+
+              <div>
+                <Label htmlFor="shiftType">Shift Type</Label>
+                <Select
+                  value={newShiftForm.shift_type}
+                  onValueChange={(value: 'Day' | 'Night' | 'Evening') => handleNewShiftFormChange('shift_type', value)}
+                >
+                  <SelectTrigger id="shiftType">
+                    <SelectValue placeholder="Select shift type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Day">Day</SelectItem>
+                    <SelectItem value="Night">Night</SelectItem>
+                    <SelectItem value="Evening">Evening</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Break times are defaulted in addShift, UI for editing them is a future enhancement */}
 
               <Button onClick={addShift} className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
@@ -180,18 +306,20 @@ const RotaBuilder = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
-                Current Shifts ({shifts.length})
-                <Button onClick={saveRota} disabled={isLoading || shifts.length === 0}>
+                Current Rota ({shifts.length} shifts)
+                <Button onClick={saveRota} disabled={isSaving || isLoadingShifts || shifts.length === 0}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isLoading ? 'Saving...' : 'Save Rota'}
+                  {isSaving ? 'Saving...' : 'Save Rota to Database'}
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {shifts.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No shifts added yet</p>
+              {isLoadingShifts ? (
+                <p className="text-muted-foreground text-center py-8">Loading shifts...</p>
+              ) : shifts.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No shifts added yet. Add shifts using the form on the left, then click "Save Rota".</p>
               ) : (
-                <div className="max-h-96 overflow-auto">
+                <div className="max-h-[500px] overflow-auto"> {/* Increased max-h */}
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -199,16 +327,26 @@ const RotaBuilder = () => {
                         <TableHead>Date</TableHead>
                         <TableHead>Time</TableHead>
                         <TableHead>Position</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {shifts.map((shift) => (
                         <TableRow key={shift.id}>
-                          <TableCell className="font-medium">{shift.guardName}</TableCell>
-                          <TableCell>{shift.date}</TableCell>
-                          <TableCell>{shift.startTime} - {shift.endTime}</TableCell>
+                          <TableCell className="font-medium">{shift.guard_name}</TableCell>
+                          <TableCell>{dayjs(shift.shift_date).format('DD/MM/YYYY')}</TableCell>
+                          <TableCell>{shift.start_time} - {shift.end_time}</TableCell>
                           <TableCell>{shift.position}</TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              shift.shift_type === 'Day' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
+                              shift.shift_type === 'Evening' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' :
+                              'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' // Night
+                            }`}>
+                              {shift.shift_type}
+                            </span>
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"

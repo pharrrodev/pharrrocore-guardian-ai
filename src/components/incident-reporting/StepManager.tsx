@@ -7,13 +7,26 @@ import Step5Description from '@/components/incident-reporting/Step5Description';
 import Step6PeopleInvolved from '@/components/incident-reporting/Step6PeopleInvolved';
 import Step7ActionsTaken from '@/components/incident-reporting/Step7ActionsTaken';
 
+interface StaffMember { // Define a simple interface for staff members
+  id: string;
+  name: string;
+}
+
 interface StepManagerProps {
     currentStep: number;
     formData: any;
     updateFormData: (data: object) => void;
+    availableStaff?: StaffMember[]; // Optional: pass down from parent
+    isLoadingStaff?: boolean;      // Optional: pass down from parent
 }
 
-const StepManager: React.FC<StepManagerProps> = ({ currentStep, formData, updateFormData }) => {
+const StepManager: React.FC<StepManagerProps> = ({
+    currentStep,
+    formData,
+    updateFormData,
+    availableStaff,
+    isLoadingStaff
+}) => {
     switch (currentStep) {
         case 1:
             return <Step1Date formData={formData} updateFormData={updateFormData} />;
@@ -24,11 +37,17 @@ const StepManager: React.FC<StepManagerProps> = ({ currentStep, formData, update
         case 4:
             return <Step4IncidentType formData={formData} updateFormData={updateFormData} />;
         case 5:
-            return <Step6PeopleInvolved formData={formData} updateFormData={updateFormData} />;
-        case 6:
-            return <Step7ActionsTaken formData={formData} updateFormData={updateFormData} />;
-        case 7:
             return <Step5Description formData={formData} updateFormData={updateFormData} />;
+        case 6:
+            // Pass availableStaff and isLoadingStaff to Step6PeopleInvolved
+            return <Step6PeopleInvolved
+                      formData={formData}
+                      updateFormData={updateFormData}
+                      availableStaff={availableStaff || []}
+                      isLoadingStaff={isLoadingStaff || false}
+                    />;
+        case 7:
+            return <Step7ActionsTaken formData={formData} updateFormData={updateFormData} />;
         default:
             return null;
     }

@@ -28,7 +28,7 @@ const SummaryReportModal = ({ isOpen, onClose, summaryContent, selectedDate }: S
 
   const handleSave = () => {
     localStorage.setItem(`summary-${selectedDate}`, summaryContent);
-    toast.success('Summary saved successfully!');
+    toast.success('Summary saved locally!'); // Clarified toast message
   };
 
   const handleEmail = () => {

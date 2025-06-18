@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'; // Import useState, useEffect
+import { supabase } from '@/lib/supabaseClient'; // Import Supabase
+import { toast } from 'sonner'; // For error notifications
 
 import { useIncidentReport } from '@/hooks/useIncidentReport';
 import ProcessingReportModal from '@/components/incident-reporting/ProcessingReportModal';
@@ -29,6 +32,31 @@ const IncidentReport = () => {
     onOpenChangeWarning,
     validationMessage,
   } = useIncidentReport();
+
+  const [availableStaff, setAvailableStaff] = useState<Array<{id: string, name: string}>>([]);
+  const [isLoadingStaff, setIsLoadingStaff] = useState(true);
+
+  useEffect(() => {
+    const fetchStaff = async () => {
+      setIsLoadingStaff(true);
+      try {
+        const { data: staffData, error } = await supabase.functions.invoke('get-guard-list');
+        if (error) throw error;
+        if (staffData) {
+          setAvailableStaff(staffData.map((s: any) => ({ id: s.id, name: s.name || s.email })));
+        } else {
+          setAvailableStaff([]);
+        }
+      } catch (err: any) {
+        console.error("Error fetching staff list:", err);
+        toast.error("Failed to load staff list for selection.");
+        setAvailableStaff([]);
+      } finally {
+        setIsLoadingStaff(false);
+      }
+    };
+    fetchStaff();
+  }, []);
 
   if (isSubmitted) {
     return (
@@ -78,6 +106,7 @@ const IncidentReport = () => {
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
                 currentStep > 1 ? 'opacity-100' : 'invisible'
               }`}
+              aria-label="Previous step"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -87,6 +116,8 @@ const IncidentReport = () => {
                 currentStep={currentStep}
                 formData={formData}
                 updateFormData={updateFormData}
+                availableStaff={availableStaff} // Pass staff list down
+                isLoadingStaff={isLoadingStaff} // Pass loading state
               />
             </div>
 
@@ -98,6 +129,7 @@ const IncidentReport = () => {
               className={`rounded-full h-10 w-10 shrink-0 transition-opacity duration-300 ${
                 currentStep < TOTAL_STEPS ? 'opacity-100' : 'invisible'
               }`}
+              aria-label="Next step"
             >
               <ArrowRight className="h-5 w-5" />
             </Button>

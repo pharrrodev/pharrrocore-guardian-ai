@@ -12,6 +12,10 @@ import AssignmentInstructions from "./pages/AssignmentInstructions";
 import InstructionGenerator from "./pages/InstructionGenerator";
 import EDOB from "./pages/EDOB";
 import UniformCheck from "./pages/UniformCheck";
+import UniformCheckLog from "./pages/UniformCheckLog";
+import ManageLicencesPage from "./pages/ManageLicences";
+import ManagePayrollInputPage from "./pages/ManagePayrollInput";
+import KPIDashboard from "./pages/KPIDashboard"; // Import the new KPIDashboard
 import BreakChecker from "./pages/BreakChecker";
 import RadioHandover from "./pages/RadioHandover";
 import RadioHandoverLog from "./pages/RadioHandoverLog";
@@ -61,6 +65,10 @@ const App = () => (
                     <Route path="/instruction-generator" element={<InstructionGenerator />} />
                     <Route path="/edob" element={<EDOB />} />
                     <Route path="/uniform-check" element={<UniformCheck />} />
+                    <Route path="/uniform-check-log" element={<UniformCheckLog />} />
+                    <Route path="/manage-licences" element={<ManageLicencesPage />} />
+                    <Route path="/manage-payroll-input" element={<ManagePayrollInputPage />} />
+                    <Route path="/kpi-dashboard" element={<KPIDashboard />} /> {/* Add new route */}
                     <Route path="/break-checker" element={<BreakChecker />} />
                     <Route path="/equipment-check" element={<EquipmentCheck />} />
                     <Route path="/radio-handover" element={<RadioHandover />} />
