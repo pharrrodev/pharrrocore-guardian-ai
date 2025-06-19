@@ -36,32 +36,22 @@ const EDOBLog = () => { // Removed props: entries, loading
     const fetchEntries = async () => {
       setLoading(true);
       try {
-        // Fetch entries and related user's email (optional join)
-        // Adjust the select query based on what user information you want.
-        // If you stored guardName directly and don't need email, simplify the query.
-        const { data, error } = await supabase
-          .from("edob_entries")
-          .select(`
-            id,
-            timestamp,
-            type,
-            details,
-            route,
-            user_id,
-            created_at,
-            users ( email )
-          `)
-          .order("timestamp", { ascending: false })
-          .limit(100); // Add a limit for performance
+        // Invoke the Edge Function
+        const { data: fetchedData, error } = await supabase.functions.invoke('get-edob-entries');
 
         if (error) {
-          console.error("Error fetching EDOB entries:", error);
+          console.error("Error fetching EDOB entries via function:", error);
           toast.error(`Failed to fetch entries: ${error.message}`);
-          throw error;
+          throw error; // Rethrow to be caught by outer catch if necessary, or handle directly
         }
-        setEntries(data || []);
+
+        // Assuming 'fetchedData' is the array of entries
+        setEntries(fetchedData || []);
       } catch (err) {
-        // Error already handled by toast
+        // Error already handled by toast if it came from the invoke error block
+        // If not, ensure it's handled:
+        // console.error("Caught error in fetchEntries:", err);
+        // toast.error("An unexpected error occurred while fetching entries.");
       } finally {
         setLoading(false);
       }
