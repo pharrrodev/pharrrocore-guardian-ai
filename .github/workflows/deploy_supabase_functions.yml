@@ -25,7 +25,7 @@ jobs:
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
         run: |
           echo "Deploying all functions..."
-          supabase functions deploy --project-id $SUPABASE_PROJECT_ID
+          supabase functions deploy 
           # If you want to deploy specific functions instead, you can use:
           # supabase functions deploy get-guard-list --project-id $SUPABASE_PROJECT_ID
           # supabase functions deploy get-edob-entries --project-id $SUPABASE_PROJECT_ID
