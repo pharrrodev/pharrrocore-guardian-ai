@@ -21,7 +21,7 @@ serve(async (req) => {
 
     const { data, error } = await adminSupabase
       .from('edob_entries')
-      .select('id,timestamp,type,details,route,user_id,created_at,users(email)')
+      .select('id,timestamp,type,details,route,user_id,created_at,profiles(email)')
       .order('timestamp', { ascending: false })
       .limit(100);
 
