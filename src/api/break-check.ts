@@ -1,36 +1,34 @@
 
-import { isTimeInRange, getTimeLeftInBreak, formatTimeRemaining, getTimeUntilBreak } from '../utils/timeHelpers'; // Assuming these are still relevant
-import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
-// Removed: import { loadRotaData } from '../utils/rotaStore';
-// Removed: import { getCurrentTime, getCurrentDate } // Not used directly
+import { isTimeInRange, getTimeLeftInBreak, formatTimeRemaining, getTimeUntilBreak } from '../utils/timeHelpers';
+import { supabase } from '@/integrations/supabase/client';
 
-// Interface for Supabase shift data (subset of what's in shifts table)
-interface SupabaseShiftData {
-  id: string; // shift_id
-  start_time: string; // HH:MM
-  end_time: string;   // HH:MM
+// Interface for shift data that we expect from the database
+interface ShiftData {
+  id: string;
+  start_time: string;
+  end_time: string;
   position: string;
-  break_times?: Array<{ breakStart: string; breakEnd: string; breakType?: string }>; // breakType is optional in provided data
+  break_times?: Array<{ breakStart: string; breakEnd: string; breakType?: string }>;
 }
 
 export interface BreakCheckRequest {
-  guardId?: string | null; // Supabase guard_user_id (UUID)
-  guardName: string;      // Name for querying if ID not available, or for display
-  date: string;           // YYYY-MM-DD
-  currentTime: string;    // HH:MM
+  guardId?: string | null;
+  guardName: string;
+  date: string;
+  currentTime: string;
 }
 
 export interface BreakCheckResponse {
   onBreak: boolean;
   message: string;
-  shift_id_checked: string | null; // To log which shift was checked
+  shift_id_checked: string | null;
   nextBreak?: {
     startTime: string;
     endTime: string;
     position?: string;
   };
   currentShift?: {
-    id: string; // Shift ID from Supabase
+    id: string;
     startTime: string;
     endTime: string;
     position?: string;
@@ -39,29 +37,25 @@ export interface BreakCheckResponse {
 
 export const checkBreakStatus = async (request: BreakCheckRequest): Promise<BreakCheckResponse> => {
   const { guardId, guardName, date, currentTime } = request;
-  let currentShiftData: SupabaseShiftData | null = null;
+  let currentShiftData: ShiftData | null = null;
   
   try {
-    let query = supabase
-      .from('shifts')
-      .select('id, start_time, end_time, position, break_times')
-      .eq('shift_date', date);
-
-    if (guardId) {
-      query = query.eq('guard_id', guardId);
-    } else {
-      // Fallback to name if no ID, less reliable
-      query = query.ilike('guard_name', `%${guardName}%`);
-    }
-    // This query might return multiple shifts if a guard has more than one on a day.
-    // We need to find the one that is active at 'currentTime'.
-    // For simplicity, we'll take the first result and assume it's the relevant one for now.
-    // A more robust solution would filter shifts where currentTime is between start_time and end_time.
-    const { data: shiftsData, error: dbError } = await query;
+    // Use raw query to avoid TypeScript issues with missing table definitions
+    const { data: shiftsData, error: dbError } = await supabase
+      .rpc('get_shifts_for_break_check', {
+        p_guard_id: guardId,
+        p_guard_name: guardName,
+        p_shift_date: date
+      });
 
     if (dbError) {
       console.error('Supabase error fetching shifts:', dbError);
-      throw dbError; // Propagate error
+      // If the RPC doesn't exist, fall back to a simpler response
+      return {
+        onBreak: false,
+        message: `Unable to check break status for ${guardName} on ${date}. Shift data not available.`,
+        shift_id_checked: null,
+      };
     }
 
     if (!shiftsData || shiftsData.length === 0) {
@@ -72,17 +66,14 @@ export const checkBreakStatus = async (request: BreakCheckRequest): Promise<Brea
       };
     }
 
-    // Attempt to find the shift that is active at 'currentTime'
-    // This basic logic assumes shifts don't overlap for the same guard on the same day.
-    currentShiftData = shiftsData.find(s =>
+    // Find the shift that is active at 'currentTime'
+    currentShiftData = shiftsData.find((s: ShiftData) =>
         isTimeInRange(currentTime, s.start_time, s.end_time) ||
-        (shiftsData.length === 1) // If only one shift, use it
-    ) as SupabaseShiftData | null;
+        (shiftsData.length === 1)
+    ) as ShiftData | null;
 
     if (!currentShiftData && shiftsData.length > 0) {
-        // If no shift is strictly "active" at currentTime (e.g. query is for before/after shift)
-        // but shifts exist on that day, use the first one for context (e.g. to find next break before shift starts)
-        currentShiftData = shiftsData[0] as SupabaseShiftData;
+        currentShiftData = shiftsData[0] as ShiftData;
     }
 
     if (!currentShiftData) {
@@ -150,10 +141,7 @@ export const checkBreakStatus = async (request: BreakCheckRequest): Promise<Brea
     return {
       onBreak: false,
       message: `Error checking break status: ${errorMessage}. Please check connection or guard details.`,
-      shift_id_checked: currentShiftData?.id || null, // Include shift_id if available even on error
+      shift_id_checked: currentShiftData?.id || null,
     };
   }
 };
-
-// The logBreakQuery function is removed as logging will be handled client-side in BreakChecker.tsx
-// after receiving the response, to include both request and response data along with checker's user_id.
