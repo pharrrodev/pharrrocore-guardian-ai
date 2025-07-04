@@ -40,13 +40,12 @@ export const checkBreakStatus = async (request: BreakCheckRequest): Promise<Brea
   let currentShiftData: ShiftData | null = null;
   
   try {
-    // Use raw query to avoid TypeScript issues with missing table definitions
+    // Use direct SQL query since RPC function types aren't available
     const { data: shiftsData, error: dbError } = await supabase
-      .rpc('get_shifts_for_break_check', {
-        p_guard_id: guardId,
-        p_guard_name: guardName,
-        p_shift_date: date
-      });
+      .from('shifts' as any)
+      .select('id, start_time, end_time, position, break_times')
+      .or(`guard_id.eq.${guardId},guard_name.eq.${guardName}`)
+      .eq('shift_date', date) as { data: ShiftData[] | null, error: any };
 
     if (dbError) {
       console.error('Supabase error fetching shifts:', dbError);

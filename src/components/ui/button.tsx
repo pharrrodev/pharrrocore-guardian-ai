@@ -25,4 +25,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-export { Button } // Only export Button component and ButtonProps (implicitly via usage)
+export { Button, buttonVariants }

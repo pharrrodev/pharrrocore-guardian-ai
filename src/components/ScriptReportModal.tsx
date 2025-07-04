@@ -85,6 +85,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
 
     switch (scriptKey) {
       case 'kpi':
+        const kpiData = scriptData as KpiReportData;
         return (
           <div className="space-y-4">
             <h4 className="text-lg font-medium">KPI Metrics</h4>
@@ -98,19 +99,19 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
               <TableBody>
                 <TableRow>
                   <TableCell>Patrol Compliance</TableCell>
-                  <TableCell>{scriptData.patrolComplianceRate}%</TableCell>
+                  <TableCell>{kpiData.patrolComplianceRate}%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Uniform Compliance</TableCell>
-                  <TableCell>{scriptData.uniformCompliance}%</TableCell>
+                  <TableCell>{kpiData.uniformCompliance}%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Total Patrols</TableCell>
-                  <TableCell>{scriptData.totalPatrols}</TableCell>
+                  <TableCell>{kpiData.totalPatrols}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Breaks Taken</TableCell>
-                  <TableCell>{scriptData.breaksTaken}</TableCell>
+                  <TableCell>{kpiData.breaksTaken}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -118,18 +119,20 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
         );
 
       case 'daily-summary':
+        const dailyData = scriptData as DailySummaryReportData;
         return (
           <div className="space-y-4">
             <h4 className="text-lg font-medium">Daily Summary Report</h4>
             <div className="bg-muted p-4 rounded-md max-h-96 overflow-auto">
               <pre className="text-sm whitespace-pre-wrap">
-                {scriptData.content}
+                {dailyData.content}
               </pre>
             </div>
           </div>
         );
 
       case 'weekly-report':
+        const weeklyData = scriptData as WeeklyReportData;
         return (
           <div className="space-y-4">
             <h4 className="text-lg font-medium">Weekly Client Report</h4>
@@ -145,17 +148,18 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
               <strong>Preview:</strong>
               <br />
               <pre className="text-sm whitespace-pre-wrap mt-2">
-                {scriptData.content.split('\n').slice(0, 20).join('\n')}...
+                {weeklyData.content.split('\n').slice(0, 20).join('\n')}...
               </pre>
             </div>
           </div>
         );
 
       case 'licence-check':
+        const licenceData = scriptData as LicenceCheckReportData;
         return (
           <div className="space-y-4">
-            <h4 className="text-lg font-medium">Licence Alerts ({scriptData.alerts.length})</h4>
-            {scriptData.alerts.length > 0 ? (
+            <h4 className="text-lg font-medium">Licence Alerts ({licenceData.alerts.length})</h4>
+            {licenceData.alerts.length > 0 ? (
               <div className="max-h-96 overflow-auto">
                 <Table>
                   <TableHeader>
@@ -167,7 +171,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(scriptData as LicenceCheckReportData).alerts.map((alert: LicenceAlert, index: number) => (
+                    {licenceData.alerts.map((alert: LicenceAlert, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{alert.guardName}</TableCell>
                         <TableCell>{dayjs(alert.expiresDate).format('YYYY-MM-DD')}</TableCell>
@@ -189,10 +193,11 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
         );
 
       case 'payroll-check':
+        const payrollData = scriptData as PayrollCheckReportData;
         return (
           <div className="space-y-4">
-            <h4 className="text-lg font-medium">Payroll Variances ({scriptData.variances.length})</h4>
-            {scriptData.variances.length > 0 ? (
+            <h4 className="text-lg font-medium">Payroll Variances ({payrollData.variances.length})</h4>
+            {payrollData.variances.length > 0 ? (
               <div className="max-h-96 overflow-auto">
                 <Table>
                   <TableHeader>
@@ -205,7 +210,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(scriptData as PayrollCheckReportData).variances.map((variance: PayrollVariance, index: number) => (
+                    {payrollData.variances.map((variance: PayrollVariance, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{variance.guardId}</TableCell>
                         <TableCell>{variance.date}</TableCell>
@@ -228,10 +233,11 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
         );
 
       case 'no-show-check':
+        const noShowData = scriptData as NoShowCheckReportData;
         return (
           <div className="space-y-4">
-            <h4 className="text-lg font-medium">No-Show Alerts ({scriptData.alerts.length})</h4>
-            {scriptData.alerts.length > 0 ? (
+            <h4 className="text-lg font-medium">No-Show Alerts ({noShowData.alerts.length})</h4>
+            {noShowData.alerts.length > 0 ? (
               <div className="max-h-96 overflow-auto">
                 <Table>
                   <TableHeader>
@@ -243,7 +249,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(scriptData as NoShowCheckReportData).alerts.map((alert: NoShowReportAlert, index: number) => (
+                    {noShowData.alerts.map((alert: NoShowReportAlert, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{alert.guardName}</TableCell>
                         <TableCell>{alert.date}</TableCell>
@@ -298,3 +304,4 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
 };
 
 export default ScriptReportModal;
+export type { AllScriptData };

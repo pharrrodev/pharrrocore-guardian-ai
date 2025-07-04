@@ -1,15 +1,13 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-// Removed: import { assignmentTopics, Topic } from "@/data/assignmentTopics";
-import { supabase } from "@/integrations/supabase/client"; // Import Supabase
-import { toast } from "sonner"; // Import sonner
-import React, { useState, useEffect } from "react"; // Import useEffect
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface FetchedTopic {
   id: string; // Kebab-case ID from DB
@@ -33,12 +31,13 @@ const TopicSelector = ({ value, onChange }: TopicSelectorProps) => {
     const fetchTopLevelTopics = async () => {
       setIsLoadingTopics(true);
       try {
+        // Use direct query with type assertion since table isn't in types
         const { data, error } = await supabase
-          .from('knowledge_base_topics')
+          .from('knowledge_base_topics' as any)
           .select('id, label')
-          .is('parent_id', null) // Fetch only top-level topics
+          .is('parent_id', null)
           .order('sort_order')
-          .order('label');
+          .order('label') as { data: FetchedTopic[] | null, error: any };
 
         if (error) throw error;
         setFetchedTopics(data || []);

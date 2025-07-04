@@ -26,15 +26,12 @@ export const logRadioHandover = async (request: RadioHandoverRequest): Promise<R
       site_id: request.site_id || null,
     };
 
-    // Use RPC function to handle the radio handover logging since the table isn't in our types
+    // Use direct SQL insert since RPC function types aren't available
     const { data, error } = await supabase
-      .rpc('log_radio_handover', {
-        p_guard_id: logEntry.guard_id,
-        p_guard_name_logged: logEntry.guard_name_logged,
-        p_action: logEntry.action,
-        p_user_id_performed_log: logEntry.user_id_performed_log,
-        p_site_id: logEntry.site_id
-      });
+      .from('radio_handover_logs' as any)
+      .insert([logEntry])
+      .select('id, created_at')
+      .single() as { data: { id?: string; created_at?: string } | null, error: any };
 
     if (error) {
       console.error('Error logging radio/handover to Supabase:', error);
@@ -46,7 +43,7 @@ export const logRadioHandover = async (request: RadioHandoverRequest): Promise<R
 
     return {
       status: 'ok',
-      timestamp: data?.log_timestamp,
+      timestamp: data?.created_at,
       logId: data?.id,
       message: 'Log entry saved successfully.'
     };
