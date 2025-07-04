@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import React, { useMemo } from "react"; // Import useMemo
 
 const ComplianceAudit = () => {
   const [acsProgress, setAcsProgress] = useState(0);
@@ -22,7 +23,7 @@ const ComplianceAudit = () => {
   const [newSubContractor, setNewSubContractor] = useState({ name: "", acsNumber: "", expiryDate: "" });
 
   // Mock ACS Requirements
-  const acsRequirements = [
+  const acsRequirements = useMemo(() => [
     { id: 1, section: "1.1", title: "Management Structure", status: "Complete", evidence: "Org chart uploaded" },
     { id: 2, section: "1.2", title: "Operating Procedures", status: "In Progress", evidence: "Procedures documented" },
     { id: 3, section: "2.1", title: "Staff Vetting", status: "Complete", evidence: "Vetting policies uploaded" },
@@ -31,7 +32,7 @@ const ComplianceAudit = () => {
     { id: 6, section: "3.2", title: "Customer Complaints", status: "In Progress", evidence: "Complaints procedure" },
     { id: 7, section: "4.1", title: "Insurance Requirements", status: "Complete", evidence: "Insurance certificates" },
     { id: 8, section: "4.2", title: "Health & Safety", status: "Not Started", evidence: "" },
-  ];
+  ], []);
 
   // Mock Sub-contractors
   const mockSubContractors = [
@@ -53,7 +54,7 @@ const ComplianceAudit = () => {
     const completedItems = acsRequirements.filter(req => req.status === "Complete").length;
     const progress = (completedItems / acsRequirements.length) * 100;
     setAcsProgress(progress);
-  }, []);
+  }, [acsRequirements]); // Added acsRequirements to dependency array
 
   const getStatusBadge = (status: string) => {
     switch (status) {

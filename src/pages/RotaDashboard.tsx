@@ -75,9 +75,10 @@ const RotaDashboard = () => {
         setActivities([]); // No shifts, so no activities to fetch
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching rota data:', error);
-      toast.error(`Failed to load rota: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to load rota: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -130,8 +131,7 @@ const RotaDashboard = () => {
     // Find the most recent 'Shift Confirmed' or 'Shift Declined' activity for this shift
     return activities
       .filter(act => act.shift_id === shiftId && (act.activity_type === 'Shift Confirmed' || act.activity_type === 'Shift Declined'))
-      .sort((a, b) => dayjs(b.timestamp).diff(dayjs(a.timestamp))) // Sort descending by time
-      [0]; // Get the latest one
+      .sort((a, b) => dayjs(b.timestamp).diff(dayjs(a.timestamp)))[0]; // Sort descending by time and get the latest one
   };
 
   const getShiftStatus = (shift: SupabaseShift): 'confirmed' | 'declined' | 'pending' => {
@@ -158,11 +158,11 @@ const RotaDashboard = () => {
 
   // Filter shifts for next 14 days
   const upcomingShifts = shifts.filter(shift => {
-    const shiftDate = dayjs(shift.date);
+    const shiftDate = dayjs(shift.shift_date); // Corrected: shift_date
     const today = dayjs();
     const twoWeeksFromNow = today.add(14, 'day');
     return shiftDate.isAfter(today.subtract(1, 'day')) && shiftDate.isBefore(twoWeeksFromNow);
-  }).sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
+  }).sort((a, b) => dayjs(a.shift_date).valueOf() - dayjs(b.shift_date).valueOf()); // Corrected: shift_date
 
   // Calculate statistics
   const totalShifts = upcomingShifts.length;
@@ -172,13 +172,13 @@ const RotaDashboard = () => {
 
   // Group shifts by date for better visualization
   const shiftsByDate = upcomingShifts.reduce((acc, shift) => {
-    const date = shift.date;
+    const date = shift.shift_date; // Corrected: shift_date
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(shift);
     return acc;
-  }, {} as Record<string, Shift[]>);
+  }, {} as Record<string, SupabaseShift[]>); // Corrected: SupabaseShift
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -292,20 +292,20 @@ const RotaDashboard = () => {
                       <TableBody>
                         {dayShifts.map(shift => {
                           const status = getShiftStatus(shift);
-                          const confirmation = getShiftConfirmation(shift.id);
+                          const confirmation = getShiftConfirmationActivity(shift.id); // Corrected: function name
                           
                           return (
                             <TableRow key={shift.id}>
-                              <TableCell className="font-medium">{shift.guardName}</TableCell>
-                              <TableCell>{shift.startTime} - {shift.endTime}</TableCell>
+                              <TableCell className="font-medium">{shift.guard_name}</TableCell> {/* Corrected: guard_name */}
+                              <TableCell>{shift.start_time} - {shift.end_time}</TableCell> {/* Corrected: start_time, end_time */}
                               <TableCell>{shift.position}</TableCell>
                               <TableCell>
                                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                  shift.shiftType === 'Day' ? 'bg-yellow-100 text-yellow-800' :
-                                  shift.shiftType === 'Evening' ? 'bg-orange-100 text-orange-800' :
+                                  shift.shift_type === 'Day' ? 'bg-yellow-100 text-yellow-800' : // Corrected: shift_type
+                                  shift.shift_type === 'Evening' ? 'bg-orange-100 text-orange-800' : // Corrected: shift_type
                                   'bg-blue-100 text-blue-800'
                                 }`}>
-                                  {shift.shiftType}
+                                  {shift.shift_type} {/* Corrected: shift_type */}
                                 </span>
                               </TableCell>
                               <TableCell>

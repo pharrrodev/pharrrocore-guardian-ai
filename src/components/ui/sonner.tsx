@@ -27,4 +27,5 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
-export { Toaster, toast }
+export { Toaster } // Remove toast from re-export
+// Consumers should import { toast } from "sonner" directly

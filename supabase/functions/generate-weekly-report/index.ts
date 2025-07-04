@@ -155,13 +155,13 @@ serve(async (req: Request) => {
     const markdownContent = generateMarkdownReportContent(weekStartDate, weekEndDate, dailySummaries || [], dailyKpis || []);
 
     const reportFileNameBase = `weekly_client_report_${weekStartDate.format('YYYY')}_W${weekStartDate.week()}`;
-    let fileContent: string | Uint8Array = markdownContent;
-    let reportType = 'WeeklyClientMarkdown';
-    let fileExtension = '.md';
-    let contentType = 'text/markdown';
+    const fileContent: string | Uint8Array = markdownContent;
+    const reportType = 'WeeklyClientMarkdown';
+    const fileExtension = '.md';
+    const contentType = 'text/markdown';
 
     let pdfGenerationAttempted = false;
-    let pdfGenerationSuccess = false;
+    const pdfGenerationSuccess = false;
 
     if (PDF_GENERATION_ENABLED) {
       pdfGenerationAttempted = true;

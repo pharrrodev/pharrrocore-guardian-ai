@@ -59,9 +59,10 @@ const PayrollVariance = () => {
           setLastUpdated('No data');
         }
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error('Unexpected error fetching variances:', e);
-      toast.error(`An unexpected error occurred: ${e.message}`);
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
+      toast.error(`An unexpected error occurred: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -99,16 +100,17 @@ const PayrollVariance = () => {
       // Real-time should pick it up, or call fetchVariances() explicitly if needed after a delay
       // For immediate feedback, we can call it:
       await fetchVariances();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error invoking payroll variance calculator:', error);
-      toast.error(`Variance calculation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Variance calculation failed: ${errorMessage}`);
     } finally {
       setIsCalculating(false);
     }
   };
 
   const getVarianceBadge = (varianceHours: number) => {
-    const absVariance = Math.abs(variance);
+    const absVariance = Math.abs(varianceHours); // Corrected: use varianceHours
     if (absVariance > 1) {
       return <Badge variant="destructive">High Variance</Badge>;
     } else if (absVariance > 0.5) {
@@ -118,8 +120,8 @@ const PayrollVariance = () => {
     }
   };
 
-  const getRowClassName = (variance: number) => {
-    const absVariance = Math.abs(variance);
+  const getRowClassName = (varianceHours: number) => { // Corrected: parameter name
+    const absVariance = Math.abs(varianceHours); // Corrected: use varianceHours
     if (absVariance > 0.25) {
       return "bg-red-50 dark:bg-red-900/20 border-l-4 border-l-red-500";
     }
@@ -140,7 +142,7 @@ const PayrollVariance = () => {
           
           <div className="flex gap-2">
             <Button 
-              onClick={loadVarianceData}
+              onClick={fetchVariances} // Corrected: use fetchVariances
               variant="outline"
               size="sm"
             >
@@ -148,12 +150,12 @@ const PayrollVariance = () => {
               Refresh
             </Button>
             <Button 
-              onClick={handleRunValidator}
-              disabled={isLoading}
+              onClick={invokeVarianceCalculator} // Corrected: use invokeVarianceCalculator
+              disabled={isCalculating || isLoading} // Use isCalculating for this button
               size="sm"
             >
               <FileText className="h-4 w-4 mr-2" />
-              {isLoading ? 'Running...' : 'Run Validator'}
+              {isCalculating ? 'Calculating...' : 'Run Validator'}
             </Button>
           </div>
         </div>
@@ -166,7 +168,7 @@ const PayrollVariance = () => {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{variances.length}</div>
+              <div className="text-2xl font-bold">{variances.filter(v => Math.abs(v.variance_hours) > 0.25).length}</div>
               <p className="text-xs text-muted-foreground">
                 Records with variance {'>'}  0.25h
               </p>
@@ -181,7 +183,7 @@ const PayrollVariance = () => {
             <CardContent>
               <div className="text-2xl font-bold">
                 {variances.length > 0 
-                  ? (variances.reduce((sum, v) => sum + Math.abs(v.variance), 0) / variances.length).toFixed(2)
+                  ? (variances.reduce((sum, v) => sum + Math.abs(v.variance_hours), 0) / variances.length).toFixed(2) // Corrected: v.variance_hours
                   : '0.00'
                 }h
               </div>
@@ -214,24 +216,26 @@ const PayrollVariance = () => {
             </p>
           </CardHeader>
           <CardContent>
-            {variances.length === 0 ? (
+            {variances.length === 0 && !isLoading ? ( // Added !isLoading condition
               <div className="text-center py-8">
                 <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Variances Found</h3>
                 <p className="text-muted-foreground mb-4">
                   Either no payroll data is available or all hours match perfectly.
                 </p>
-                <Button onClick={handleRunValidator} disabled={isLoading}>
+                <Button onClick={invokeVarianceCalculator} disabled={isCalculating || isLoading}>
                   <FileText className="h-4 w-4 mr-2" />
-                  {isLoading ? 'Running...' : 'Generate Report'}
+                  {isCalculating ? 'Calculating...' : 'Generate Report'}
                 </Button>
               </div>
+            ) : isLoading ? (
+              <div className="text-center text-muted-foreground py-8">Loading variances...</div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Guard ID</TableHead>
+                      <TableHead>Guard Name</TableHead> {/* Changed from Guard ID */}
                       <TableHead>Date</TableHead>
                       <TableHead>Site</TableHead>
                       <TableHead className="text-right">Actual Hours</TableHead>
@@ -241,22 +245,24 @@ const PayrollVariance = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {variances.map((variance, index) => (
+                    {variances.map((variance) => ( // Removed index as key if variance.id is unique
                       <TableRow 
-                        key={index}
-                        className={getRowClassName(variance.variance)}
+                        key={variance.id} // Use variance.id if unique
+                        className={getRowClassName(variance.variance_hours)} // Corrected
                       >
-                        <TableCell className="font-medium">{variance.guardId}</TableCell>
-                        <TableCell>{variance.date}</TableCell>
-                        <TableCell>{variance.siteCode}</TableCell>
-                        <TableCell className="text-right">{variance.actualHours.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">{variance.hoursPaid.toFixed(2)}</TableCell>
-                        <TableCell className={`text-right font-medium ${
-                          variance.variance > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {variance.variance > 0 ? '+' : ''}{variance.variance.toFixed(2)}h
+                        <TableCell className="font-medium">
+                          {variance.guard_user?.user_metadata?.full_name || variance.guard_user?.email || variance.guard_user_id}
                         </TableCell>
-                        <TableCell>{getVarianceBadge(variance.variance)}</TableCell>
+                        <TableCell>{dayjs(variance.variance_date).format('DD/MM/YYYY')}</TableCell> {/* Corrected */}
+                        <TableCell>{variance.site_id || '-'}</TableCell> {/* Corrected */}
+                        <TableCell className="text-right">{variance.actual_hours_calculated.toFixed(2)}</TableCell> {/* Corrected */}
+                        <TableCell className="text-right">{variance.paid_hours.toFixed(2)}</TableCell> {/* Corrected */}
+                        <TableCell className={`text-right font-medium ${
+                          variance.variance_hours > 0 ? 'text-green-600' : 'text-red-600' // Corrected
+                        }`}>
+                          {variance.variance_hours > 0 ? '+' : ''}{variance.variance_hours.toFixed(2)}h {/* Corrected */}
+                        </TableCell>
+                        <TableCell>{getVarianceBadge(variance.variance_hours)}</TableCell> {/* Corrected */}
                       </TableRow>
                     ))}
                   </TableBody>

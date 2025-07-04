@@ -28,7 +28,7 @@ interface TopicOutput {
 // Helper to ensure generated IDs are unique within this generation batch
 function ensureUniqueIds(topics: TopicOutput[], existingIds: Set<string>, parentKebabBase: string): TopicOutput[] {
   return topics.map((topic, index) => {
-    let newId = kebabCase(topic.label || `topic-${index}`);
+    const newId = kebabCase(topic.label || `topic-${index}`);
     if (!topic.label) console.warn("Topic found with no label, generating generic ID.");
 
     // Ensure uniqueness within the current generation context
@@ -72,7 +72,7 @@ serve(async (req: Request) => {
     // This prompt needs to be carefully engineered.
     const systemPrompt = `You are an AI expert at analyzing Standard Operating Procedures (SOPs) and structuring them into a hierarchical list of topics and sub-topics. Each topic must have a unique 'id' (in kebab-case, derived from its label), a concise 'label', a detailed 'response' (the core information for that topic), and optionally a 'subTopics' array for further breakdown. The output MUST be a valid JSON array of topic objects. Ensure generated 'id' fields are unique within your response. Do not create empty 'subTopics' arrays; omit the 'subTopics' field if there are no sub-topics.`;
 
-    let userMessages = [];
+    const userMessages = [];
     userMessages.push(`The primary context or parent topic label for this SOP is: "${parentTopicLabel}".`);
     if (parentTopicId) {
       userMessages.push(`This SOP content should be structured as sub-topics under an existing parent topic which has the ID: "${parentTopicId}". The topics you generate will be children of this parent.`);

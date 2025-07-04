@@ -12,14 +12,14 @@ import { generateWeeklyClientReport } from '@/scripts/weeklyClientReport';
 import { runLicenceChecker, getLicenceAlerts } from '@/scripts/licenceChecker';
 import { runPayrollValidator, getLatestPayrollVarianceReport } from '@/scripts/payrollValidator';
 import { checkNoShows, getAlertsLast24Hours } from '@/scripts/noShowCheck';
-import ScriptReportModal from '@/components/ScriptReportModal';
+import ScriptReportModal, { AllScriptData } from '@/components/ScriptReportModal'; // Import AllScriptData
 
 interface ScriptStatus {
   name: string;
   lastRun?: string;
   status: 'success' | 'error' | 'running' | 'never';
   message?: string;
-  data?: any;
+  data?: AllScriptData | null; // Use AllScriptData, allow null for initial/error states
 }
 
 const AdminTools = () => {
@@ -92,37 +92,35 @@ const AdminTools = () => {
     saveScriptStatus(scriptKey, { status: 'running' });
 
     try {
-      let result: any = {};
-      let scriptData: any = null;
+      let scriptData: AllScriptData | null = null;
 
       // Execute the actual script functions instead of making API calls
       switch (scriptKey) {
         case 'kpi':
-          result = await generateKPIReport();
-          scriptData = result;
+          // Assuming generateKPIReport() returns KpiReportData
+          scriptData = await generateKPIReport();
           break;
         case 'daily-summary':
-          // result = { content: await generateDailySummary() }; // Removed
-          result = { content: "Daily summary generation from admin panel is temporarily disabled." };
-          scriptData = result;
+          // This matches DailySummaryReportData
+          scriptData = { content: "Daily summary generation from admin panel is temporarily disabled." };
           break;
         case 'weekly-report':
-          result = { content: await generateWeeklyClientReport() };
-          scriptData = result;
+          // Assuming generateWeeklyClientReport() returns string, this matches WeeklyReportData
+          scriptData = { content: await generateWeeklyClientReport() };
           break;
         case 'licence-check':
           runLicenceChecker();
-          result = { alerts: getLicenceAlerts() };
-          scriptData = result;
+          // Assuming getLicenceAlerts() returns LicenceAlert[]
+          scriptData = { alerts: getLicenceAlerts() };
           break;
         case 'payroll-check':
           runPayrollValidator();
-          result = { variances: getLatestPayrollVarianceReport() };
-          scriptData = result;
+          // Assuming getLatestPayrollVarianceReport() returns PayrollVariance[]
+          scriptData = { variances: getLatestPayrollVarianceReport() };
           break;
         case 'no-show-check':
-          result = { alerts: checkNoShows() };
-          scriptData = result;
+          // Assuming checkNoShows() returns NoShowReportAlert[]
+          scriptData = { alerts: checkNoShows() };
           break;
         default:
           throw new Error('Unknown script');

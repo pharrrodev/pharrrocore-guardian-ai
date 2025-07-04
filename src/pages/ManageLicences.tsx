@@ -17,9 +17,16 @@ import dayjs from 'dayjs';
 import { toast } from 'sonner';
 
 // Types
-interface GuardUser {
+interface GuardUser { // Represents the structure used in availableGuards state
   id: string;
   name: string;
+}
+
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string; // Name from metadata or email
+  email?: string; // Email is always expected from the function
 }
 
 interface SIALicence {
@@ -78,10 +85,18 @@ const ManageLicencesPage = () => {
     try {
       const { data, error } = await supabase.functions.invoke('get-guard-list');
       if (error) throw error;
-      setAvailableGuards(data.map((g: any) => ({ id: g.id, name: g.name || g.email })) || []);
+      if (data && Array.isArray(data)) {
+        setAvailableGuards(data.map((g: GuardListDataItem) => ({
+          id: g.id,
+          name: g.name || g.email || `User ${g.id.substring(0,6)}`
+        })));
+      } else {
+        setAvailableGuards([]);
+      }
     } catch (err) {
       console.error("Error fetching guards:", err);
-      toast.error("Failed to load guard list.");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load guard list: ${errorMessage}`);
     }
   }, []);
 
@@ -98,9 +113,10 @@ const ManageLicencesPage = () => {
         .order('expiry_date', { ascending: true });
       if (error) throw error;
       setLicences(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching licences:", err);
-      toast.error(`Failed to load licences: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load licences: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -140,9 +156,10 @@ const ManageLicencesPage = () => {
         setIsModalOpen(false);
         form.reset();
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error saving licence:", err);
-      toast.error(`Failed to save licence: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to save licence: ${errorMessage}`);
     }
   };
 

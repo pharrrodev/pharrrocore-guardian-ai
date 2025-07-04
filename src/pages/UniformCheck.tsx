@@ -21,9 +21,16 @@ import { supabase } from "@/integrations/supabase/client"; // Import Supabase cl
 import React, { useState, useEffect } from "react"; // Import React hooks
 
 // Define a type for fetched users/guards
-interface GuardUser {
+interface GuardUser { // For the state `guardUsers`
   id: string;
   name: string; // This could be email or a display name from metadata
+}
+
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email?: string;
 }
 
 const uniformCheckSchema = z.object({
@@ -59,12 +66,12 @@ const UniformCheck = () => {
           throw functionsError;
         }
 
-        if (guardsData) {
+        if (guardsData && Array.isArray(guardsData)) {
           // Edge function returns [{id, name, email}]
           // Map to GuardUser interface {id, name}
-          const formattedGuards = guardsData.map((g: any) => ({
+          const formattedGuards = guardsData.map((g: GuardListDataItem) => ({
             id: g.id,
-            name: g.name || g.email, // Use name, fallback to email
+            name: g.name || g.email || `User ${g.id.substring(0,6)}`,
           }));
           setGuardUsers(formattedGuards);
         } else {
@@ -73,6 +80,11 @@ const UniformCheck = () => {
       } catch (err) {
         // Error already handled by toast in the try block or it's an unexpected client-side issue
         console.error("Client-side error in fetchGuards:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        // Avoid double toast if functionsError was already handled
+        if (!(err instanceof Error && err.message.includes("Edge Function"))) {
+             toast.error(`Client error loading guards: ${errorMessage}`);
+        }
         // setGuardUsers([]); // Ensure it's empty on error
       } finally {
         setIsLoadingGuards(false);
@@ -135,9 +147,10 @@ const UniformCheck = () => {
         additionalComments: "",
       });
       setSelectedGuardUserId(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting uniform check:", error);
-      toast.error(`Failed to submit check: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to submit check: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }

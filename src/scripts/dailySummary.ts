@@ -1,14 +1,22 @@
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client'; // Import Supabase client
+import type { Tables } from '../integrations/supabase/types'; // Import Supabase generated types
 // Removed getLogsFromStorage and getTodaysVisitorLogs as they are localStorage/CSV based
 
 export interface DailySummaryData {
   date: string; // YYYY-MM-DD
-  edobEntries: any[]; // Define more specific types if possible
-  incidents: any[];   // Define more specific types if possible
-  visitors: any[];    // Define more specific types if possible
-  shiftLogs: any[];   // Define more specific types if possible
-  noShowAlerts: any[];// Define more specific types if possible
+  edobEntries: Tables<'edob_entries'>[];
+  incidents: Tables<'incident_reports'>[];
+  visitors: Tables<'visitor_logs'>[];
+  shiftLogs: Tables<'shift_activities'>[];
+  noShowAlerts: NoShowAlert[]; // Use local interface
+}
+
+// Local interface for NoShowAlert if not in Supabase types
+interface NoShowAlert {
+  guard_name: string;
+  expected_shift_start_time: string;
+  // Potentially other fields relevant to the summary
 }
 
 // Helper function to get start and end of a given day
@@ -21,7 +29,7 @@ const getDayBoundaries = (date: string) => {
 };
 
 // New helper functions to fetch data from Supabase
-const getEdobEntriesForDateFromSupabase = async (date: string): Promise<any[]> => {
+const getEdobEntriesForDateFromSupabase = async (date: string): Promise<Tables<'edob_entries'>[]> => {
   const { startOfDay, endOfDay } = getDayBoundaries(date);
   const { data, error } = await supabase
     .from('edob_entries')
@@ -33,7 +41,7 @@ const getEdobEntriesForDateFromSupabase = async (date: string): Promise<any[]> =
   return data || [];
 };
 
-const getIncidentsForDateFromSupabase = async (date: string): Promise<any[]> => {
+const getIncidentsForDateFromSupabase = async (date: string): Promise<Tables<'incident_reports'>[]> => {
   // Assuming 'incident_reports' table has a 'created_at' or a specific 'incident_date' field
   // For this example, let's assume 'created_at' for the incident reporting time.
   // If there's a field like 'occurrence_date' that stores just the date, adjust accordingly.
@@ -48,7 +56,7 @@ const getIncidentsForDateFromSupabase = async (date: string): Promise<any[]> => 
   return data || [];
 };
 
-const getVisitorLogsForDateFromSupabase = async (date: string): Promise<any[]> => {
+const getVisitorLogsForDateFromSupabase = async (date: string): Promise<Tables<'visitor_logs'>[]> => {
   const { startOfDay, endOfDay } = getDayBoundaries(date);
   const { data, error } = await supabase
     .from('visitor_logs')
@@ -60,7 +68,7 @@ const getVisitorLogsForDateFromSupabase = async (date: string): Promise<any[]> =
   return data || [];
 };
 
-const getShiftActivitiesForDateFromSupabase = async (date: string): Promise<any[]> => {
+const getShiftActivitiesForDateFromSupabase = async (date: string): Promise<Tables<'shift_activities'>[]> => {
   const { startOfDay, endOfDay } = getDayBoundaries(date);
   // Fetch relevant activities like 'Shift Start', 'Shift Confirmed'
   const relevantActivityTypes = ['Shift Start', 'Shift Confirmed', 'Check Call'];
@@ -75,7 +83,7 @@ const getShiftActivitiesForDateFromSupabase = async (date: string): Promise<any[
   return data || [];
 };
 
-const getNoShowAlertsForDateFromSupabase = async (date: string): Promise<any[]> => {
+const getNoShowAlertsForDateFromSupabase = async (date: string): Promise<NoShowAlert[]> => {
   const { startOfDay, endOfDay } = getDayBoundaries(date);
   // No-show alerts usually have an 'alert_time' or 'expected_shift_start_time'
   const { data, error } = await supabase
@@ -143,30 +151,30 @@ SHIFT OVERVIEW:
 
 PATROL ACTIVITIES:
 ${data.edobEntries
-  .filter(entry => entry.type === 'Patrol')
-  .map(entry => `• ${dayjs(entry.timestamp).format('HH:mm')} - ${entry.details}${entry.route ? ` (${entry.route})` : ''}`)
+  .filter(entry => entry.entry_type === 'Patrol') // Corrected: entry_type
+  .map(entry => `• ${dayjs(entry.timestamp).format('HH:mm')} - ${entry.details}${entry.patrol_route ? ` (${entry.patrol_route})` : ''}`) // Corrected: patrol_route
   .join('\n') || '• No patrol activities logged'}
 
 INCIDENTS & OBSERVATIONS:
 ${data.incidents.length > 0 
-  ? data.incidents.map(incident => `• ${incident.time} - ${incident.type}: ${incident.description}`).join('\n')
+  ? data.incidents.map(incident => `• ${incident.time} - ${incident.incident_type}: ${incident.description}`).join('\n') // Corrected: incident_type
   : '• No incidents reported'}
 
 ${data.edobEntries
-  .filter(entry => entry.type !== 'Patrol')
-  .map(entry => `• ${dayjs(entry.timestamp).format('HH:mm')} - ${entry.type}: ${entry.details}`)
+  .filter(entry => entry.entry_type !== 'Patrol') // Corrected: entry_type
+  .map(entry => `• ${dayjs(entry.timestamp).format('HH:mm')} - ${entry.entry_type}: ${entry.details}`) // Corrected: entry_type
   .join('\n')}
 
 VISITOR MANAGEMENT:
 ${data.visitors.length > 0
   ? data.visitors.map(visitor => 
-      `• ${visitor.visitorName} (${visitor.company}) - ${dayjs(visitor.arrivalTime).format('HH:mm')}${visitor.departureTime ? ` to ${dayjs(visitor.departureTime).format('HH:mm')}` : ' (Still on-site)'}`
+      `• ${visitor.visitor_name} (${visitor.company}) - ${dayjs(visitor.arrival_time).format('HH:mm')}${visitor.departure_time ? ` to ${dayjs(visitor.departure_time).format('HH:mm')}` : ' (Still on-site)'}` // Corrected: visitor_name, arrival_time, departure_time
     ).join('\n')
   : '• No visitors logged'}
 
 ALERTS & ISSUES:
 ${data.noShowAlerts.length > 0
-  ? data.noShowAlerts.map(alert => `• No-show alert: ${alert.guardName} failed to check in for ${alert.shiftStartTime} shift`).join('\n')
+  ? data.noShowAlerts.map(alert => `• No-show alert: ${alert.guard_name} failed to check in for ${alert.expected_shift_start_time} shift`).join('\n') // Corrected: guard_name, expected_shift_start_time
   : '• No alerts generated'}
 
 SUMMARY:

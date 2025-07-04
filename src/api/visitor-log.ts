@@ -1,6 +1,6 @@
 
 import dayjs from 'dayjs';
-import { appendVisitorLog, updateVisitorDeparture } from '@/utils/csvHelpers';
+import { appendVisitorLog, updateVisitorDeparture, VisitorLogEntry } from '@/utils/csvHelpers';
 
 export interface VisitorLogRequest {
   visitorName: string;
@@ -13,7 +13,7 @@ export interface VisitorLogRequest {
 export interface VisitorLogResponse {
   status: 'ok' | 'error';
   message?: string;
-  data?: any;
+  data?: VisitorLogEntry | null;
 }
 
 export const submitVisitorLog = async (request: VisitorLogRequest): Promise<VisitorLogResponse> => {

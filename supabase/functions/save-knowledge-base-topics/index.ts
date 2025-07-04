@@ -2,6 +2,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import type { TablesInsert } from '../../integrations/supabase/types.ts'; // Import Supabase types
 
 // Load environment variables
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -18,16 +19,25 @@ interface Topic {
 
 // Helper function to recursively prepare upsert operations
 // This flattens the hierarchy and sets parent_id
-const prepareUpserts = (topics: Topic[], parentId: string | null = null): any[] => {
-  let operations: any[] = [];
+const prepareUpserts = (topics: Topic[], parentId: string | null = null): TablesInsert<'knowledge_base_topics'>[] => {
+  let operations: TablesInsert<'knowledge_base_topics'>[] = [];
   topics.forEach((topic, index) => {
     const { subTopics, ...topicData } = topic; // Exclude subTopics from the direct insert/upsert data
-    operations.push({
-      ...topicData,
+
+    // Construct the object matching TablesInsert<'knowledge_base_topics'>
+    // Ensure all required fields for 'knowledge_base_topics' are present in topicData or added here.
+    // id, label, response are from Topic. parent_id and sort_order are added.
+    // Any other columns in knowledge_base_topics need to be handled.
+    const operation: TablesInsert<'knowledge_base_topics'> = {
+      ...topicData, // Spreads id, label, response from Topic
       parent_id: parentId,
-      sort_order: topic.sort_order !== undefined ? topic.sort_order : index, // Use provided sort_order or index
-    });
+      sort_order: topic.sort_order !== undefined ? topic.sort_order : index,
+      // Ensure any other non-nullable fields in 'knowledge_base_topics' have defaults or are in 'Topic'
+    };
+    operations.push(operation);
+
     if (subTopics && subTopics.length > 0) {
+      // The recursive call returns TablesInsert<'knowledge_base_topics'>[], so concat is fine.
       operations = operations.concat(prepareUpserts(subTopics, topic.id));
     }
   });

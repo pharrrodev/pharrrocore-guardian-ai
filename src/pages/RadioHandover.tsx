@@ -9,9 +9,16 @@ import { logRadioHandover } from '../api/radio-handover';
 import { supabase } from '@/integrations/supabase/client';
 import dayjs from 'dayjs';
 
-interface GuardUser {
+interface GuardUser { // For the state `guardUsers`
   id: string;
   name: string;
+}
+
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email?: string;
 }
 
 interface LogEntry {
@@ -44,23 +51,23 @@ const RadioHandover = () => {
           console.error("Error fetching guards via Edge Function:", functionsError);
           toast.error("Failed to load guards list. Please try again later.");
           setGuardUsers([]);
-        } else if (guardsData) {
+        } else if (guardsData && Array.isArray(guardsData)) {
           // Map to GuardUser interface {id, name}
-          const formattedGuards = guardsData.map((g: any) => ({
+          const formattedGuards = guardsData.map((g: GuardListDataItem) => ({
             id: g.id,
-            name: g.name || g.email, // Use name, fallback to email
+            name: g.name || g.email || `User ${g.id.substring(0,6)}`, // Use name, fallback to email, then ID
           }));
           setGuardUsers(formattedGuards);
         } else {
           // No data and no error, unlikely but handle it
           setGuardUsers([]);
-          // The missing semicolon has been added to this line to fix the build error.
           console.warn("No guards data returned from Edge Function, and no error reported.");
         }
       } catch (err) {
         // Catch any other client-side errors during the fetch process
         console.error("Client-side error in fetchGuards:", err);
-        toast.error("An unexpected error occurred while loading guards.");
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        toast.error(`An unexpected error occurred while loading guards: ${errorMessage}`);
         setGuardUsers([]);
       } finally {
         setIsFetchingGuards(false);
@@ -140,8 +147,9 @@ const RadioHandover = () => {
       } else {
         toast.error(response.message || 'Failed to log action');
       }
-    } catch (error: any) {
-      toast.error(`Failed to log action: ${error.message || 'Unknown error'}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to log action: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }

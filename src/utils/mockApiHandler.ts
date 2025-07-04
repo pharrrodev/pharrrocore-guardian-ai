@@ -109,16 +109,19 @@ window.fetch = async (url: string | URL | Request, options?: RequestInit): Promi
             headers: { 'Content-Type': 'application/json' }
           });
 
-        case 'run-no-show-check':
+        case 'run-no-show-check': { // Added block scope
           console.log('🔄 Running No-Show Checker...');
-          const alerts = checkNoShows();
+          await checkNoShows(); // Await the async function
           console.log('✅ No-Show Check completed');
+          // checkNoShows logs alerts internally but doesn't return them.
+          // Adjust message to reflect this.
           return new Response(JSON.stringify({ 
-            message: `No-show check completed - ${alerts.length} alerts generated` 
+            message: `No-show check completed. Alerts (if any) have been processed internally.`
           }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
           });
+        } // Added block scope
 
         default:
           return new Response(JSON.stringify({ message: 'Unknown admin endpoint' }), {

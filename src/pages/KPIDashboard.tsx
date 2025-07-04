@@ -47,9 +47,10 @@ const KPIDashboard = () => {
       const { data, error } = await query;
       if (error) throw error;
       setKpiData(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching KPI data:", err);
-      toast.error(`Failed to load KPI data: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load KPI data: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -71,9 +72,10 @@ const KPIDashboard = () => {
       toast.success(`KPI generation for ${yesterday} initiated. Data will refresh shortly.`);
       // Optionally, trigger a delayed refresh or rely on real-time updates if implemented later
       setTimeout(fetchKpiData, 5000); // Give function some time to run
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error invoking KPI generation function:', error);
-      toast.error(`KPI generation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`KPI generation failed: ${errorMessage}`);
     } finally {
       setIsGenerating(false);
     }
