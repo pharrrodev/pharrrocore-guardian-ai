@@ -3,32 +3,25 @@ import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, User, Shield, AlertTriangle, UserCircle } from "lucide-react"; // Removed Building, added UserCircle
-// EDOBEntry might need to be redefined or imported if its structure changes with Supabase
-// For now, we assume the structure fetched from Supabase will be compatible or adapted.
-// import { EDOBEntry } from "@/data/edob-types";
+import { Clock, MapPin, User, Shield, AlertTriangle, UserCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import dayjs from "dayjs"; // For formatting timestamp
+import dayjs from "dayjs";
 
 // Define a type for entries fetched from Supabase
-// This should match the structure of your 'edob_entries' table + any joins (e.g., user email)
 export interface SupabaseEDOBEntry {
   id: string;
-  timestamp: string; // timestamptz comes as string
-  type: string;
+  timestamp: string;
+  entry_type: string; // This matches the database column name
   details: string;
-  route?: string | null;
+  patrol_route?: string | null;
   user_id?: string | null;
-  site_id?: string | null;
   created_at: string;
-  // Optional: include user email if joining with auth.users
-  users?: { email?: string | null } | null;
+  profiles?: { full_name?: string | null } | null;
 }
 
-
-const EDOBLog = () => { // Removed props: entries, loading
+const EDOBLog = () => {
   const [entries, setEntries] = useState<SupabaseEDOBEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,29 +29,24 @@ const EDOBLog = () => { // Removed props: entries, loading
     const fetchEntries = async () => {
       setLoading(true);
       try {
-        // Invoke the Edge Function
         const { data: fetchedData, error } = await supabase.functions.invoke('get-edob-entries');
 
         if (error) {
           console.error("Error fetching EDOB entries via function:", error);
           toast.error(`Failed to fetch entries: ${error.message}`);
-          throw error; // Rethrow to be caught by outer catch if necessary, or handle directly
+          throw error;
         }
 
-        // Assuming 'fetchedData' is the array of entries
         setEntries(fetchedData || []);
       } catch (err) {
         // Error already handled by toast if it came from the invoke error block
-        // If not, ensure it's handled:
-        // console.error("Caught error in fetchEntries:", err);
-        // toast.error("An unexpected error occurred while fetching entries.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchEntries();
-  }, []); // Empty dependency array means this runs once on mount, and when `key` prop changes (remount)
+  }, []);
 
   const getEntryIcon = (type: string) => {
     switch (type) {
@@ -81,7 +69,7 @@ const EDOBLog = () => { // Removed props: entries, loading
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
       case "Alarm Activation":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      default: // Incident / Observation or other types
+      default:
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
     }
   };
@@ -98,12 +86,12 @@ const EDOBLog = () => { // Removed props: entries, loading
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="space-y-2 p-4 border rounded-md">
-                  <Skeleton className="h-5 w-1/4" /> {/* Badge type */}
+                  <Skeleton className="h-5 w-1/4" />
                   <div className="flex justify-between">
-                    <Skeleton className="h-4 w-1/4" /> {/* Timestamp */}
-                    <Skeleton className="h-4 w-1/4" /> {/* User */}
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-1/4" />
                   </div>
-                  <Skeleton className="h-10 w-full mt-1" /> {/* Details */}
+                  <Skeleton className="h-10 w-full mt-1" />
                 </div>
               ))}
             </div>
@@ -138,36 +126,29 @@ const EDOBLog = () => { // Removed props: entries, loading
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {getEntryIcon(entry.type)}
-                        <Badge className={getTypeColor(entry.type)}>
-                          {entry.type}
+                        {getEntryIcon(entry.entry_type)}
+                        <Badge className={getTypeColor(entry.entry_type)}>
+                          {entry.entry_type}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {/* Format timestamp using dayjs */}
                         {dayjs(entry.timestamp).format('HH:mm:ss on DD MMM YYYY')}
                       </div>
                     </div>
                     
-                    {entry.route && (
-                      <p className="text-sm font-medium mb-1">Route: {entry.route}</p>
+                    {entry.patrol_route && (
+                      <p className="text-sm font-medium mb-1">Route: {entry.patrol_route}</p>
                     )}
-                    
-                    {/* Details are now expected to contain the specifics for Access Control/Alarm
-                        If these were separate fields in Supabase, you would render them directly.
-                        Since they are merged into 'details' in EDOB.tsx, we just show 'details'.
-                    */}
                     
                     {entry.details && (
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words mt-2">{entry.details}</p>
                     )}
 
-                    {/* Display user info if available (e.g., email from joined users table) */}
-                    {entry.users?.email && (
+                    {entry.profiles?.full_name && (
                       <p className="text-xs text-muted-foreground mt-2 flex items-center">
                         <UserCircle className="w-3 h-3 mr-1" />
-                        Logged by: {entry.users.email}
+                        Logged by: {entry.profiles.full_name}
                       </p>
                     )}
                   </CardContent>

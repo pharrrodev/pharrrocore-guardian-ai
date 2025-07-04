@@ -1,7 +1,8 @@
+
 // supabase/functions/get-edob-entries/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts' // Adjust path if necessary
+import { corsHeaders } from '../_shared/cors.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -21,7 +22,7 @@ serve(async (req) => {
 
     const { data, error } = await adminSupabase
       .from('edob_entries')
-      .select('id,timestamp,type,details,route,user_id,created_at,profiles(full_name)')
+      .select('id,timestamp,entry_type,details,patrol_route,user_id,created_at,profiles(full_name)')
       .order('timestamp', { ascending: false })
       .limit(100);
 

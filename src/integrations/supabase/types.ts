@@ -22,7 +22,7 @@ export type Database = {
           patrol_route: string | null
           person_name: string | null
           timestamp: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           access_type?: string | null
@@ -36,7 +36,7 @@ export type Database = {
           patrol_route?: string | null
           person_name?: string | null
           timestamp?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           access_type?: string | null
@@ -50,7 +50,7 @@ export type Database = {
           patrol_route?: string | null
           person_name?: string | null
           timestamp?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -115,6 +115,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          full_name: string | null
           guard_id: string | null
           guard_name: string
           id: string
@@ -123,6 +124,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          full_name?: string | null
           guard_id?: string | null
           guard_name: string
           id: string
@@ -131,6 +133,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          full_name?: string | null
           guard_id?: string | null
           guard_name?: string
           id?: string
