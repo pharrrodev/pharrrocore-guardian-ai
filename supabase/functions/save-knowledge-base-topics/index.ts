@@ -2,7 +2,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
-import type { TablesInsert } from '../../integrations/supabase/types.ts'; // Import Supabase types
+import type { TablesInsert } from '../../src/integrations/supabase/types.ts'; // Corrected import path
 
 // Load environment variables
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
