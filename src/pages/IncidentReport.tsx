@@ -33,6 +33,13 @@ const IncidentReport = () => {
     validationMessage,
   } = useIncidentReport();
 
+  // Type for the data items returned by the 'get-guard-list' Supabase function
+  interface GuardListDataItem {
+    id: string;
+    name?: string;
+    email: string;
+  }
+
   const [availableStaff, setAvailableStaff] = useState<Array<{id: string, name: string}>>([]);
   const [isLoadingStaff, setIsLoadingStaff] = useState(true);
 
@@ -42,14 +49,18 @@ const IncidentReport = () => {
       try {
         const { data: staffData, error } = await supabase.functions.invoke('get-guard-list');
         if (error) throw error;
-        if (staffData) {
-          setAvailableStaff(staffData.map((s: any) => ({ id: s.id, name: s.name || s.email })));
+        if (staffData && Array.isArray(staffData)) {
+          setAvailableStaff(staffData.map((s: GuardListDataItem) => ({
+            id: s.id,
+            name: s.name || s.email || `User ${s.id.substring(0,6)}` // Fallback for name
+          })));
         } else {
           setAvailableStaff([]);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching staff list:", err);
-        toast.error("Failed to load staff list for selection.");
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        toast.error(`Failed to load staff list: ${errorMessage}`);
         setAvailableStaff([]);
       } finally {
         setIsLoadingStaff(false);

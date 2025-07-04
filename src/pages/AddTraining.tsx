@@ -19,6 +19,13 @@ interface AddTrainingProps {
   onRecordAdded: () => void; // Callback after successful record addition
 }
 
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email: string;
+}
+
 interface TrainingFormData {
   guardNameDisplay: string; // For display in Select and for guard_name_recorded
   courseName: string;
@@ -53,8 +60,11 @@ const AddTraining: React.FC<AddTrainingProps> = ({ isOpen, onClose, onRecordAdde
       try {
         const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
         if (error) throw error;
-        if (guardsData) {
-          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        if (guardsData && Array.isArray(guardsData)) {
+          setAvailableGuards(guardsData.map((g: GuardListDataItem) => ({
+            id: g.id,
+            name: g.name || g.email || `User ${g.id.substring(0,6)}` // Fallback for name
+          })));
         } else {
           setAvailableGuards([]);
         }

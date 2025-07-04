@@ -24,26 +24,13 @@ const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
-type SidebarContext = {
-  state: "expanded" | "collapsed"
-  open: boolean
-  setOpen: (open: boolean) => void
-  openMobile: boolean
-  setOpenMobile: (open: boolean) => void
-  isMobile: boolean
-  toggleSidebar: () => void
-}
+// Removed local SidebarContext type and SidebarContext object definition
+// They are now imported from ./sidebar-context
+import { SidebarContext, type SidebarContextValue } from "./sidebar-context"
+// Removed local useSidebar hook definition
+// It is now imported from @/hooks/use-sidebar
+import { useSidebar } from "@/hooks/use-sidebar"
 
-const SidebarContext = React.createContext<SidebarContext | null>(null)
-
-function useSidebar() {
-  const context = React.useContext(SidebarContext)
-  if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider.")
-  }
-
-  return context
-}
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -114,7 +101,7 @@ const SidebarProvider = React.forwardRef<
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue = React.useMemo<SidebarContextValue>( // Use imported SidebarContextValue
       () => ({
         state,
         open,
@@ -757,5 +744,5 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
+  // useSidebar, // Not exported from here anymore, imported from @/hooks/use-sidebar
 }

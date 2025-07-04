@@ -58,11 +58,12 @@ export const logRadioHandover = async (request: RadioHandoverRequest): Promise<R
       message: 'Log entry saved successfully.'
     };
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Unexpected error logging radio/handover:', error);
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
     return {
       status: 'error',
-      message: error.message || 'An unexpected error occurred'
+      message: errorMessage
     };
   }
 };

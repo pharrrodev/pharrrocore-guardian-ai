@@ -91,11 +91,12 @@ const TenderWriter = () => {
         throw new Error("Received incomplete data from tender generation service. Missing text or filename.");
       }
 
-    } catch (error: any) { // Catch any error (string or Error object)
+    } catch (error) { // Catch any error (string or Error object)
       console.error('Error generating tender:', error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Generation Failed",
-        description: error.message || "Failed to generate tender document. Please try again.",
+        description: errorMessage || "Failed to generate tender document. Please try again.",
         variant: "destructive"
       });
     } finally {

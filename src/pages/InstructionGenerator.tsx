@@ -57,7 +57,7 @@ const InstructionGenerator = () => {
 
     setIsGenerating(true);
     let currentParentId = selectedParentTopicInfo.id;
-    let parentTopicLabel = selectedParentTopicInfo.label.trim();
+    const parentTopicLabel = selectedParentTopicInfo.label.trim();
 
     // If it's a new parent topic (no ID yet), generate one.
     // This new parent itself won't have a response from this UI,
@@ -139,9 +139,10 @@ const InstructionGenerator = () => {
       } else {
         toast.error(funcResponse.message || funcResponse.error || 'Failed to generate instructions via Edge Function');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Generation error:', error);
-      toast.error(error.message || 'An error occurred while generating instructions');
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Generation failed: ${errorMessage}`);
     } finally {
       setIsGenerating(false);
     }
@@ -165,15 +166,17 @@ const InstructionGenerator = () => {
       if (saveData && !saveData.error) { // Check for application-level error from function
         toast.success(saveData.message || 'Instructions saved successfully');
         setRawText("");
-        setParentLabel("");
+        setSelectedParentTopicInfo({ id: null, label: "" }); // Corrected
         setGeneratedTopics([]);
         setShowPreview(false);
       } else {
-        toast.error(response.message || 'Failed to save instructions');
+        // Use saveData for error message if available, otherwise a generic message
+        toast.error(saveData?.error || saveData?.message || 'Failed to save instructions');
       }
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('An error occurred while saving instructions');
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Save failed: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -211,8 +214,8 @@ const InstructionGenerator = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <TopicSelector 
-                value={parentLabel}
-                onChange={setParentLabel}
+                value={selectedParentTopicInfo.label} // Corrected
+                onChange={handleParentTopicChange} // Corrected
               />
 
               <div>
@@ -230,7 +233,7 @@ const InstructionGenerator = () => {
 
               <Button 
                 onClick={handleGenerate} 
-                disabled={isGenerating || !rawText.trim() || !parentLabel.trim()}
+                disabled={isGenerating || !rawText.trim() || !selectedParentTopicInfo.label.trim()} // Corrected
                 className="w-full"
               >
                 {isGenerating ? (

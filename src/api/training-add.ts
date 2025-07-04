@@ -2,6 +2,15 @@
 // Mock API endpoint for adding training records
 // In a real implementation, this would be a server-side endpoint
 
+interface TrainingRecord {
+  id: string;
+  guardId: string;
+  guardName: string;
+  courseName: string;
+  completedDate: string;
+  expiresDate: string;
+}
+
 export const addTrainingRecord = async (recordData: {
   guardName: string;
   courseName: string;
@@ -26,10 +35,10 @@ export const addTrainingRecord = async (recordData: {
     };
 
     // Get existing records from localStorage (simulating CSV file)
-    const existingRecords = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
+    const existingRecords: TrainingRecord[] = JSON.parse(localStorage.getItem('trainingRecords') || '[]');
     
     // Check for duplicates
-    const isDuplicate = existingRecords.some((record: any) => 
+    const isDuplicate = existingRecords.some((record: TrainingRecord) =>
       record.guardName.toLowerCase() === recordData.guardName.toLowerCase() &&
       record.courseName.toLowerCase() === recordData.courseName.toLowerCase() &&
       record.expiresDate === recordData.expiresDate

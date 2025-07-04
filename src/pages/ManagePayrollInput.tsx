@@ -17,9 +17,16 @@ import dayjs from 'dayjs';
 import { toast } from 'sonner';
 
 // Types
-interface GuardUser {
+interface GuardUser { // Represents the structure used in availableGuards state
   id: string;
   name: string;
+}
+
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email?: string;
 }
 
 interface PayrollInput {
@@ -70,10 +77,18 @@ const ManagePayrollInputPage = () => {
     try {
       const { data, error } = await supabase.functions.invoke('get-guard-list');
       if (error) throw error;
-      setAvailableGuards(data.map((g: any) => ({ id: g.id, name: g.name || g.email })) || []);
+      if (data && Array.isArray(data)) {
+        setAvailableGuards(data.map((g: GuardListDataItem) => ({
+          id: g.id,
+          name: g.name || g.email || `User ${g.id.substring(0,6)}`
+        })));
+      } else {
+        setAvailableGuards([]);
+      }
     } catch (err) {
       console.error("Error fetching guards:", err);
-      toast.error("Failed to load guard list.");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load guard list: ${errorMessage}`);
     }
   }, []);
 
@@ -91,9 +106,10 @@ const ManagePayrollInputPage = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       setPayrollInputs(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching payroll inputs:", err);
-      toast.error(`Failed to load payroll input data: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load payroll input data: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -134,9 +150,10 @@ const ManagePayrollInputPage = () => {
         setIsModalOpen(false);
         form.reset();
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error saving payroll input:", err);
-      toast.error(`Failed to save payroll input: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to save payroll input: ${errorMessage}`);
     }
   };
 

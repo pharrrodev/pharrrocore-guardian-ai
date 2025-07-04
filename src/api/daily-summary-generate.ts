@@ -1,13 +1,42 @@
 import dayjs from 'dayjs';
 
 // Define interfaces for expected request and response
+interface EdobEntry {
+  type: string;
+  details: string;
+  timestamp: string | Date;
+}
+
+interface Incident {
+  type: string;
+  description: string;
+  time: string;
+}
+
+interface Visitor {
+  visitorName: string;
+  company: string;
+  arrivalTime: string | Date;
+  departureTime?: string | Date;
+}
+
+interface ShiftLog {
+  guardName: string;
+  timestamp: string | Date;
+}
+
+interface NoShowAlert {
+  guardName: string;
+  shiftStartTime: string;
+}
+
 interface DailySummaryData {
   date: string;
-  edobEntries: any[];
-  incidents: any[];
-  visitors: any[];
-  shiftLogs: any[];
-  noShowAlerts: any[];
+  edobEntries: EdobEntry[];
+  incidents: Incident[];
+  visitors: Visitor[];
+  shiftLogs: ShiftLog[];
+  noShowAlerts: NoShowAlert[];
 }
 
 interface GenerateSummaryRequest {

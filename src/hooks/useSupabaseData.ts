@@ -3,12 +3,45 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { FormData as IncidentFormData } from './useIncidentReport'; // For saveIncidentReport
+
+// Define input data interfaces for the hook's public API
+interface EDOBInputData {
+  type: string;
+  details: string;
+  route?: string;
+  accessType?: string;
+  personName?: string;
+  company?: string;
+  alarmZone?: string;
+  alarmType?: string;
+  timestamp: string | Date;
+}
+
+interface VisitorInputData {
+  visitorName: string;
+  company: string;
+  purpose: string;
+  hostContact: string;
+  arrivalTime: string | Date;
+  departureTime?: string | Date | null;
+  badgeNumber?: string | null;
+  vehicleReg?: string | null;
+}
+
+interface ShiftLogInputData {
+  guardId: string;
+  guardName: string;
+  action: string;
+  timestamp: string | Date;
+}
+
 
 export const useSupabaseData = () => {
   const { user } = useAuth();
 
   // EDOB Functions
-  const saveEDOBEntry = async (entry: any) => {
+  const saveEDOBEntry = async (entry: EDOBInputData) => {
     if (!user) return { error: 'User not authenticated' };
 
     const { error } = await supabase
@@ -54,7 +87,7 @@ export const useSupabaseData = () => {
   };
 
   // Incident Report Functions
-  const saveIncidentReport = async (report: any) => {
+  const saveIncidentReport = async (report: IncidentFormData) => {
     if (!user) return { error: 'User not authenticated' };
 
     const { error } = await supabase
@@ -99,7 +132,7 @@ export const useSupabaseData = () => {
   };
 
   // Visitor Log Functions
-  const saveVisitorLog = async (visitor: any) => {
+  const saveVisitorLog = async (visitor: VisitorInputData) => {
     if (!user) return { error: 'User not authenticated' };
 
     const { error } = await supabase
@@ -144,7 +177,7 @@ export const useSupabaseData = () => {
   };
 
   // Shift Log Functions
-  const saveShiftLog = async (shiftLog: any) => {
+  const saveShiftLog = async (shiftLog: ShiftLogInputData) => {
     if (!user) return { error: 'User not authenticated' };
 
     const { error } = await supabase

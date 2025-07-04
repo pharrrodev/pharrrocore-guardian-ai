@@ -1,6 +1,7 @@
 
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client'; // Assuming supabase client is configured
+import type { TablesInsert } from '../integrations/supabase/types'; // Import Supabase generated types
 
 // Define types based on expected Supabase table structures
 interface RotaEntry {
@@ -33,7 +34,7 @@ const GRACE_PERIOD_MINUTES = parseInt(process.env.GRACE_PERIOD_MINUTES || '10');
 export const checkNoShows = async (): Promise<void> => {
   console.log('=== Starting No-Show Check ===');
   const now = dayjs();
-  const newAlertsToInsert: any[] = [];
+  const newAlertsToInsert: TablesInsert<'no_show_alerts'>[] = [];
 
   // 1. Fetch upcoming/recent shifts from Supabase 'rota' table
   //    Adjust filters as needed (e.g., shifts starting in the last X hours and next Y hours)

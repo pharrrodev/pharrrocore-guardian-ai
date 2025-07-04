@@ -32,8 +32,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/hooks/use-sidebar"; // Corrected import path
 
 const menuItems = [
   // Core Operations

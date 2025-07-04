@@ -11,11 +11,12 @@ interface StaffMember { // Define a simple interface for staff members
   id: string;
   name: string;
 }
+import { FormData as IncidentFormData } from '@/hooks/useIncidentReport'; // Import and alias
 
 interface StepManagerProps {
     currentStep: number;
-    formData: any;
-    updateFormData: (data: object) => void;
+    formData: IncidentFormData; // Use the imported type
+    updateFormData: (data: Partial<IncidentFormData>) => void; // Use Partial for updates
     availableStaff?: StaffMember[]; // Optional: pass down from parent
     isLoadingStaff?: boolean;      // Optional: pass down from parent
 }

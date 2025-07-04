@@ -67,9 +67,10 @@ const AssignmentInstructions = () => {
       setCurrentTopics(topicTree);
       setHistory([topicTree]);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching knowledge base topics:", err);
-      toast.error("Failed to load instructions topics.");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      toast.error(`Failed to load instructions topics: ${errorMessage}`);
       setCurrentTopics([]);
       setHistory([]);
     } finally {
@@ -121,8 +122,9 @@ const AssignmentInstructions = () => {
     setMessages([
       { sender: 'ai', text: "Hello! I am your AI assistant for assignment instructions. Please select a topic below to get started." }
     ]);
-    setCurrentTopics(centralData.assignmentTopics);
-    setHistory([centralData.assignmentTopics]);
+    // Use initialTopics (which is the root of the fetched tree) instead of centralData
+    setCurrentTopics(initialTopics);
+    setHistory([initialTopics]);
   };
 
   const renderMessageText = (text: string) => {

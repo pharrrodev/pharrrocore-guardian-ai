@@ -33,7 +33,7 @@ const NoShowDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAcknowledging, setIsAcknowledging] = useState<string | null>(null); // For button loading state
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
@@ -65,11 +65,11 @@ const NoShowDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showLast24Hours]); // Add showLast24Hours as a dependency for useCallback
 
   useEffect(() => {
     fetchAlerts();
-  }, [showLast24Hours]);
+  }, [fetchAlerts]); // Corrected: Add fetchAlerts to dependencies
 
   // "Check Now" button will just refresh data from DB.
   // The actual noShowCheck.ts script is assumed to run periodically in the backend.
@@ -207,7 +207,7 @@ const NoShowDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {alerts.filter(alert => dayjs().diff(dayjs(alert.alertTime), 'minute') < 30).length}
+              {alerts.filter(alert => dayjs().diff(dayjs(alert.alert_time), 'minute') < 30).length}
             </div>
           </CardContent>
         </Card>
@@ -219,7 +219,7 @@ const NoShowDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {alerts.filter(alert => dayjs(alert.alertTime).isSame(dayjs(), 'day')).length}
+              {alerts.filter(alert => dayjs(alert.alert_time).isSame(dayjs(), 'day')).length}
             </div>
           </CardContent>
         </Card>
@@ -250,23 +250,23 @@ const NoShowDashboard = () => {
               </TableHeader>
               <TableBody>
                 {alerts
-                  .sort((a, b) => dayjs(b.alertTime).diff(dayjs(a.alertTime)))
+                  .sort((a, b) => dayjs(b.alert_time).diff(dayjs(a.alert_time))) // Corrected: alert_time
                   .map((alert) => (
                   <TableRow key={alert.id}>
-                    <TableCell className="font-medium">{alert.guardName}</TableCell>
-                    <TableCell>{dayjs(alert.date).format('DD/MM/YYYY')}</TableCell>
-                    <TableCell>{alert.shiftStartTime}</TableCell>
+                    <TableCell className="font-medium">{alert.guard?.email || alert.guard_id}</TableCell> {/* Corrected: guard display */}
+                    <TableCell>{dayjs(alert.expected_shift_start_time).format('DD/MM/YYYY')}</TableCell> {/* Corrected: date from expected_shift_start_time */}
+                    <TableCell>{dayjs(alert.expected_shift_start_time).format('HH:mm')}</TableCell> {/* Corrected: time from expected_shift_start_time */}
                     <TableCell>
                       <div className="flex flex-col">
-                        <span>{dayjs(alert.alertTime).format('DD/MM/YYYY HH:mm')}</span>
+                        <span>{dayjs(alert.alert_time).format('DD/MM/YYYY HH:mm')}</span> {/* Corrected: alert_time */}
                         <span className="text-xs text-muted-foreground">
-                          {getTimeSinceAlert(alert.alertTime)}
+                          {getTimeSinceAlert(alert.alert_time)} {/* Corrected: alert_time */}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getAlertSeverity(alert.alertTime)}>
-                        No Show
+                      <Badge variant={getStatusBadgeVariant(alert.status)}> {/* Corrected: Use getStatusBadgeVariant with alert.status */}
+                        {alert.status}
                       </Badge>
                     </TableCell>
                   </TableRow>

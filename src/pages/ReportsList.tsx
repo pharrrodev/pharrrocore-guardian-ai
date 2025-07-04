@@ -44,9 +44,10 @@ const ReportsList = () => {
       } else {
         toast.info("No reports found.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading reports:', error);
-      toast.error(`Failed to load reports: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to load reports: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -99,9 +100,10 @@ const ReportsList = () => {
       
       toast.success(`Downloading ${report.report_name}...`);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Download error:', error);
-      toast.error(`Failed to download report: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to download report: ${errorMessage}`);
     } finally {
       setIsDownloading(null);
     }

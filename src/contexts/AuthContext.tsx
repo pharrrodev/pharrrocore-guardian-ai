@@ -1,14 +1,21 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js'; // Import AuthError
 import { supabase } from '@/integrations/supabase/client';
+
+// Define a basic Profile interface based on common Supabase profile setups
+interface Profile {
+  id: string; // Typically mirrors auth.users.id
+  full_name?: string;
+  // Add other fields like avatar_url, username, etc., if they exist in your 'profiles' table
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: any | null;
-  signUp: (email: string, password: string, guardName: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  profile: Profile | null; // Use the Profile interface
+  signUp: (email: string, password: string, guardName: string) => Promise<{ error: AuthError | null }>; // Use AuthError
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>; // Use AuthError
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -26,7 +33,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null); // Use Profile interface
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

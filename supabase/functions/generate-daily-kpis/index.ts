@@ -21,7 +21,7 @@ function calculateScheduledHours(shift: { start_time: string, end_time: string, 
     endDateTime = endDateTime.add(1, 'day');
   }
 
-  let totalDurationMinutes = endDateTime.diff(startDateTime, 'minute');
+  const totalDurationMinutes = endDateTime.diff(startDateTime, 'minute');
   let unpaidBreakMinutes = 0;
 
   if (shift.break_times) {

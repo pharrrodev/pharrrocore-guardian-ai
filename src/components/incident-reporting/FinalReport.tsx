@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { FormData as IncidentFormData } from '@/hooks/useIncidentReport'; // Import and alias
 
 interface FinalReportProps {
-  formData: any;
+  formData: IncidentFormData; // Use the imported type
 }
 
 const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
@@ -14,8 +15,8 @@ const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
   const generatedDate = format(new Date(), 'dd/MM/yyyy');
 
   const generateNarrative = () => {
-    const time = formData.incidentTime || 'a time';
-    const date = formData.incidentDate ? format(formData.incidentDate, 'do MMMM yyyy') : 'a recent date';
+    const time = formData.time || 'a time'; // Changed from incidentTime
+    const date = formData.date ? format(new Date(formData.date), 'do MMMM yyyy') : 'a recent date'; // Changed from incidentDate, ensure Date object if formData.date is string
     const location = formData.location ? `at ${formData.location}` : 'at an on-site location';
     const type = formData.incidentType ? `a ${formData.incidentType.toLowerCase()}` : 'an';
     const description = formData.description || 'No detailed description was provided.';
@@ -76,8 +77,8 @@ const FinalReport: React.FC<FinalReportProps> = ({ formData }) => {
         </CardHeader>
         <CardContent>
           <div className="border-b pb-4 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><span className="font-semibold">Date:</span> {formData.incidentDate ? format(formData.incidentDate, 'dd/MM/yyyy') : 'N/A'}</div>
-            <div><span className="font-semibold">Time:</span> {formData.incidentTime || 'N/A'}</div>
+            <div><span className="font-semibold">Date:</span> {formData.date ? format(new Date(formData.date), 'dd/MM/yyyy') : 'N/A'}</div> {/* Changed from incidentDate */}
+            <div><span className="font-semibold">Time:</span> {formData.time || 'N/A'}</div> {/* Changed from incidentTime */}
             <div><span className="font-semibold">Location:</span> {formData.location || 'N/A'}</div>
             <div><span className="font-semibold">Type:</span> {formData.incidentType || 'N/A'}</div>
           </div>

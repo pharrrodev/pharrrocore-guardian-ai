@@ -8,12 +8,69 @@ import { Download, FileText, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import dayjs from 'dayjs';
 
+// Individual script data types
+interface KpiReportData {
+  patrolComplianceRate: number;
+  uniformCompliance: number;
+  totalPatrols: number;
+  breaksTaken: number;
+}
+
+interface DailySummaryReportData {
+  content: string;
+}
+
+interface WeeklyReportData {
+  content: string;
+}
+
+interface LicenceAlert {
+  guardName: string;
+  expiresDate: string | Date;
+  daysLeft: number;
+}
+
+interface LicenceCheckReportData {
+  alerts: LicenceAlert[];
+}
+
+interface PayrollVariance {
+  guardId: string;
+  date: string;
+  actualHours: number;
+  hoursPaid: number;
+  variance: number;
+}
+
+interface PayrollCheckReportData {
+  variances: PayrollVariance[];
+}
+
+interface NoShowReportAlert {
+  guardName: string;
+  date: string;
+  shiftStartTime: string;
+}
+
+interface NoShowCheckReportData {
+  alerts: NoShowReportAlert[];
+}
+
+// Union type for all possible script data structures
+type AllScriptData =
+  | KpiReportData
+  | DailySummaryReportData
+  | WeeklyReportData
+  | LicenceCheckReportData
+  | PayrollCheckReportData
+  | NoShowCheckReportData;
+
 interface ScriptReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  scriptKey: string;
+  scriptKey: 'kpi' | 'daily-summary' | 'weekly-report' | 'licence-check' | 'payroll-check' | 'no-show-check';
   scriptName: string;
-  scriptData: any;
+  scriptData: AllScriptData;
 }
 
 const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
@@ -110,7 +167,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {scriptData.alerts.map((alert: any, index: number) => (
+                    {(scriptData as LicenceCheckReportData).alerts.map((alert: LicenceAlert, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{alert.guardName}</TableCell>
                         <TableCell>{dayjs(alert.expiresDate).format('YYYY-MM-DD')}</TableCell>
@@ -148,7 +205,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {scriptData.variances.map((variance: any, index: number) => (
+                    {(scriptData as PayrollCheckReportData).variances.map((variance: PayrollVariance, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{variance.guardId}</TableCell>
                         <TableCell>{variance.date}</TableCell>
@@ -186,7 +243,7 @@ const ScriptReportModal: React.FC<ScriptReportModalProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {scriptData.alerts.map((alert: any, index: number) => (
+                    {(scriptData as NoShowCheckReportData).alerts.map((alert: NoShowReportAlert, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{alert.guardName}</TableCell>
                         <TableCell>{alert.date}</TableCell>

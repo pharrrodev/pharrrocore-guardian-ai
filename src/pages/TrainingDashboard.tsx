@@ -51,9 +51,10 @@ const TrainingDashboard = () => {
       } else {
         setRecords(data || []);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Unexpected error fetching records:", e);
-      toast.error(`An unexpected error occurred: ${e.message}`);
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
+      toast.error(`An unexpected error occurred: ${errorMessage}`);
       setRecords([]);
     } finally {
       setIsLoading(false);
@@ -200,13 +201,13 @@ const TrainingDashboard = () => {
                 {records.map((record) => (
                   <TableRow
                     key={record.id}
-                    className={cn(getRowClass(record.expiry_date))} // Corrected: record.expiry_date
+                    className={cn(getRowClass(record.expiry_date))}
                   >
-                    <TableCell className="font-medium">{record.guard_name_recorded}</TableCell> {/* Corrected: record.guard_name_recorded */}
-                    <TableCell>{record.course_name}</TableCell> {/* Corrected: record.course_name */}
-                    <TableCell>{dayjs(record.completed_date).format('DD/MM/YYYY')}</TableCell> {/* Corrected: record.completed_date */}
-                    <TableCell>{dayjs(record.expiry_date).format('DD/MM/YYYY')}</TableCell> {/* Corrected: record.expiry_date */}
-                    <TableCell>{getExpiryBadge(record.expiry_date)}</TableCell> {/* Corrected: record.expiry_date */}
+                    <TableCell className="font-medium">{record.guard_name_recorded}</TableCell>
+                    <TableCell>{record.course_name}</TableCell>
+                    <TableCell>{dayjs(record.completed_date).format('DD/MM/YYYY')}</TableCell>
+                    <TableCell>{dayjs(record.expiry_date).format('DD/MM/YYYY')}</TableCell>
+                    <TableCell>{getExpiryBadge(record.expiry_date)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

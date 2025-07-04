@@ -144,11 +144,12 @@ export const checkBreakStatus = async (request: BreakCheckRequest): Promise<Brea
       currentShift: mappedCurrentShiftInfo,
     };
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in checkBreakStatus:', error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       onBreak: false,
-      message: `Error checking break status: ${error.message}. Please check connection or guard details.`,
+      message: `Error checking break status: ${errorMessage}. Please check connection or guard details.`,
       shift_id_checked: currentShiftData?.id || null, // Include shift_id if available even on error
     };
   }

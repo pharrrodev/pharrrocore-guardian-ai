@@ -9,7 +9,7 @@ import { Clock, Coffee, Home, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { checkBreakStatus } from '@/api/break-check';
+import { checkBreakStatus, BreakCheckResponse } from '@/api/break-check'; // Import BreakCheckResponse
 import { supabase } from '@/integrations/supabase/client'; // Import Supabase
 import { toast } from 'sonner'; // Import sonner toast
 import dayjs from 'dayjs'; // Import dayjs for current time
@@ -22,13 +22,20 @@ interface GuardUser {
   name: string; // Display name
 }
 
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email: string;
+}
+
 const BreakChecker = () => {
   // State for selected guard's details
   const [selectedGuardForQuery, setSelectedGuardForQuery] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Default to today
   const [currentTime, setCurrentTime] = useState<string>(dayjs().format('HH:mm')); // Default to current time
-  const [breakStatus, setBreakStatus] = useState<any>(null); // Type any for now, should match BreakCheckResponse
+  const [breakStatus, setBreakStatus] = useState<BreakCheckResponse | null>(null); // Use BreakCheckResponse
   const [isLoading, setIsLoading] = useState(false);
   const [availableGuards, setAvailableGuards] = useState<GuardUser[]>([]);
   const [isLoadingGuards, setIsLoadingGuards] = useState(true);
@@ -40,8 +47,11 @@ const BreakChecker = () => {
       try {
         const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
         if (error) throw error;
-        if (guardsData) {
-          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        if (guardsData && Array.isArray(guardsData)) {
+          setAvailableGuards(guardsData.map((g: GuardListDataItem) => ({
+            id: g.id,
+            name: g.name || g.email || `User ${g.id.substring(0,6)}` // Fallback for name
+          })));
         } else {
           setAvailableGuards([]);
         }
@@ -71,7 +81,7 @@ const BreakChecker = () => {
 
     setIsLoading(true);
     setBreakStatus(null); // Clear previous status
-    let result: any; // To store result from checkBreakStatus, should be BreakCheckResponse
+    let result: BreakCheckResponse; // Use BreakCheckResponse
 
     try {
       const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
@@ -139,17 +149,23 @@ const BreakChecker = () => {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="guardNameSelect">Guard Name</Label>
-              <Select value={guardName} onValueChange={setGuardName}>
+              <Select
+                value={selectedGuardForQuery.id || ""}
+                onValueChange={handleGuardSelection}
+                disabled={isLoadingGuards}
+              >
                 <SelectTrigger id="guardNameSelect">
                   <SelectValue placeholder="Select guard name" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableGuards.length > 0 ? (
-                    availableGuards.map(name => (
-                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                  {isLoadingGuards ? (
+                     <div className="p-2 text-sm text-muted-foreground">Loading guards...</div>
+                  ) : availableGuards.length > 0 ? (
+                    availableGuards.map(guard => (
+                      <SelectItem key={guard.id} value={guard.id}>{guard.name}</SelectItem>
                     ))
                   ) : (
-                    <div className="p-4 text-sm text-muted-foreground">No guards found in rota.</div>
+                    <div className="p-2 text-sm text-muted-foreground">No guards available.</div>
                   )}
                 </SelectContent>
               </Select>
@@ -178,7 +194,7 @@ const BreakChecker = () => {
             <Button 
               onClick={checkBreak} 
               className="w-full"
-              disabled={!guardName || !selectedDate || !currentTime || isLoading}
+              disabled={!selectedGuardForQuery.name || !selectedDate || !currentTime || isLoading}
             >
               <Clock className="w-4 h-4 mr-2" />
               {isLoading ? 'Checking...' : 'Check Break Status'}

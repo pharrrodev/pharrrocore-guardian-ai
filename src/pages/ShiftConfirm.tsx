@@ -15,12 +15,20 @@ import { Shift, guards } from '@/data/rota-data';
 import { loadRotaData, loadConfirmations } from '@/utils/rotaStore';
 import { confirmShift } from '@/api/rota-confirm';
 
+interface Confirmation {
+  guardId: string;
+  date: string; // YYYY-MM-DD
+  shiftId: string;
+  confirmed: boolean;
+  // Potentially other fields if present in localStorage
+}
+
 const ShiftConfirm = () => {
   const [guardId, setGuardId] = useState('');
   const [guardName, setGuardName] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [confirmations, setConfirmations] = useState<any[]>([]);
+  const [confirmations, setConfirmations] = useState<Confirmation[]>([]); // Use Confirmation interface
   const [filteredShifts, setFilteredShifts] = useState<Shift[]>([]);
 
   useEffect(() => {
@@ -115,7 +123,8 @@ const ShiftConfirm = () => {
         toast.error(response.message || 'Failed to update confirmation');
       }
     } catch (error) {
-      toast.error('Error updating confirmation');
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Error updating confirmation: ${errorMessage}`);
       console.error('Confirmation error:', error);
     }
   };

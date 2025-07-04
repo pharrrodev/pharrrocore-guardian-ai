@@ -50,9 +50,10 @@ const LicenceDashboard = () => {
       } else {
         setAlerts(data || []);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error('Unexpected error fetching alerts:', e);
-      sonnerToast.error(`An unexpected error occurred: ${e.message}`);
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
+      sonnerToast.error(`An unexpected error occurred: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +69,10 @@ const LicenceDashboard = () => {
       }
       sonnerToast.success("Licence expiry check completed. Refreshing alerts...");
       await fetchLicenceAlerts();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error invoking licence checker function:', error);
-      sonnerToast.error(`Licence checker invocation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      sonnerToast.error(`Licence checker invocation failed: ${errorMessage}`);
     } finally {
       setIsChecking(false);
     }
@@ -114,8 +116,9 @@ const LicenceDashboard = () => {
         .eq('id', alertId);
       if (error) throw error;
       sonnerToast.success("Alert acknowledged successfully.");
-    } catch (error: any) {
-      sonnerToast.error(`Failed to acknowledge alert: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      sonnerToast.error(`Failed to acknowledge alert: ${errorMessage}`);
     }
   };
 

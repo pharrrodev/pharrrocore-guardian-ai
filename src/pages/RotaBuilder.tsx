@@ -31,10 +31,20 @@ export interface Shift {
   // created_at and updated_at are handled by Supabase
 }
 
-interface GuardUser {
+interface GuardUser { // For availableGuards state
   id: string;
   name: string;
 }
+
+// Type for the data items returned by the 'get-guard-list' Supabase function
+interface GuardListDataItem {
+  id: string;
+  name?: string;
+  email?: string;
+}
+
+type NewShiftFormValue = string | Date | undefined | 'Day' | 'Night' | 'Evening';
+
 
 const RotaBuilder = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -68,12 +78,18 @@ const RotaBuilder = () => {
       try {
         const { data: guardsData, error } = await supabase.functions.invoke('get-guard-list');
         if (error) throw error;
-        if (guardsData) {
-          setAvailableGuards(guardsData.map((g: any) => ({ id: g.id, name: g.name || g.email })));
+        if (guardsData && Array.isArray(guardsData)) {
+          setAvailableGuards(guardsData.map((g: GuardListDataItem) => ({
+            id: g.id,
+            name: g.name || g.email || `User ${g.id.substring(0,6)}`
+          })));
+        } else {
+          setAvailableGuards([]);
         }
       } catch (err) {
         console.error("Error fetching guards:", err);
-        toast.error("Failed to load guard list.");
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        toast.error(`Failed to load guard list: ${errorMessage}`);
         setAvailableGuards([]);
       } finally {
         setIsLoadingGuards(false);
@@ -98,7 +114,8 @@ const RotaBuilder = () => {
         setShifts(data || []);
       } catch (err) {
         console.error("Error fetching shifts:", err);
-        toast.error("Failed to load existing shifts.");
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+        toast.error(`Failed to load existing shifts: ${errorMessage}`);
         setShifts([]);
       } finally {
         setIsLoadingShifts(false);
@@ -107,7 +124,7 @@ const RotaBuilder = () => {
     fetchShifts();
   }, []);
 
-  const handleNewShiftFormChange = (field: string, value: any) => {
+  const handleNewShiftFormChange = (field: keyof typeof newShiftForm, value: NewShiftFormValue) => {
     setNewShiftForm(prev => ({ ...prev, [field]: value }));
   };
 
@@ -241,8 +258,8 @@ const RotaBuilder = () => {
                 <Label>Date</Label>
                 <div className="mt-2">
                   <DatePicker
-                    value={newShift.date}
-                    onChange={(date) => setNewShift({ ...newShift, date })}
+                    value={newShiftForm.shift_date_obj}
+                    onChange={(date) => handleNewShiftFormChange('shift_date_obj', date)}
                   />
                 </div>
               </div>
@@ -251,8 +268,8 @@ const RotaBuilder = () => {
                 <Label>Start Time</Label>
                 <div className="mt-2">
                   <TimePicker
-                    value={newShift.startTime}
-                    onChange={(time) => setNewShift({ ...newShift, startTime: time })}
+                    value={newShiftForm.start_time}
+                    onChange={(time) => handleNewShiftFormChange('start_time', time as string)}
                   />
                 </div>
               </div>
@@ -261,8 +278,8 @@ const RotaBuilder = () => {
                 <Label>End Time</Label>
                 <div className="mt-2">
                   <TimePicker
-                    value={newShift.endTime}
-                    onChange={(time) => setNewShift({ ...newShift, endTime: time })}
+                    value={newShiftForm.end_time}
+                    onChange={(time) => handleNewShiftFormChange('end_time', time as string)}
                   />
                 </div>
               </div>

@@ -1,6 +1,7 @@
 // supabase/functions/_shared/constraintFetcher.ts
 
 import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { Json } from '../../integrations/supabase/types.ts'; // Assuming Json is exported from there
 import dayjs from 'https://esm.sh/dayjs@1.11.10'
 import isBetween from 'https://esm.sh/dayjs@1.11.10/plugin/isBetween'
 
@@ -17,7 +18,7 @@ export interface Profile {
 }
 
 export interface ProfileWithConstraints extends Profile {
-  availability_preferences?: any | null; // JSONB
+  availability_preferences?: Json | null; // JSONB
   max_hours_per_week?: number | null;
   skill_certifications?: string[] | null;
 }

@@ -42,9 +42,10 @@ const TopicSelector = ({ value, onChange }: TopicSelectorProps) => {
 
         if (error) throw error;
         setFetchedTopics(data || []);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching top-level topics:", err);
-        toast.error("Failed to load topics.");
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching topics.";
+        toast.error(`Failed to load topics: ${errorMessage}`);
         setFetchedTopics([]);
       } finally {
         setIsLoadingTopics(false);
@@ -143,16 +144,16 @@ const TopicSelector = ({ value, onChange }: TopicSelectorProps) => {
             <CommandList>
               <CommandEmpty>No topics found.</CommandEmpty>
               <CommandGroup heading="Existing Topics">
-                {existingTopics.map((topic) => (
+                {fetchedTopics.map((topic) => (
                   <CommandItem
                     key={topic.id}
-                    value={topic.value}
+                    value={topic.id} // Use topic.id for the value passed to onSelect
                     onSelect={handleSelect}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === topic.value ? "opacity-100" : "opacity-0"
+                        value === topic.id ? "opacity-100" : "opacity-0" // Compare with topic.id
                       )}
                     />
                     {topic.label}
