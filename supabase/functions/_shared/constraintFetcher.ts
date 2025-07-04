@@ -1,7 +1,7 @@
 // supabase/functions/_shared/constraintFetcher.ts
 
 import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import type { Json } from '../../integrations/supabase/types.ts'; // Assuming Json is exported from there
+import type { Json } from '../../src/integrations/supabase/types.ts'; // Corrected import path
 import dayjs from 'https://esm.sh/dayjs@1.11.10'
 import isBetween from 'https://esm.sh/dayjs@1.11.10/plugin/isBetween'
 
